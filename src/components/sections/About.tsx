@@ -43,20 +43,20 @@ const About = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* About Text */}
           <div className="space-y-6">
-            <div className="terminal-border rounded-lg p-6">
-              <h3 className="text-xl font-display text-primary mb-4">console.log("Hello, World!");</h3>
+            <div className="terminal-border rounded-lg p-6 animate-slide-in-left hover-lift">
+              <h3 className="text-xl font-display text-primary mb-4 animate-neon-flicker">console.log("Hello, World!");</h3>
               <div className="space-y-4 text-muted-foreground font-terminal">
-                <p>
-                  I'm <span className="text-primary">Asmit Jogdand</span>, a passionate B.Tech student at 
+                <p className="animate-slide-in-up" style={{ animationDelay: '0.2s' }}>
+                  I'm <span className="text-primary shimmer">Asmit Jogdand</span>, a passionate B.Tech student at 
                   <span className="text-secondary"> DY Patil Rait, New Mumbai</span>, with a deep fascination 
                   for cloud computing and modern web development.
                 </p>
-                <p>
+                <p className="animate-slide-in-up" style={{ animationDelay: '0.4s' }}>
                   My journey in tech revolves around creating elegant solutions with 
                   <span className="text-accent"> Python</span>, building responsive web applications, 
                   and exploring the vast possibilities of cloud infrastructure.
                 </p>
-                <p>
+                <p className="animate-slide-in-up" style={{ animationDelay: '0.6s' }}>
                   When I'm not coding, you'll find me curating DSA repositories, 
                   experimenting with new technologies, or contributing to open-source projects 
                   that make a difference.
@@ -82,12 +82,13 @@ const About = () => {
             {highlights.map((item, index) => (
               <div 
                 key={index}
-                className="terminal-border rounded-lg p-6 hover-glow transition-all duration-300 group"
+                className="terminal-border rounded-lg p-6 hover-glow transition-all duration-300 group animate-slide-in-right stagger-animation"
+                style={{ '--stagger': index } as React.CSSProperties}
               >
-                <div className="text-primary mb-4 group-hover:text-secondary transition-colors">
+                <div className="text-primary mb-4 group-hover:text-secondary transition-colors animate-bounce-gentle">
                   {item.icon}
                 </div>
-                <h4 className="font-display text-lg mb-2 text-foreground">{item.title}</h4>
+                <h4 className="font-display text-lg mb-2 text-foreground group-hover:text-primary transition-colors">{item.title}</h4>
                 <p className="text-sm text-muted-foreground">{item.description}</p>
               </div>
             ))}

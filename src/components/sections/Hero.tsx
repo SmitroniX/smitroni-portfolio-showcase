@@ -133,10 +133,19 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Floating Elements */}
-      <div className="absolute top-20 left-10 w-20 h-20 border border-primary/30 rounded-full animate-float" />
-      <div className="absolute bottom-20 right-10 w-16 h-16 border border-secondary/30 rounded-full animate-float" style={{ animationDelay: '2s' }} />
-      <div className="absolute top-1/2 left-20 w-12 h-12 border border-accent/30 rounded-full animate-float" style={{ animationDelay: '4s' }} />
+      {/* Enhanced Floating Elements */}
+      <div className="absolute top-20 left-10 w-20 h-20 border border-primary/30 rounded-full animate-float hover-lift">
+        <div className="w-full h-full rounded-full bg-primary/10 animate-glow-pulse" />
+      </div>
+      <div className="absolute bottom-20 right-10 w-16 h-16 border border-secondary/30 rounded-full animate-float hover-lift" style={{ animationDelay: '2s' }}>
+        <div className="w-full h-full rounded-full bg-secondary/10 animate-glow-pulse" style={{ animationDelay: '1s' }} />
+      </div>
+      <div className="absolute top-1/2 left-20 w-12 h-12 border border-accent/30 rounded-full animate-float hover-lift" style={{ animationDelay: '4s' }}>
+        <div className="w-full h-full rounded-full bg-accent/10 animate-glow-pulse" style={{ animationDelay: '2s' }} />
+      </div>
+      <div className="absolute top-1/3 right-20 w-8 h-8 border border-primary/40 animate-rotate-slow">
+        <div className="w-full h-full bg-primary/20 animate-particle-float" />
+      </div>
     </section>
   );
 };
