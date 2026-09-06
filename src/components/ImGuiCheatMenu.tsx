@@ -17,6 +17,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
+import { CS2Icon, ValorantIcon, PhasmophobiaIcon, MinecraftIcon, GtaVIcon } from './BrandIcons';
 
 interface ImGuiCheatMenuProps {
   isOpen: boolean;
@@ -555,8 +556,8 @@ export const ImGuiCheatMenu: React.FC<ImGuiCheatMenuProps> = ({
               {activeTab === 'games' && (
                 <div className="space-y-2 text-xs">
                   <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 space-y-1">
-                    <div className="font-bold text-red-400 flex items-center gap-1.5">
-                      <span>🎯</span>
+                    <div className="font-bold text-amber-400 flex items-center gap-2">
+                      <CS2Icon className="w-4 h-4 shrink-0" />
                       <span>Counter-Strike 2 NetVar Dumper</span>
                     </div>
                     <div className="text-[11px] text-slate-300 leading-relaxed">
@@ -565,8 +566,8 @@ export const ImGuiCheatMenu: React.FC<ImGuiCheatMenuProps> = ({
                   </div>
 
                   <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 space-y-1">
-                    <div className="font-bold text-rose-400 flex items-center gap-1.5">
-                      <span>🛡️</span>
+                    <div className="font-bold text-rose-400 flex items-center gap-2">
+                      <ValorantIcon className="w-4 h-4 shrink-0" />
                       <span>Valorant DMA Hardware Interface</span>
                     </div>
                     <div className="text-[11px] text-slate-300 leading-relaxed">
@@ -575,8 +576,18 @@ export const ImGuiCheatMenu: React.FC<ImGuiCheatMenuProps> = ({
                   </div>
 
                   <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 space-y-1">
-                    <div className="font-bold text-purple-400 flex items-center gap-1.5">
-                      <span>👻</span>
+                    <div className="font-bold text-cyan-400 flex items-center gap-2">
+                      <GtaVIcon className="w-4 h-4 shrink-0" />
+                      <span>GTA V &amp; FiveM Lua Native Executor</span>
+                    </div>
+                    <div className="text-[11px] text-slate-300 leading-relaxed">
+                      CitizenFX runtime bypass executing remote server events and Godmode.
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 space-y-1">
+                    <div className="font-bold text-sky-400 flex items-center gap-2">
+                      <PhasmophobiaIcon className="w-4 h-4 shrink-0" />
                       <span>Phasmophobia Ghost Revealer</span>
                     </div>
                     <div className="text-[11px] text-slate-300 leading-relaxed">
@@ -585,8 +596,8 @@ export const ImGuiCheatMenu: React.FC<ImGuiCheatMenuProps> = ({
                   </div>
 
                   <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 space-y-1">
-                    <div className="font-bold text-amber-400 flex items-center gap-1.5">
-                      <span>⛏️</span>
+                    <div className="font-bold text-emerald-400 flex items-center gap-2">
+                      <MinecraftIcon className="w-4 h-4 shrink-0" />
                       <span>Minecraft Velocity Nullifier</span>
                     </div>
                     <div className="text-[11px] text-slate-300 leading-relaxed">

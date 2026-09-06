@@ -16,6 +16,7 @@ import {
   Check
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
+import { CS2Icon, PhasmophobiaIcon, MinecraftIcon } from './BrandIcons';
 
 interface DummyEntity {
   id: number;
@@ -361,7 +362,7 @@ export const EspRadarSimulator: React.FC = () => {
           ctx.fillStyle = '#FFFFFF';
           ctx.font = '9px monospace';
           ctx.textAlign = 'center';
-          const tag = gameMode === 'phasmo' ? `👻 ${target.ghostType}` : target.name;
+          const tag = gameMode === 'phasmo' ? `[ENTITY] ${target.ghostType}` : target.name;
           ctx.fillText(tag, centerX, target.y - 6);
 
           ctx.fillStyle = primaryColor;
@@ -548,7 +549,7 @@ export const EspRadarSimulator: React.FC = () => {
                 : 'bg-white/5 text-slate-400 hover:text-white'
             }`}
           >
-            <span>🎯</span>
+            <CS2Icon className="w-3.5 h-3.5" />
             <span>CS2 / Valorant</span>
           </button>
 
@@ -563,7 +564,7 @@ export const EspRadarSimulator: React.FC = () => {
                 : 'bg-white/5 text-slate-400 hover:text-white'
             }`}
           >
-            <span>👻</span>
+            <PhasmophobiaIcon className="w-3.5 h-3.5" />
             <span>Phasmophobia</span>
           </button>
 
@@ -578,7 +579,7 @@ export const EspRadarSimulator: React.FC = () => {
                 : 'bg-white/5 text-slate-400 hover:text-white'
             }`}
           >
-            <span>⛏️</span>
+            <MinecraftIcon className="w-3.5 h-3.5" />
             <span>Minecraft PvP</span>
           </button>
         </div>

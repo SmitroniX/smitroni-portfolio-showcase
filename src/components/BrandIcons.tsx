@@ -188,3 +188,266 @@ export const BashIcon: React.FC<IconProps> = ({ className = "w-4 h-4", ...props 
   </svg>
 );
 
+/* =========================================================================
+   Official Game Brand Vector Logos
+   Counter-Strike 2, Valorant, GTA V / FiveM, Minecraft, Phasmophobia, Apex Legends, Call of Duty
+   ========================================================================= */
+
+// Counter-Strike 2 (Official Valve CS2 Operative & Bold Logo)
+export const CS2Icon: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) => (
+  <svg viewBox="0 0 100 100" className={className} {...props}>
+    {/* Dark tactical hexagon background */}
+    <polygon points="50,4 93,27 93,73 50,96 7,73 7,27" fill="#0E121A" stroke="#DE9B35" strokeWidth="4" />
+    <polygon points="50,10 87,30 87,70 50,90 13,70 13,30" fill="#18202F" />
+    {/* Counter-Terrorist Operative Silhouette with Rifle */}
+    <path
+      d="M51 22c2.8 0 5 2.2 5 5 0 2.2-1.4 4-3.3 4.7l2.1 4.5 4.5 1.5 12-2.5 1.2 3.2-9.5 3.5 16 1.8.8 3.5-18.5 1.2-2.2 4.8 7.2 18.5-4.8 1.8-6.2-14.8-5.5 3.2 4.2 16.5-5 1.5-5.8-19.5-2.2-11.2-4.5 1.8-3.2-4.2 8.5-5.5-1.2-7.5-3.5-1.2-1.5-6.5c4.2-.8 7.5-4.5 7.5-9z"
+      fill="#DE9B35"
+    />
+    {/* CS2 Text Badge */}
+    <rect x="22" y="74" width="56" height="15" rx="3" fill="#DE9B35" />
+    <text x="50" y="86" fill="#0E121A" fontSize="12" fontWeight="900" fontFamily="monospace" textAnchor="middle">CS2</text>
+  </svg>
+);
+
+// Valorant (Official Riot Games V Monogram)
+export const ValorantIcon: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) => (
+  <svg viewBox="0 0 100 100" className={className} {...props}>
+    <g fill="#FF4655">
+      {/* Left polygon */}
+      <polygon points="12,18 48,18 35,56 12,38" />
+      {/* Right chevron polygon forming V */}
+      <polygon points="88,18 52,18 52,86 88,38" />
+    </g>
+  </svg>
+);
+
+// Grand Theft Auto V (Official GTA V Roman 'V' with 'FIVE' green ribbon banner)
+export const GtaVIcon: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) => (
+  <svg viewBox="0 0 100 100" className={className} {...props}>
+    {/* Roman Numeral V */}
+    <path
+      d="M20 18 L38 18 L46 64 L54 18 L74 18 L56 82 L42 82 Z"
+      fill="#FFFFFF"
+      stroke="#1E293B"
+      strokeWidth="3"
+    />
+    {/* Inner shadow/hatch on V */}
+    <path
+      d="M26 22 L34 22 L44 68 L48 68 L36 22 L40 22"
+      fill="#94A3B8"
+    />
+    {/* Green Decorative Ribbon Banner */}
+    <polygon points="14,46 86,46 82,62 18,62" fill="#15803D" stroke="#052E16" strokeWidth="2" />
+    <polygon points="14,46 20,40 20,46" fill="#0D5425" />
+    <polygon points="86,46 80,40 80,46" fill="#0D5425" />
+    {/* FIVE text inside ribbon */}
+    <text
+      x="50"
+      y="58"
+      fill="#FEF08A"
+      fontSize="13"
+      fontWeight="900"
+      fontFamily="serif"
+      letterSpacing="2"
+      textAnchor="middle"
+    >
+      FIVE
+    </text>
+  </svg>
+);
+
+// Minecraft (Official Minecraft Green Creeper Face)
+export const MinecraftIcon: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) => (
+  <svg viewBox="0 0 100 100" className={className} {...props}>
+    {/* Creeper Green Head Base */}
+    <rect width="90" height="90" x="5" y="5" rx="10" fill="#4E9331" stroke="#3A6E24" strokeWidth="4" />
+    {/* Mosaic subtle green texture blocks */}
+    <rect width="18" height="18" x="12" y="12" fill="#5BA63A" />
+    <rect width="18" height="18" x="70" y="12" fill="#3D7527" />
+    <rect width="18" height="18" x="70" y="70" fill="#5BA63A" />
+    <rect width="18" height="18" x="12" y="70" fill="#3D7527" />
+    {/* Black Creeper Eyes */}
+    <rect width="20" height="20" x="20" y="24" fill="#000000" />
+    <rect width="20" height="20" x="60" y="24" fill="#000000" />
+    {/* Nose */}
+    <rect width="20" height="30" x="40" y="44" fill="#000000" />
+    {/* Downturned Mouth */}
+    <rect width="40" height="20" x="30" y="54" fill="#000000" />
+    <rect width="10" height="20" x="30" y="64" fill="#000000" />
+    <rect width="10" height="20" x="60" y="64" fill="#000000" />
+  </svg>
+);
+
+// Phasmophobia (Official Kinetic Games Ghost Delta Glyph)
+export const PhasmophobiaIcon: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) => (
+  <svg viewBox="0 0 100 100" className={className} {...props}>
+    {/* Dark ethereal circle */}
+    <circle cx="50" cy="50" r="45" fill="#061219" stroke="#38BDF8" strokeWidth="3" />
+    {/* Ghost handprint / spectral delta glyph */}
+    <path
+      d="M50 14 L82 76 L18 76 Z"
+      fill="none"
+      stroke="#38BDF8"
+      strokeWidth="5"
+      strokeLinejoin="round"
+    />
+    <circle cx="50" cy="42" r="8" fill="#38BDF8" />
+    <path
+      d="M36 68 Q50 50 64 68"
+      fill="none"
+      stroke="#7DD3FC"
+      strokeWidth="4"
+      strokeLinecap="round"
+    />
+    <path
+      d="M50 24 L50 60"
+      stroke="#E0F2FE"
+      strokeWidth="3"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+// Apex Legends (Official Respawn Apex Chevron Arrowhead)
+export const ApexLegendsIcon: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) => (
+  <svg viewBox="0 0 100 100" className={className} {...props}>
+    {/* Apex Red Triangular Chevron */}
+    <path
+      d="M50 10 L10 88 L30 88 L50 48 L70 88 L90 88 Z"
+      fill="#DA292A"
+    />
+    {/* Inner triangular negative notch */}
+    <polygon points="50,56 36,84 64,84" fill="#0F172A" />
+  </svg>
+);
+
+// Call of Duty / Warzone (Official Tactical Skull Emblem)
+export const CodIcon: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) => (
+  <svg viewBox="0 0 100 100" className={className} {...props}>
+    <path
+      d="M50 8 C30 8 20 22 20 40 C20 54 28 62 34 68 L34 84 L66 84 L66 68 C72 62 80 54 80 40 C80 22 70 8 50 8 Z"
+      fill="#1E293B"
+      stroke="#F59E0B"
+      strokeWidth="3"
+    />
+    {/* Skull Helmet Visor */}
+    <path d="M24 30 C34 26 66 26 76 30 L74 38 C64 34 36 34 26 38 Z" fill="#F59E0B" />
+    {/* Eye Sockets */}
+    <ellipse cx="38" cy="48" rx="6" ry="8" fill="#F59E0B" />
+    <ellipse cx="62" cy="48" rx="6" ry="8" fill="#F59E0B" />
+    {/* Nose */}
+    <polygon points="50,56 46,64 54,64" fill="#F59E0B" />
+    {/* Tactical Teeth Grid */}
+    <line x1="42" y1="72" x2="42" y2="82" stroke="#F59E0B" strokeWidth="2.5" />
+    <line x1="50" y1="72" x2="50" y2="82" stroke="#F59E0B" strokeWidth="2.5" />
+    <line x1="58" y1="72" x2="58" y2="82" stroke="#F59E0B" strokeWidth="2.5" />
+  </svg>
+);
+
+/* =========================================================================
+   Official Anti-Cheat Brand Vector Logos
+   Riot Vanguard, Valve VACnet / VAC, EasyAntiCheat (EAC), Activision Ricochet, BattlEye
+   ========================================================================= */
+
+// Riot Vanguard (Official Ring-0 Boot Driver Shield with Angular V Core)
+export const VanguardIcon: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) => (
+  <svg viewBox="0 0 100 100" className={className} {...props}>
+    {/* Vanguard Outer Shield */}
+    <polygon
+      points="50,6 88,24 82,72 50,94 18,72 12,24"
+      fill="#1A0A0F"
+      stroke="#FF4655"
+      strokeWidth="4"
+    />
+    {/* Red Angular V Geometric Crest */}
+    <polygon points="50,22 76,34 50,78 24,34" fill="#FF4655" />
+    {/* Inner Dark Inverted Core */}
+    <polygon points="50,42 64,36 50,66 36,36" fill="#0B0306" />
+    {/* Top pip */}
+    <circle cx="50" cy="14" r="3" fill="#FF4655" />
+  </svg>
+);
+
+// Valve VAC / VACnet (Official Valve Anti-Cheat Red Crest & Sensor)
+export const VacnetIcon: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) => (
+  <svg viewBox="0 0 100 100" className={className} {...props}>
+    {/* Valve Industrial Dark Hexagon */}
+    <polygon points="50,6 90,26 90,74 50,94 10,74 10,26" fill="#180B0D" stroke="#E11D48" strokeWidth="4" />
+    {/* Valve Corporation Valve Cog Silhouette */}
+    <circle cx="50" cy="46" r="26" fill="#E11D48" />
+    <circle cx="50" cy="46" r="14" fill="#180B0D" />
+    <circle cx="50" cy="46" r="6" fill="#E11D48" />
+    {/* Cog teeth spokes */}
+    <rect x="47" y="16" width="6" height="10" rx="1" fill="#E11D48" />
+    <rect x="47" y="66" width="6" height="10" rx="1" fill="#E11D48" />
+    <rect x="18" y="43" width="10" height="6" rx="1" fill="#E11D48" />
+    <rect x="72" y="43" width="10" height="6" rx="1" fill="#E11D48" />
+    {/* VAC Bold Text Badge */}
+    <rect x="22" y="74" width="56" height="14" rx="3" fill="#E11D48" />
+    <text x="50" y="85" fill="#FFFFFF" fontSize="10" fontWeight="900" fontFamily="sans-serif" letterSpacing="1" textAnchor="middle">VACnet</text>
+  </svg>
+);
+
+// EasyAntiCheat (EAC) (Official Epic Games / Kamu Blue Cyber Shield)
+export const EasyAntiCheatIcon: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) => (
+  <svg viewBox="0 0 100 100" className={className} {...props}>
+    {/* Blue Watchdog Shield */}
+    <path
+      d="M50 8 L86 24 C86 64 68 84 50 94 C32 84 14 64 14 24 Z"
+      fill="#031628"
+      stroke="#0088CC"
+      strokeWidth="4"
+    />
+    {/* Bear Silhouette / Cyber Core */}
+    <path
+      d="M32 36 L40 28 L46 36 L54 36 L60 28 L68 36 C72 44 70 56 64 62 L50 74 L36 62 C30 56 28 44 32 36 Z"
+      fill="#0088CC"
+    />
+    {/* Cyan Electronic Eyes */}
+    <polygon points="40,46 44,48 40,52 38,48" fill="#38BDF8" />
+    <polygon points="60,46 62,48 60,52 56,48" fill="#38BDF8" />
+    {/* EAC Text */}
+    <text x="50" y="86" fill="#38BDF8" fontSize="10" fontWeight="900" fontFamily="sans-serif" textAnchor="middle">EAC</text>
+  </svg>
+);
+
+// Activision Ricochet (Official CoD Ricochet Shield with Reflected Trajectory)
+export const RicochetIcon: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) => (
+  <svg viewBox="0 0 100 100" className={className} {...props}>
+    {/* Angular Tactical Dark Shield */}
+    <polygon points="50,6 92,26 82,78 50,94 18,78 8,26" fill="#041B16" stroke="#10B981" strokeWidth="4" />
+    {/* Ricochet Angular 'R' with projectile bounce */}
+    <path
+      d="M34 26 L56 26 C64 26 70 32 70 40 C70 48 64 52 56 52 L44 52 L58 76 L44 76 L32 54 L32 76 L26 76 L26 26 Z M34 34 L34 46 L54 46 C58 46 62 44 62 40 C62 36 58 34 54 34 Z"
+      fill="#10B981"
+    />
+    {/* Ricocheting spark trajectory */}
+    <polyline points="20,82 50,66 80,82" fill="none" stroke="#34D399" strokeWidth="3" strokeLinecap="round" />
+    <circle cx="50" cy="66" r="3" fill="#A7F3D0" />
+  </svg>
+);
+
+// BattlEye (Official BattlEye Tactical Surveillance Eye Shield)
+export const BattlEyeIcon: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) => (
+  <svg viewBox="0 0 100 100" className={className} {...props}>
+    {/* Dark Circular Tactical Reticle */}
+    <circle cx="50" cy="50" r="44" fill="#141108" stroke="#E5A93C" strokeWidth="4" />
+    {/* Reticle Target Crossbars */}
+    <line x1="50" y1="6" x2="50" y2="20" stroke="#E5A93C" strokeWidth="3" />
+    <line x1="50" y1="80" x2="50" y2="94" stroke="#E5A93C" strokeWidth="3" />
+    <line x1="6" y1="50" x2="20" y2="50" stroke="#E5A93C" strokeWidth="3" />
+    <line x1="80" y1="50" x2="94" y2="50" stroke="#E5A93C" strokeWidth="3" />
+    {/* Golden All-Seeing Eye */}
+    <path
+      d="M22 50 C32 34 68 34 78 50 C68 66 32 66 22 50 Z"
+      fill="none"
+      stroke="#E5A93C"
+      strokeWidth="4"
+    />
+    <circle cx="50" cy="50" r="10" fill="#E5A93C" />
+    <circle cx="50" cy="50" r="5" fill="#141108" />
+  </svg>
+);
+
+

@@ -11,6 +11,17 @@ import {
   Radio
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
+import {
+  VanguardIcon,
+  VacnetIcon,
+  EasyAntiCheatIcon,
+  RicochetIcon,
+  BattlEyeIcon,
+  CS2Icon,
+  ValorantIcon,
+  ApexLegendsIcon,
+  CodIcon
+} from './BrandIcons';
 
 interface AntiCheatBoss {
   id: string;
@@ -21,7 +32,6 @@ interface AntiCheatBoss {
   maxHp: number;
   defense: number;
   threatLevel: 'OMEGA' | 'CRITICAL' | 'HIGH';
-  icon: string;
   color: string;
   borderColor: string;
   description: string;
@@ -33,6 +43,31 @@ interface AntiCheatBoss {
   }[];
 }
 
+const renderBossIcon = (bossId: string, className = "w-4 h-4") => {
+  switch (bossId) {
+    case 'vanguard':
+      return <VanguardIcon className={className} />;
+    case 'vacnet':
+      return <VacnetIcon className={className} />;
+    case 'eac':
+      return <EasyAntiCheatIcon className={className} />;
+    case 'ricochet':
+      return <RicochetIcon className={className} />;
+    case 'battleye':
+      return <BattlEyeIcon className={className} />;
+    default:
+      return <ShieldAlert className={className} />;
+  }
+};
+
+const renderGameIcon = (game: string, className = "w-3.5 h-3.5") => {
+  if (game.includes('Valorant')) return <ValorantIcon className={className} />;
+  if (game.includes('Counter-Strike') || game.includes('CS2')) return <CS2Icon className={className} />;
+  if (game.includes('Apex')) return <ApexLegendsIcon className={className} />;
+  if (game.includes('Call of Duty') || game.includes('Warzone')) return <CodIcon className={className} />;
+  return null;
+};
+
 const BOSS_LIST: AntiCheatBoss[] = [
   {
     id: 'vanguard',
@@ -43,7 +78,6 @@ const BOSS_LIST: AntiCheatBoss[] = [
     maxHp: 950,
     defense: 25,
     threatLevel: 'OMEGA',
-    icon: '🛡️',
     color: 'from-rose-600 to-red-900',
     borderColor: 'border-rose-500',
     description: 'Kernel-level boot driver loaded before Windows OS initializes. Enforces SecureBoot, HVCI memory integrity, and continuous memory pool audits.',
@@ -62,7 +96,6 @@ const BOSS_LIST: AntiCheatBoss[] = [
     maxHp: 850,
     defense: 20,
     threatLevel: 'OMEGA',
-    icon: '👁️',
     color: 'from-amber-600 to-orange-950',
     borderColor: 'border-amber-500',
     description: 'Cloud AI cluster analyzing petabytes of match demos, sub-tick mouse movement jerkiness, angular acceleration, and predictive crosshair snaps.',
@@ -81,7 +114,6 @@ const BOSS_LIST: AntiCheatBoss[] = [
     maxHp: 800,
     defense: 18,
     threatLevel: 'CRITICAL',
-    icon: '⚡',
     color: 'from-blue-600 to-cyan-950',
     borderColor: 'border-blue-500',
     description: 'Wide-spread kernel watchdog monitoring OpenProcess handles, thread injection hooks, and virtual memory read/write permissions.',
@@ -100,7 +132,6 @@ const BOSS_LIST: AntiCheatBoss[] = [
     maxHp: 880,
     defense: 22,
     threatLevel: 'CRITICAL',
-    icon: '🎯',
     color: 'from-emerald-600 to-teal-950',
     borderColor: 'border-emerald-500',
     description: 'Server-orchestrated anti-cheat equipped with live in-game mitigations: phantom targets, damage shielding, and weapon disarming.',
@@ -108,6 +139,24 @@ const BOSS_LIST: AntiCheatBoss[] = [
       { name: 'Damage Shield & Ghost Bullets', damage: 22, description: 'Renders legitimate players immune and nullifies incoming damage packets.', type: 'telemetry' },
       { name: 'Hallucination Dummy Decoys', damage: 30, description: 'Spawns server-side fake invisible entities to bait and trap silent aimbots.', type: 'scan' },
       { name: 'Shadowban Disconnect (Lobby Purgatory)', damage: 42, description: 'Silently exiles cheat signature to high-ping developer shadowban lobbies.', type: 'ban' }
+    ]
+  },
+  {
+    id: 'battleye',
+    name: 'BattlEye Guard',
+    codename: 'BEDaisy.sys Kernel Memory Scanner',
+    game: 'Rainbow Six Siege / DayZ / PUBG',
+    hp: 780,
+    maxHp: 780,
+    defense: 20,
+    threatLevel: 'HIGH',
+    color: 'from-amber-600 to-yellow-950',
+    borderColor: 'border-amber-500',
+    description: 'Dynamic memory page hashing watchdog that sweeps process virtual memory regions looking for known cheat signatures and hook trampolines.',
+    attacks: [
+      { name: 'Virtual Memory Page Sweep', damage: 20, description: 'Hashes executable code pages and cross-references against master hashes.', type: 'scan' },
+      { name: 'Driver Signature Validation', damage: 25, description: 'Identifies unsigned or revoked kernel driver load attempts.', type: 'telemetry' },
+      { name: 'Global Game Ban Enforcement', damage: 36, description: 'Terminates game process and submits account identifier to master banlist.', type: 'ban' }
     ]
   }
 ];
@@ -380,13 +429,13 @@ export const AntiCheatBattleArena: React.FC = () => {
                 sounds.playClick();
                 setSelectedBossIndex(idx);
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
                 selectedBossIndex === idx
                   ? 'bg-red-600 text-white shadow-lg shadow-red-600/40 border border-red-400'
                   : 'bg-black/40 border border-red-950 text-slate-400 hover:text-white hover:border-red-800'
               }`}
             >
-              <span>{b.icon}</span>
+              <span className="shrink-0">{renderBossIcon(b.id, "w-3.5 h-3.5")}</span>
               <span>{b.name}</span>
               <span className="text-[9px] px-1 py-0.5 rounded bg-black/60 text-amber-300">
                 {b.threatLevel}
@@ -415,8 +464,8 @@ export const AntiCheatBattleArena: React.FC = () => {
         <div className={`lg:col-span-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-[#18090C] to-black border-2 ${boss.borderColor} relative overflow-hidden shadow-crimson-glow`}>
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-black/80 border border-red-500/40 flex items-center justify-center text-2xl shadow-inner">
-                {boss.icon}
+              <div className="w-12 h-12 rounded-xl bg-black/80 border border-red-500/40 flex items-center justify-center p-2 shadow-inner shrink-0">
+                {renderBossIcon(boss.id, "w-8 h-8")}
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -430,8 +479,9 @@ export const AntiCheatBattleArena: React.FC = () => {
                 <div className="text-[11px] text-red-400/90 font-mono">
                   {boss.codename}
                 </div>
-                <div className="text-[10px] text-slate-400 mt-0.5">
-                  Target: {boss.game}
+                <div className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1.5">
+                  {renderGameIcon(boss.game, "w-3 h-3 shrink-0")}
+                  <span>Target: {boss.game}</span>
                 </div>
               </div>
             </div>

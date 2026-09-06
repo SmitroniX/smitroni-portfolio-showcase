@@ -33,6 +33,19 @@ import { EspRadarSimulator } from './EspRadarSimulator';
 import { AntiCheatBattleArena } from './AntiCheatBattleArena';
 import { DarkWebMarketplace } from './DarkWebMarketplace';
 import { WantedPosterGenerator } from './WantedPosterGenerator';
+import {
+  CS2Icon,
+  ValorantIcon,
+  GtaVIcon,
+  MinecraftIcon,
+  PhasmophobiaIcon,
+  ApexLegendsIcon,
+  VanguardIcon,
+  VacnetIcon,
+  EasyAntiCheatIcon,
+  RicochetIcon,
+  BattlEyeIcon
+} from './BrandIcons';
 
 interface DarkSideModalProps {
   isOpen: boolean;
@@ -50,11 +63,40 @@ interface GameExploit {
   threatLevel: 'OMEGA' | 'CRITICAL' | 'HIGH';
   status: 'UNDETECTED' | 'OPERATIONAL' | 'CLASSIFIED';
   engine: string;
-  icon: string;
   description: string;
   techniques: string[];
   codeSnippet: string;
 }
+
+const getGameLogo = (gameId: string, className = "w-4 h-4 shrink-0") => {
+  switch (gameId) {
+    case 'cs2':
+      return <CS2Icon className={className} />;
+    case 'valorant':
+      return <ValorantIcon className={className} />;
+    case 'gta':
+    case 'gta5':
+      return <GtaVIcon className={className} />;
+    case 'phasmo':
+    case 'phasmophobia':
+      return <PhasmophobiaIcon className={className} />;
+    case 'minecraft':
+      return <MinecraftIcon className={className} />;
+    case 'apex':
+      return <ApexLegendsIcon className={className} />;
+    default:
+      return <Crosshair className={className} />;
+  }
+};
+
+const getAntiCheatLogo = (acName: string, className = "w-3.5 h-3.5 shrink-0") => {
+  if (acName.includes('Vanguard')) return <VanguardIcon className={className} />;
+  if (acName.includes('VACnet') || acName.includes('VAC')) return <VacnetIcon className={className} />;
+  if (acName.includes('EasyAntiCheat') || acName.includes('EAC')) return <EasyAntiCheatIcon className={className} />;
+  if (acName.includes('Ricochet')) return <RicochetIcon className={className} />;
+  if (acName.includes('BattlEye') || acName.includes('BattleEye')) return <BattlEyeIcon className={className} />;
+  return <ShieldAlert className={className} />;
+};
 
 const GAME_EXPLOITS: GameExploit[] = [
   {
@@ -67,7 +109,6 @@ const GAME_EXPLOITS: GameExploit[] = [
     threatLevel: 'OMEGA',
     status: 'UNDETECTED',
     engine: 'Source 2 (DirectX 11 / Vulkan)',
-    icon: '🎯',
     description:
       'Direct memory manipulation & Bone Matrix transformation tool. Parses dynamic NetVars directly from client.dll memory space to render high-fidelity ESP bounding boxes and algorithmic Bezier recoil compensation.',
     techniques: [
@@ -101,7 +142,6 @@ void RenderPlayerESP(uintptr_t entityList, ViewMatrix& vm) {
     threatLevel: 'OMEGA',
     status: 'OPERATIONAL',
     engine: 'Unreal Engine 4.27',
-    icon: '🛡️',
     description:
       'State-of-the-art kernel security research into Vanguard hypervisor memory guards. Demonstrates PCIe Direct Memory Access (DMA) hardware screamer techniques and Bring-Your-Own-Vulnerable-Driver (BYOVD) physical mapping without hooks in protected memory.',
     techniques: [
@@ -126,11 +166,10 @@ NTSTATUS ReadPhysicalMemory(ULONG64 physAddress, PVOID buffer, SIZE_T size) {
     game: 'GTA V / FiveM',
     codename: 'Los Santos Chaos Native Invoker',
     targetProcess: 'GTA5.exe',
-    anticheat: 'Rockstar Arxan & BattleEye Integration',
+    anticheat: 'Rockstar Arxan & BattlEye Integration',
     threatLevel: 'CRITICAL',
     status: 'OPERATIONAL',
     engine: 'RAGE Engine (Rockstar Advanced Game Engine)',
-    icon: '🚗',
     description:
       'Native function registration table hook and cross-thread script invoker. Overrides Rockstar tunable global arrays to unlock vehicles, freeze entity damage states, and bypass transaction server checksum verifications.',
     techniques: [
@@ -163,7 +202,6 @@ void ActivateInvincibility() {
     threatLevel: 'HIGH',
     status: 'OPERATIONAL',
     engine: 'Unity (IL2CPP Runtime)',
-    icon: '👻',
     description:
       'IL2CPP binary reverse engineering tool. Extracts class structures and runtime metadata using Il2CppDumper to reveal ghost identity, real-time favorite room temperatures, hunting state timers, and manipulate cursed possessions.',
     techniques: [
@@ -192,7 +230,6 @@ void Hook_GhostAI_Update(GhostAI* ghost) {
     threatLevel: 'OMEGA',
     status: 'UNDETECTED',
     engine: 'Java Virtual Machine (JVM / LWJGL)',
-    icon: '⛏️',
     description:
       'High-performance JVM bytecode transformation engine built using ASM and Fabric/Forge Mixin architecture. Spoofs incoming/outgoing network packets to achieve Velocity cancellation and humanized rotational raytracing.',
     techniques: [
@@ -219,7 +256,6 @@ private void onEntityVelocity(SPacketEntityVelocity packet, CallbackInfo ci) {
     threatLevel: 'CRITICAL',
     status: 'CLASSIFIED',
     engine: 'Source Modified & IW Engine',
-    icon: '⚡',
     description:
       'Bespoke kernel-mode memory reader with bullet drop trajectory physics. Calculates target velocity vectors and travel time to predict 100% projectile impacts across long-range ballistic sniper rifles.',
     techniques: [
@@ -681,7 +717,7 @@ export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose, o
                           : 'bg-black/40 border border-white/5 text-slate-400 hover:text-slate-200'
                       }`}
                     >
-                      <span>{exp.icon}</span>
+                      <span className="shrink-0">{getGameLogo(exp.id, "w-3.5 h-3.5")}</span>
                       <span>{exp.game}</span>
                     </button>
                   ))}
@@ -692,7 +728,7 @@ export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose, o
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/5">
                     <div>
                       <div className="flex items-center gap-2 text-xs font-bold text-red-400">
-                        <span>{selectedGame.icon}</span>
+                        <span className="shrink-0">{getGameLogo(selectedGame.id, "w-4 h-4")}</span>
                         <span>{selectedGame.codename}</span>
                       </div>
                       <h3 className="text-lg sm:text-xl font-bold text-white mt-0.5">
@@ -701,8 +737,9 @@ export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose, o
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 text-[11px]">
-                      <span className="px-2.5 py-1 rounded bg-red-950/60 border border-red-800 text-red-300 font-bold">
-                        Target: {selectedGame.anticheat}
+                      <span className="px-2.5 py-1 rounded bg-red-950/60 border border-red-800 text-red-300 font-bold flex items-center gap-1.5">
+                        {getAntiCheatLogo(selectedGame.anticheat, "w-3.5 h-3.5")}
+                        <span>Target: {selectedGame.anticheat}</span>
                       </span>
                       <span className="px-2.5 py-1 rounded bg-emerald-950/60 border border-emerald-800 text-emerald-300 font-bold">
                         {selectedGame.status}

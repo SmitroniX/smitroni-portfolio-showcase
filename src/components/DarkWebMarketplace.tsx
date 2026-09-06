@@ -17,6 +17,15 @@ import {
   Eye
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
+import {
+  CS2Icon,
+  ValorantIcon,
+  GtaVIcon,
+  PhasmophobiaIcon,
+  MinecraftIcon,
+  ApexLegendsIcon,
+  CodIcon
+} from './BrandIcons';
 
 interface ExploitListing {
   id: string;
@@ -31,6 +40,17 @@ interface ExploitListing {
   fullSpecs: string[];
   codeStub: string;
 }
+
+const getGameOrAcLogo = (target: string, className = "w-3.5 h-3.5 shrink-0") => {
+  if (target.includes('Valorant')) return <ValorantIcon className={className} />;
+  if (target.includes('Counter-Strike') || target.includes('CS2')) return <CS2Icon className={className} />;
+  if (target.includes('GTA') || target.includes('FiveM')) return <GtaVIcon className={className} />;
+  if (target.includes('Phasmophobia')) return <PhasmophobiaIcon className={className} />;
+  if (target.includes('Minecraft')) return <MinecraftIcon className={className} />;
+  if (target.includes('Apex')) return <ApexLegendsIcon className={className} />;
+  if (target.includes('Warzone') || target.includes('CoD')) return <CodIcon className={className} />;
+  return null;
+};
 
 const INITIAL_LISTINGS: ExploitListing[] = [
   {
@@ -322,7 +342,10 @@ export const DarkWebMarketplace: React.FC = () => {
                     <span className="px-1.5 py-0.5 rounded bg-black/60 text-red-400 border border-red-900/40">
                       {item.category}
                     </span>
-                    <span className="text-slate-400">Target: {item.targetGame}</span>
+                    <span className="text-slate-400 flex items-center gap-1.5">
+                      {getGameOrAcLogo(item.targetGame, "w-3 h-3")}
+                      <span>Target: {item.targetGame}</span>
+                    </span>
                   </div>
 
                   <p className="text-xs text-slate-400 leading-relaxed mt-2 line-clamp-2">
@@ -367,7 +390,10 @@ export const DarkWebMarketplace: React.FC = () => {
                   <span className="px-2 py-0.5 rounded bg-red-600/20 border border-red-500/40 text-[10px] text-red-300 font-bold">
                     {selectedListing.category}
                   </span>
-                  <span className="text-slate-400 text-xs">Target: {selectedListing.targetGame}</span>
+                  <span className="text-slate-400 text-xs flex items-center gap-1.5">
+                    {getGameOrAcLogo(selectedListing.targetGame, "w-3.5 h-3.5")}
+                    <span>Target: {selectedListing.targetGame}</span>
+                  </span>
                 </div>
                 <h4 className="text-base sm:text-lg font-bold text-white font-display mt-1">
                   {selectedListing.title}
