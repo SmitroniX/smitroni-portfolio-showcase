@@ -25,11 +25,13 @@ import {
   Binary,
   Maximize2,
   Target,
-  Sliders
+  Sliders,
+  ShoppingBag
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
 import { EspRadarSimulator } from './EspRadarSimulator';
 import { AntiCheatBattleArena } from './AntiCheatBattleArena';
+import { DarkWebMarketplace } from './DarkWebMarketplace';
 
 interface DarkSideModalProps {
   isOpen: boolean;
@@ -238,7 +240,7 @@ Vector3 PredictImpactPosition(Vector3 targetPos, Vector3 targetVel, float bullet
 
 export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose, onOpenImGui }) => {
   const [phase, setPhase] = useState<'breach' | 'dossier'>('breach');
-  const [activeTab, setActiveTab] = useState<'radar' | 'battle' | 'games' | 'arsenal' | 'simulator'>('radar');
+  const [activeTab, setActiveTab] = useState<'radar' | 'battle' | 'marketplace' | 'games' | 'arsenal' | 'simulator'>('radar');
   const [selectedGame, setSelectedGame] = useState<GameExploit>(GAME_EXPLOITS[0]);
   const [breachProgress, setBreachProgress] = useState(0);
   const [breachText, setBreachText] = useState('INITIALIZING BIOMETRIC OVERRIDE...');
@@ -561,6 +563,24 @@ export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose, o
               <button
                 onClick={() => {
                   sounds.playClick();
+                  setActiveTab('marketplace');
+                }}
+                className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+                  activeTab === 'marketplace'
+                    ? 'bg-red-600 text-white shadow-lg shadow-red-600/30'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <ShoppingBag className="w-3.5 h-3.5 text-amber-300" />
+                <span>Dark Web Exploit Market</span>
+                <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-[9px] text-amber-300 font-bold">
+                  ONION
+                </span>
+              </button>
+
+              <button
+                onClick={() => {
+                  sounds.playClick();
                   setActiveTab('games');
                 }}
                 className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
@@ -612,6 +632,11 @@ export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose, o
             {/* TAB 0.5: Turn-Based Anti-Cheat vs Hacker Duel Arena */}
             {activeTab === 'battle' && (
               <AntiCheatBattleArena />
+            )}
+
+            {/* TAB 0.8: Dark Web Onion Exploit Marketplace */}
+            {activeTab === 'marketplace' && (
+              <DarkWebMarketplace />
             )}
 
             {/* TAB 1: Game Engine Reversing & Modding Vault */}
