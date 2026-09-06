@@ -1,17 +1,17 @@
 export interface Project {
   id: string;
   title: string;
-  category: 'Full Stack' | 'Cloud & API' | 'AI & CLI' | 'Systems & Bots';
+  category: 'Full Stack' | 'Cloud & API' | 'Developer Tools' | 'Systems & Bots';
   tagline: string;
   description: string;
-  features: string[];
+  story: string;
+  highlights: string[];
   techStack: string[];
   githubUrl?: string;
   liveUrl?: string;
-  featured: boolean;
   status: string;
-  gradient: string;
-  badge: string;
+  stats?: { label: string; value: string };
+  previewType: 'dypu' | 'aniplex' | 'shadow' | 'cli' | 'discord';
 }
 
 export interface Experience {
@@ -20,37 +20,25 @@ export interface Experience {
   period: string;
   type: string;
   location: string;
-  highlights: string[];
-  tech: string[];
-}
-
-export interface SkillCategory {
-  title: string;
-  icon: string;
   description: string;
-  skills: { name: string; level: number; highlight?: boolean }[];
+  highlights: string[];
+  skills: string[];
 }
 
 export const PERSONAL_INFO = {
   name: "Asmit Jogdand",
   handle: "SmitroniX",
-  title: "Full Stack & Cloud Systems Engineer",
-  roles: [
-    "Cloud Computing Architect",
-    "Full Stack Web Sorcerer",
-    "Python & Systems Hacker",
-    "Discord Bot & Concurrency Engineer",
-    "AI CLI Tool Builder"
-  ],
-  bio: "Cloud Computing student at RAIT, Python wizard, React & Node.js aficionado. Crafting resilient web applications, ultra-fast APIs, and mastering high-scale distributed systems.",
-  quote: "Code with purpose. Learn without limits. Build what matters.",
+  role: "Full-Stack Engineer & Cloud Enthusiast",
+  headline: "Crafting scalable web platforms, high-throughput APIs, and modern developer experiences.",
+  shortBio: "Computer Engineering student at RAIT, DY Patil University in Mumbai. Experienced in building production web applications, high-concurrency systems, and cloud infrastructure.",
   location: "Mumbai, Maharashtra, India",
+  timezone: "Asia/Kolkata",
   email: "jogdandasmit@gmail.com",
   education: {
-    degree: "Bachelor of Technology in Computer Engineering",
+    degree: "B.Tech in Computer Engineering",
     institution: "Ramrao Adik Institute of Technology (RAIT), DYPU",
     year: "2025 — 2029",
-    score: "ICSE General Studies: 85.7%"
+    grade: "ICSE General Studies: 85.7%"
   },
   socials: {
     github: "https://github.com/SmitroniX",
@@ -58,14 +46,20 @@ export const PERSONAL_INFO = {
     leetcode: "https://leetcode.com/u/SmitroniX/",
     hackerrank: "https://www.hackerrank.com/jogdandasmit",
     instagram: "https://www.instagram.com/asmit.jogdand_pvt",
-    website: "https://smitronix.dev"
+    portfolio: "https://smitronix.dev"
   },
-  metrics: [
-    { label: "Public Repos", value: "52+", detail: "GitHub verified" },
-    { label: "Production Apps", value: "15+", detail: "Deployed & active" },
-    { label: "System Uptime", value: "99.9%", detail: "Cloud bots & APIs" },
-    { label: "Code Mastery", value: "4+ Yrs", detail: "Self-driven engineering" }
-  ]
+  stats: [
+    { label: "Public Repos", value: "52+", note: "Active open-source" },
+    { label: "Production Apps", value: "15+", note: "Deployed & maintained" },
+    { label: "Years Coding", value: "4+", note: "Self-driven engineering" },
+    { label: "Cloud Uptime", value: "99.9%", note: "Bots & services" }
+  ],
+  currently: {
+    building: "DYPU Connect v2 & exploring AWS cloud-native patterns",
+    listening: "Lofi Beats for deep programming sessions",
+    learning: "System design at scale & distributed messaging",
+    available: "Open for Software Engineering internships & freelance"
+  }
 };
 
 export const PROJECTS: Project[] = [
@@ -73,178 +67,136 @@ export const PROJECTS: Project[] = [
     id: "dypu-connect",
     title: "DYPU Connect",
     category: "Full Stack",
-    tagline: "Exclusive Campus Social Platform for DY Patil University",
-    description: "A comprehensive digital ecosystem built exclusively for university students. Features secure student verification, anonymous confession feeds, student marketplace, clubs discovery, real-time encrypted messaging, and campus event hubs.",
-    features: [
-      "Real-time WebSocket chat and push notification dispatchers",
-      "Anonymous Confessions module with AI moderation filter",
-      "P2P Student Marketplace for academic materials and tech",
-      "Club, community, and university event tracking board"
+    tagline: "Exclusive campus social network for DY Patil University students",
+    description: "A complete digital campus hub built from the ground up to connect students across departments. Includes authenticated student accounts, anonymous confession boards, student peer marketplace, clubs showcase, and real-time private chat.",
+    story: "I built DYPU Connect to solve the fragmented communication on our university campus. It gave thousands of students an official, secure space to socialize, trade academic resources, and discover college clubs.",
+    highlights: [
+      "Real-time WebSocket chat and push notifications",
+      "Confession feed with community moderation heuristics",
+      "P2P marketplace for textbooks, notes, and electronics",
+      "Club event feeds with RSVP and announcements"
     ],
-    techStack: ["React", "TypeScript", "Node.js", "Firebase", "MongoDB", "TailwindCSS"],
+    techStack: ["React", "TypeScript", "Node.js", "Firebase", "MongoDB", "Tailwind CSS"],
     githubUrl: "https://github.com/SmitroniX/DYPU-Connect",
     liveUrl: "https://dypu-connect.netlify.app",
-    featured: true,
-    status: "Active Production",
-    gradient: "from-orange-500/20 via-amber-500/10 to-transparent",
-    badge: "Flagship Platform"
+    status: "Live in Production",
+    stats: { label: "Campus Reach", value: "Active Users" },
+    previewType: "dypu"
   },
   {
-    id: "aniplex-reader",
+    id: "aniplex",
     title: "AniDex & AniPlex",
     category: "Full Stack",
-    tagline: "Next-Gen Anime Streaming & Manga Reader Hub",
-    description: "A lightning-fast streaming and manga reader inspired by modern OTT interfaces. Integrates high-speed content scraping engines, adaptive stream resolution, bookmarking sync, and responsive mobile-first UI.",
-    features: [
-      "Fluid manga reader with infinite vertical scroll and page preloading",
-      "Multi-server streaming proxy with sub-second buffering",
-      "Personalized watchlist, progress tracker, and search filters",
-      "Consumet API aggregation with fallback failover"
+    tagline: "Streaming & discovery platform inspired by modern OTT interfaces",
+    description: "A fast, ad-light anime and manga reader designed for high performance. Features responsive catalog browsing, real-time search, multi-source streaming proxies, and smooth chapter readers.",
+    story: "Frustrated by bloated and slow streaming sites, I developed AniPlex with an emphasis on instant page loads, elegant typography, and seamless video playback.",
+    highlights: [
+      "Dynamic manga reader with smooth page preloading",
+      "Adaptive streaming resolution with fallback proxies",
+      "Personalized watchlist and progress synchronizer",
+      "Consumet API aggregation with sub-second response times"
     ],
-    techStack: ["React.js", "Consumet API", "Node.js", "Firebase", "TailwindCSS"],
+    techStack: ["React.js", "Consumet API", "Node.js", "Firebase", "Tailwind CSS"],
     githubUrl: "https://github.com/SmitroniX/AniPlex",
     liveUrl: "https://ani-plex.vercel.app",
-    featured: true,
     status: "Active Deployment",
-    gradient: "from-cyan-500/20 via-blue-500/10 to-transparent",
-    badge: "High Traffic App"
+    stats: { label: "Performance", value: "98 Lighthouse" },
+    previewType: "aniplex"
   },
   {
-    id: "shadowplex-api",
-    title: "ShadowPlex & Shadow_API",
+    id: "shadow-api",
+    title: "Shadow_API & ShadowPlex",
     category: "Cloud & API",
-    tagline: "High-Throughput Entertainment Search Engine & Media Engine",
-    description: "Ultra low-latency Node/TypeScript RESTful microservice scraping and indexing multimedia metadata across top providers. Powers frontend cinema web apps with caching and automated rate limiting.",
-    features: [
-      "Multi-provider media scraping pipeline with Redis cache layer",
-      "Automated payload sanitization and sub-150ms response times",
-      "CORS-ready REST endpoints with granular documentation",
-      "Containerized microservice architecture deployed on serverless nodes"
+    tagline: "High-throughput media indexing microservice & streaming engine",
+    description: "A low-latency RESTful microservice scraping and indexing multimedia metadata across entertainment providers. Powers client frontends with caching and automated rate-limiting.",
+    story: "Engineered to handle high-frequency concurrent requests while maintaining response latencies under 150ms through in-memory caching and optimized HTTP pipelines.",
+    highlights: [
+      "Multi-provider media scraping pipeline with Redis caching",
+      "Clean RESTful endpoints with automatic rate limiting",
+      "Payload sanitization and sub-150ms response benchmarks",
+      "Deployable as serverless functions or containerized nodes"
     ],
-    techStack: ["TypeScript", "Node.js", "Express", "Cheerio", "Vercel Serverless"],
+    techStack: ["TypeScript", "Node.js", "Express", "Cheerio", "Redis", "Vercel"],
     githubUrl: "https://github.com/SmitroniX/shadow_api",
     liveUrl: "https://shadowapi-bice.vercel.app",
-    featured: true,
     status: "Production API",
-    gradient: "from-purple-500/20 via-indigo-500/10 to-transparent",
-    badge: "Microservice Engine"
+    stats: { label: "Latency", value: "<150ms" },
+    previewType: "shadow"
   },
   {
     id: "gemini-cli",
     title: "GhostCLI & Gemini CLI",
-    category: "AI & CLI",
-    tagline: "Autonomous AI Developer Terminal Companion",
-    description: "Brings the power of Google Gemini AI directly into your UNIX terminal. Streamlines shell command generation, git diff explanations, code reviews, and automated debugging workflows right from the prompt.",
-    features: [
-      "Context-aware CLI shell command generation with auto-explain",
-      "Streaming markdown syntax rendering right in the terminal window",
-      "Interactive multi-turn conversation memory with zero latency",
+    category: "Developer Tools",
+    tagline: "Terminal AI companion integrating Google Gemini into shell workflows",
+    description: "An open-source terminal developer utility that brings Google Gemini AI into your shell. Automates bash command generation, explains code and git diffs, and assists debugging without switching context.",
+    story: "Built to eliminate the friction of context-switching between the terminal and browser while debugging Linux server errors and writing complex shell scripts.",
+    highlights: [
+      "Context-aware shell command generation with auto-explain",
+      "Streaming markdown syntax rendering right in the terminal",
+      "Zero-latency multi-turn interactive session memory",
       "Custom system prompt presets for DevOps, Python, and WebDev"
     ],
-    techStack: ["TypeScript", "Node.js", "Google Gemini API", "Commander.js", "Chalk"],
+    techStack: ["TypeScript", "Node.js", "Google Gemini API", "Commander.js"],
     githubUrl: "https://github.com/SmitroniX/gemini-cli",
     liveUrl: "https://geminicli.com",
-    featured: true,
     status: "Open Source Tool",
-    gradient: "from-emerald-500/20 via-teal-500/10 to-transparent",
-    badge: "AI Terminal Agent"
-  },
-  {
-    id: "smitrix",
-    title: "SmiTriX Digital Matrix",
-    category: "AI & CLI",
-    tagline: "Cyberpunk Digital Sandbox & Matrix Engine",
-    description: "An interactive browser-based cyberpunk matrix interface. Features real-time visual code generation, audio-reactive canvas rain, command-line simulations, and hacker terminal games.",
-    features: [
-      "Custom 60FPS WebGL/Canvas Matrix rain simulator with green glow trails",
-      "Interactive hacker console with system diagnostics and mini-games",
-      "Synthesized sound feedback using HTML5 Web Audio API",
-      "Optimized for high frame rates on both mobile and desktop GPUs"
-    ],
-    techStack: ["JavaScript", "HTML5 Canvas", "Web Audio API", "CSS3 Animations"],
-    githubUrl: "https://github.com/SmitroniX/SmiTriX",
-    liveUrl: "https://smitronix.github.io/SmiTriX/",
-    featured: false,
-    status: "Live Experience",
-    gradient: "from-lime-500/20 via-green-500/10 to-transparent",
-    badge: "Creative Tech"
+    stats: { label: "Terminal Tool", value: "CLI Native" },
+    previewType: "cli"
   },
   {
     id: "plexstaff-bots",
     title: "PlexStaff & High-Concurrency Bots",
     category: "Systems & Bots",
-    tagline: "Distributed Discord Management & Event Dispatchers",
-    description: "Enterprise-grade Discord automation bots managing communities with tens of thousands of members. Handles automated verification, moderation triage, voice-channel dynamic provisioning, and analytics.",
-    features: [
-      "Discord.js v14 gateway sharding architecture for high concurrency",
+    tagline: "Distributed Discord automation bots managing 50k+ server members",
+    description: "Enterprise-grade Discord automation bots managing large community servers. Handles automated verification, ticket triage, voice-channel dynamic allocation, and moderation logs.",
+    story: "Scaled from a simple utility bot into a distributed system handling over 50,000 active server members with zero downtime and sub-second reaction times.",
+    highlights: [
+      "Discord.js v14 gateway sharding architecture",
       "Automated member safety protocols and anti-raid heuristics",
-      "Integrated SQLite/MongoDB persistence for tickets and warnings",
-      "Custom dashboard integration via secure OAuth2"
+      "Persistent ticket storage with SQLite/MongoDB",
+      "High reliability with 99.9% uptime"
     ],
-    techStack: ["JavaScript", "Node.js", "Discord.js", "MongoDB", "REST APIs"],
+    techStack: ["Node.js", "JavaScript", "Discord.js", "MongoDB", "REST APIs"],
     githubUrl: "https://github.com/SmitroniX/PlexStaff",
     liveUrl: "https://github.com/SmitroniX",
-    featured: false,
-    status: "Deployed Systems",
-    gradient: "from-rose-500/20 via-pink-500/10 to-transparent",
-    badge: "Bot Architecture"
+    status: "Production Bots",
+    stats: { label: "Community", value: "50k+ Users" },
+    previewType: "discord"
   }
 ];
 
-export const SKILL_CATEGORIES: SkillCategory[] = [
-  {
-    title: "Frontend & Creative UI",
-    icon: "Layout",
-    description: "Crafting fluid, high-performance interfaces and 3D web experiences.",
-    skills: [
-      { name: "React.js", level: 95, highlight: true },
-      { name: "TypeScript", level: 90, highlight: true },
-      { name: "Tailwind CSS", level: 95, highlight: true },
-      { name: "Three.js & Canvas", level: 85, highlight: true },
-      { name: "Next.js", level: 80 },
-      { name: "HTML5 / Modern CSS", level: 98 }
-    ]
-  },
-  {
-    title: "Backend & Distributed Systems",
-    icon: "Server",
-    description: "Building resilient microservices, robust REST APIs, and event-driven architectures.",
-    skills: [
-      { name: "Node.js & Express", level: 92, highlight: true },
-      { name: "Python", level: 95, highlight: true },
-      { name: "RESTful API Design", level: 94, highlight: true },
-      { name: "WebSockets & Real-time", level: 86 },
-      { name: "Java", level: 82 },
-      { name: "Discord.js Architecture", level: 96, highlight: true }
-    ]
-  },
-  {
-    title: "Cloud & Infrastructure",
-    icon: "Cloud",
-    description: "Deploying, containerizing, and orchestrating serverless and scalable cloud workloads.",
-    skills: [
-      { name: "AWS (EC2, S3, Lambda)", level: 82, highlight: true },
-      { name: "Firebase Suite", level: 88, highlight: true },
-      { name: "Docker & Containerization", level: 78 },
-      { name: "Linux Administration", level: 88 },
-      { name: "Vercel / Netlify CI/CD", level: 92 },
-      { name: "Git & Version Control", level: 95, highlight: true }
-    ]
-  },
-  {
-    title: "Databases & Algorithms",
-    icon: "Database",
-    description: "Optimizing database schemas and sharpening competitive algorithmic problem solving.",
-    skills: [
-      { name: "MongoDB", level: 90, highlight: true },
-      { name: "MySQL / Relational DBs", level: 84 },
-      { name: "Redis Caching", level: 80 },
-      { name: "Data Structures & DSA", level: 88, highlight: true },
-      { name: "Competitive Programming", level: 82 },
-      { name: "System Design Fundamentals", level: 85 }
-    ]
-  }
-];
+export const TECH_STACK = {
+  frontend: [
+    { name: "React.js", tag: "Primary UI", exp: "Advanced" },
+    { name: "TypeScript", tag: "Type Safety", exp: "Advanced" },
+    { name: "Next.js", tag: "Full Stack", exp: "Proficient" },
+    { name: "Tailwind CSS", tag: "Styling", exp: "Advanced" },
+    { name: "Three.js / WebGL", tag: "3D & Canvas", exp: "Intermediate" },
+    { name: "HTML5 / Modern CSS", tag: "Standards", exp: "Mastery" }
+  ],
+  backend: [
+    { name: "Node.js", tag: "Runtime", exp: "Advanced" },
+    { name: "Express.js", tag: "REST APIs", exp: "Advanced" },
+    { name: "Python", tag: "Scripting & AI", exp: "Advanced" },
+    { name: "Java", tag: "Systems & OOP", exp: "Proficient" },
+    { name: "WebSockets", tag: "Real-time", exp: "Proficient" },
+    { name: "Discord.js", tag: "Bot Engine", exp: "Mastery" }
+  ],
+  cloud: [
+    { name: "AWS (EC2, S3, Lambda)", tag: "Cloud Infrastructure", exp: "Intermediate" },
+    { name: "Firebase Suite", tag: "Auth & Realtime", exp: "Advanced" },
+    { name: "Docker", tag: "Containers", exp: "Intermediate" },
+    { name: "Linux / Shell", tag: "SysAdmin", exp: "Advanced" },
+    { name: "Vercel / Netlify", tag: "CI/CD & Edge", exp: "Advanced" },
+    { name: "Git & GitHub", tag: "Collaboration", exp: "Advanced" }
+  ],
+  databases: [
+    { name: "MongoDB", tag: "NoSQL", exp: "Advanced" },
+    { name: "MySQL / SQL", tag: "Relational", exp: "Proficient" },
+    { name: "Redis", tag: "In-Memory Cache", exp: "Intermediate" },
+    { name: "DSA & Algorithms", tag: "Problem Solving", exp: "Active Practice" }
+  ]
+};
 
 export const EXPERIENCES: Experience[] = [
   {
@@ -252,13 +204,14 @@ export const EXPERIENCES: Experience[] = [
     company: "Naviotech Solution Pvt Ltd",
     period: "2026 — Present",
     type: "Internship",
-    location: "Mumbai / Remote",
+    location: "Mumbai, India",
+    description: "Contributing to production client applications, modernizing frontend components, and building robust REST endpoints.",
     highlights: [
-      "Engineered production-grade web applications utilizing React.js and Node.js microservices.",
-      "Spearheaded REST API optimization, reducing response payloads and endpoint latencies by 28%.",
-      "Collaborated on full-stack architecture, database schema migrations, and authentication flows."
+      "Engineered performant UI modules using React.js and responsive Tailwind styling.",
+      "Optimized backend REST endpoints, reducing payload overhead and latency.",
+      "Collaborated on database schema design and secure JWT-based authentication flows."
     ],
-    tech: ["React.js", "Node.js", "REST APIs", "Full Stack Engineering", "TailwindCSS"]
+    skills: ["React.js", "Node.js", "REST APIs", "Full-Stack Development"]
   },
   {
     role: "Marketing & Operations Lead",
@@ -266,51 +219,41 @@ export const EXPERIENCES: Experience[] = [
     period: "2025 — Present",
     type: "Leadership & Community",
     location: "Ramrao Adik Institute of Technology",
+    description: "Leading campus outreach, digital community infrastructure, and technical events for the student body.",
     highlights: [
-      "Coordinated campus-wide tech conferences, hackathons, and student community drives.",
-      "Engineered social campaigns and digital awareness reaching 2,500+ engineering students.",
-      "Facilitated cross-functional collaboration between student developers and academic committees."
+      "Coordinated campus tech drives, workshops, and community events reaching 2,500+ engineering students.",
+      "Managed digital operations, cross-departmental coordination, and social campaigns.",
+      "Built collaborative technical spaces for junior engineers to learn web dev and competitive coding."
     ],
-    tech: ["Community Building", "Event Architecture", "Public Relations", "Team Leadership"]
+    skills: ["Community Building", "Event Operations", "Team Leadership"]
   },
   {
     role: "Freelance Software & Systems Engineer",
     company: "Self-Employed",
     period: "2024 — 2025",
     type: "Freelance",
-    location: "Remote / Global",
+    location: "Remote",
+    description: "Designed bespoke automation infrastructure, cloud scrapers, and high-concurrency bot systems for international clients.",
     highlights: [
-      "Designed and deployed custom Discord automation bots handling 50k+ server interactions monthly.",
-      "Engineered custom web scrapers, automation scripts, and microservice APIs for international clients.",
-      "Maintained 99.9% uptime across independent server nodes and AWS instances."
+      "Architected custom high-concurrency Discord bots handling 50k+ server members with sub-second response times.",
+      "Built automated data scrapers and custom API integrations for international clients.",
+      "Maintained 99.9% uptime on cloud-hosted bots and EC2 nodes."
     ],
-    tech: ["Python", "Node.js", "Discord.js", "Automation", "AWS EC2", "MongoDB"]
+    skills: ["Python", "Node.js", "Discord.js", "AWS EC2", "MongoDB"]
   },
   {
     role: "Plugin Developer (Part-Time)",
-    company: "Hypixel Inc Ecosystem",
+    company: "Hypixel Ecosystem",
     period: "2023 — 2024",
-    type: "Game Systems & Performance",
+    type: "Systems & Optimization",
     location: "Remote",
+    description: "Engineered high-throughput Java server extensions, optimizing networking ticks and concurrent packet dispatchers.",
     highlights: [
       "Developed high-efficiency Java server plugins for multiplayer game servers.",
-      "Profiled and optimized server tick-rates (TPS), garbage collection spikes, and packet handling.",
+      "Profiled and optimized server tick-rates (TPS), memory allocation, and packet handling under peak loads.",
       "Implemented custom game mechanics, anti-cheat detection routines, and event listeners."
     ],
-    tech: ["Java", "Bukkit / Spigot API", "Packet Optimization", "High Concurrency"]
-  },
-  {
-    role: "AI & Software Testing Intern",
-    company: "Tech QA Labs",
-    period: "2023",
-    type: "Internship",
-    location: "Remote",
-    highlights: [
-      "Tested AI prompt generation engines, edge-case failure detection, and LLM hallucination checks.",
-      "Executed manual & automated test suites across cross-browser environments.",
-      "Reported over 120+ functional bugs with reproducible trace logs and patch recommendations."
-    ],
-    tech: ["AI Testing", "Quality Assurance", "Bug Triage", "Test Automation"]
+    skills: ["Java", "Packet Optimization", "High Concurrency", "Performance Profiling"]
   }
 ];
 
@@ -319,22 +262,12 @@ export const CERTIFICATIONS = [
     title: "Data Analytics Job Simulation",
     issuer: "Deloitte Australia",
     year: "2026",
-    credentialUrl: "https://www.linkedin.com/in/asmit-jogdand",
-    skills: ["Data Analytics", "Business Intelligence", "Python Insights"]
+    link: "https://www.linkedin.com/in/asmit-jogdand"
   },
   {
     title: "The Complete Web Development Bootcamp",
     issuer: "Udemy",
     year: "2024",
-    credentialUrl: "https://www.linkedin.com/in/asmit-jogdand",
-    skills: ["React", "Node.js", "Express", "MongoDB", "REST APIs"]
+    link: "https://www.linkedin.com/in/asmit-jogdand"
   }
-];
-
-export const FUN_FACTS = [
-  "⚡ Python is my absolute favorite language for algorithmic brilliance.",
-  "🌩 Cloud computing & high-concurrency distributed systems fascinate me deeply.",
-  "🚀 I love shipping products from zero to production in record time.",
-  "🎮 Gaming and game server mechanics heavily inspired my initial coding journey.",
-  "☕ Debugging complex asynchronous race conditions is better with hot coffee."
 ];

@@ -2,13 +2,11 @@ import React, { useEffect, useState } from 'react';
 
 export const CustomCursor: React.FC = () => {
   const [pos, setPos] = useState({ x: -100, y: -100 });
-  const [trailingPos, setTrailingPos] = useState({ x: -100, y: -100 });
+  const [trail, setTrail] = useState({ x: -100, y: -100 });
   const [isHovering, setIsHovering] = useState(false);
-  const [isClicked, setIsClicked] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Only activate custom cursor on non-touch devices
     const isTouch = window.matchMedia('(pointer: coarse)').matches;
     if (isTouch) return;
 
@@ -17,42 +15,28 @@ export const CustomCursor: React.FC = () => {
     const handleMouseMove = (e: MouseEvent) => {
       setPos({ x: e.clientX, y: e.clientY });
 
-      // Check if hovering over clickable element
       const target = e.target as HTMLElement | null;
       if (target) {
-        const isClickable = target.closest('a, button, input, textarea, [role="button"], .cursor-pointer');
-        setIsHovering(!!isClickable);
+        const isInteractive = target.closest('a, button, input, textarea, select, [role="button"]');
+        setIsHovering(!!isInteractive);
       }
     };
 
-    const handleMouseDown = () => setIsClicked(true);
-    const handleMouseUp = () => setIsClicked(false);
-    const handleMouseLeave = () => setIsVisible(false);
-    const handleMouseEnter = () => setIsVisible(true);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('mouseleave', handleMouseLeave);
-    document.addEventListener('mouseenter', handleMouseEnter);
-
-    let animationFrameId: number;
-    const animateTrail = () => {
-      setTrailingPos((prev) => ({
-        x: prev.x + (pos.x - prev.x) * 0.22,
-        y: prev.y + (pos.y - prev.y) * 0.22,
+    let animId: number;
+    const updateTrail = () => {
+      setTrail((prev) => ({
+        x: prev.x + (pos.x - prev.x) * 0.2,
+        y: prev.y + (pos.y - prev.y) * 0.2,
       }));
-      animationFrameId = requestAnimationFrame(animateTrail);
+      animId = requestAnimationFrame(updateTrail);
     };
-    animationFrameId = requestAnimationFrame(animateTrail);
+    animId = requestAnimationFrame(updateTrail);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mouseup', handleMouseUp);
-      document.removeEventListener('mouseleave', handleMouseLeave);
-      document.removeEventListener('mouseenter', handleMouseEnter);
-      cancelAnimationFrame(animationFrameId);
+      cancelAnimationFrame(animId);
     };
   }, [pos]);
 
@@ -60,32 +44,29 @@ export const CustomCursor: React.FC = () => {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
-      {/* Central bright dot */}
+      {/* Precision Core Dot */}
       <div
-        className="fixed -translate-x-1/2 -translate-y-1/2 rounded-full transition-transform duration-75 ease-out"
+        className="fixed -translate-x-1/2 -translate-y-1/2 rounded-full transition-transform duration-75"
         style={{
           left: `${pos.x}px`,
           top: `${pos.y}px`,
-          width: isClicked ? '10px' : isHovering ? '6px' : '8px',
-          height: isClicked ? '10px' : isHovering ? '6px' : '8px',
-          backgroundColor: isHovering ? '#00F0FF' : '#FF6B00',
-          boxShadow: isHovering
-            ? '0 0 12px #00F0FF, 0 0 20px #00F0FF'
-            : '0 0 12px #FF6B00, 0 0 24px #FF6B00',
+          width: isHovering ? '6px' : '4px',
+          height: isHovering ? '6px' : '4px',
+          backgroundColor: isHovering ? '#FF8A00' : '#FFFFFF',
         }}
       />
 
-      {/* Trailing aura ring */}
+      {/* Smooth Trailing Halo */}
       <div
-        className="fixed -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed transition-all duration-150"
+        className="fixed -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-150 ease-out"
         style={{
-          left: `${trailingPos.x}px`,
-          top: `${trailingPos.y}px`,
-          width: isHovering ? '44px' : isClicked ? '24px' : '32px',
-          height: isHovering ? '44px' : isClicked ? '24px' : '32px',
-          borderColor: isHovering ? 'rgba(0, 240, 255, 0.7)' : 'rgba(255, 107, 0, 0.5)',
-          backgroundColor: isHovering ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 107, 0, 0.03)',
-          transform: `translate(-50%, -50%) scale(${isClicked ? 0.8 : 1})`,
+          left: `${trail.x}px`,
+          top: `${trail.y}px`,
+          width: isHovering ? '36px' : '20px',
+          height: isHovering ? '36px' : '20px',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
+          backgroundColor: isHovering ? 'rgba(255, 138, 0, 0.05)' : 'transparent',
+          transform: 'translate(-50%, -50%)',
         }}
       />
     </div>

@@ -2,151 +2,126 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
 export const ThreeCanvas: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!mountRef.current) return;
 
-    // Scene setup
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
-      60,
+      55,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
     );
-    camera.position.z = 35;
+    camera.position.z = 40;
 
     let renderer: THREE.WebGLRenderer;
     try {
-      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        powerPreference: 'high-performance'
+      });
     } catch {
-      return; // WebGL not supported
+      return;
     }
 
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    containerRef.current.appendChild(renderer.domElement);
+    mountRef.current.appendChild(renderer.domElement);
 
-    // 1. Interactive Starfield / Particle Cloud
-    const particleCount = 1800;
+    // Ambient floating star dust (discrete, ultra-refined)
+    const particleCount = 750;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
 
-    const orangeColor = new THREE.Color('#FF6B00');
-    const cyanColor = new THREE.Color('#00F0FF');
-    const whiteColor = new THREE.Color('#FFFFFF');
+    const warmColor = new THREE.Color('#F97316'); // refined warm amber
+    const slateColor = new THREE.Color('#94A3B8'); // soft slate
+    const indigoColor = new THREE.Color('#6366F1'); // subtle indigo
 
     for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 120;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 120;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 80;
+      positions[i * 3] = (Math.random() - 0.5) * 110;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 110;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 60;
 
-      const mixed = Math.random() < 0.6 ? orangeColor : Math.random() < 0.85 ? cyanColor : whiteColor;
-      colors[i * 3] = mixed.r;
-      colors[i * 3 + 1] = mixed.g;
-      colors[i * 3 + 2] = mixed.b;
+      const mix = Math.random();
+      const col = mix < 0.2 ? warmColor : mix < 0.6 ? slateColor : indigoColor;
+      colors[i * 3] = col.r;
+      colors[i * 3 + 1] = col.g;
+      colors[i * 3 + 2] = col.b;
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-    // Particle Material
-    const pMaterial = new THREE.PointsMaterial({
-      size: 0.85,
+    const material = new THREE.PointsMaterial({
+      size: 0.65,
       vertexColors: true,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.45,
       blending: THREE.AdditiveBlending,
     });
 
-    const particles = new THREE.Points(geometry, pMaterial);
-    scene.add(particles);
+    const pointCloud = new THREE.Points(geometry, material);
+    scene.add(pointCloud);
 
-    // 2. Central Wireframe Cyber Icosahedron
-    const geoIcosa = new THREE.IcosahedronGeometry(9, 1);
-    const wireIcosa = new THREE.WireframeGeometry(geoIcosa);
-    const lineMaterial = new THREE.LineBasicMaterial({
-      color: 0xff6b00,
+    // Floating delicate ambient ring
+    const ringGeo = new THREE.TorusGeometry(12, 0.05, 16, 100);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0xF97316,
       transparent: true,
-      opacity: 0.28,
-      blending: THREE.AdditiveBlending,
+      opacity: 0.12,
+      wireframe: true
     });
-    const icosaMesh = new THREE.LineSegments(wireIcosa, lineMaterial);
-    icosaMesh.position.set(14, 2, -5);
-    scene.add(icosaMesh);
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.position.set(16, 4, -8);
+    ring.rotation.x = Math.PI / 3;
+    scene.add(ring);
 
-    // Inner glowing sphere
-    const innerGeo = new THREE.SphereGeometry(4, 16, 16);
-    const innerMat = new THREE.MeshBasicMaterial({
-      color: 0x00f0ff,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.2,
-      blending: THREE.AdditiveBlending,
-    });
-    const innerMesh = new THREE.Mesh(innerGeo, innerMat);
-    icosaMesh.add(innerMesh);
+    // Mouse movement lerp
+    let mouseX = 0;
+    let mouseY = 0;
+    let targetX = 0;
+    let targetY = 0;
 
-    // Mouse Tracking
-    let targetMouseX = 0;
-    let targetMouseY = 0;
-    let currentMouseX = 0;
-    let currentMouseY = 0;
-
-    const onMouseMove = (e: MouseEvent) => {
-      targetMouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-      targetMouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+    const handleMouseMove = (e: MouseEvent) => {
+      targetX = (e.clientX / window.innerWidth - 0.5) * 2;
+      targetY = (e.clientY / window.innerHeight - 0.5) * 2;
     };
 
-    const onScroll = () => {
-      const scrollProgress = window.scrollY / (document.body.scrollHeight - window.innerHeight || 1);
-      camera.position.y = -scrollProgress * 25;
-      icosaMesh.rotation.y = scrollProgress * Math.PI * 4;
-    };
-
-    window.addEventListener('mousemove', onMouseMove, { passive: true });
-    window.addEventListener('scroll', onScroll, { passive: true });
-
-    // Resize Handler
-    const onResize = () => {
-      if (!containerRef.current) return;
+    const handleResize = () => {
+      if (!mountRef.current) return;
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
 
-      // Adjust mesh position for mobile
       if (window.innerWidth < 768) {
-        icosaMesh.position.set(0, -6, -10);
-        icosaMesh.scale.set(0.65, 0.65, 0.65);
+        ring.visible = false;
       } else {
-        icosaMesh.position.set(14, 2, -5);
-        icosaMesh.scale.set(1, 1, 1);
+        ring.visible = true;
       }
     };
-    onResize();
-    window.addEventListener('resize', onResize);
 
-    // Animation Loop
+    handleResize();
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('resize', handleResize);
+
     let animId: number;
     let clock = new THREE.Clock();
 
     const animate = () => {
       const elapsed = clock.getElapsedTime();
 
-      // Smooth mouse lerp
-      currentMouseX += (targetMouseX - currentMouseX) * 0.05;
-      currentMouseY += (targetMouseY - currentMouseY) * 0.05;
+      mouseX += (targetX - mouseX) * 0.035;
+      mouseY += (targetY - mouseY) * 0.035;
 
-      particles.rotation.y = elapsed * 0.03 + currentMouseX * 0.2;
-      particles.rotation.x = elapsed * 0.015 - currentMouseY * 0.2;
+      pointCloud.rotation.y = elapsed * 0.015 + mouseX * 0.1;
+      pointCloud.rotation.x = elapsed * 0.008 - mouseY * 0.1;
 
-      icosaMesh.rotation.x = elapsed * 0.15 + currentMouseY * 0.3;
-      icosaMesh.rotation.y = elapsed * 0.2 + currentMouseX * 0.3;
-      innerMesh.rotation.y = -elapsed * 0.3;
-
-      camera.position.x = currentMouseX * 4;
+      ring.rotation.z = elapsed * 0.05;
+      ring.rotation.y = elapsed * 0.03 + mouseX * 0.2;
 
       renderer.render(scene, camera);
       animId = requestAnimationFrame(animate);
@@ -155,26 +130,23 @@ export const ThreeCanvas: React.FC = () => {
     animate();
 
     return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onResize);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animId);
       geometry.dispose();
-      pMaterial.dispose();
-      geoIcosa.dispose();
-      lineMaterial.dispose();
-      innerGeo.dispose();
-      innerMat.dispose();
+      material.dispose();
+      ringGeo.dispose();
+      ringMat.dispose();
       renderer.dispose();
-      if (containerRef.current && renderer.domElement) {
-        containerRef.current.removeChild(renderer.domElement);
+      if (mountRef.current && renderer.domElement) {
+        mountRef.current.removeChild(renderer.domElement);
       }
     };
   }, []);
 
   return (
     <div
-      ref={containerRef}
+      ref={mountRef}
       className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
       aria-hidden="true"
     />

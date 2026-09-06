@@ -1,242 +1,199 @@
 import React, { useState, useEffect } from 'react';
-import { Terminal, ArrowRight, ShieldCheck, Cpu, Code2, Globe, Sparkles, Download } from 'lucide-react';
-import { sounds } from '../utils/sound';
+import { ArrowRight, Mail, Copy, Check, Terminal, ExternalLink, MapPin, Clock, Sparkles, Code2, Layers, Cpu } from 'lucide-react';
+import { GithubIcon, LinkedinIcon } from './BrandIcons';
 import { PERSONAL_INFO } from '../data/portfolioData';
+import { SpotlightCard } from './SpotlightCard';
+import { sounds } from '../utils/sound';
 
 interface HeroProps {
   onOpenTerminal: () => void;
 }
 
 export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
-  const [roleIndex, setRoleIndex] = useState(0);
-  const [displayText, setDisplayText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [time, setTime] = useState('');
 
-  // Typewriter effect
+  // Live Mumbai Time
   useEffect(() => {
-    const currentRole = PERSONAL_INFO.roles[roleIndex];
-    let typingSpeed = isDeleting ? 40 : 80;
+    const updateTime = () => {
+      const now = new Date();
+      const options: Intl.DateTimeFormatOptions = {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      };
+      setTime(new Intl.DateTimeFormat('en-US', options).format(now));
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
-    if (!isDeleting && displayText === currentRole) {
-      typingSpeed = 2000; // Pause at end of text
-      const timeout = setTimeout(() => setIsDeleting(true), typingSpeed);
-      return () => clearTimeout(timeout);
-    }
-
-    if (isDeleting && displayText === '') {
-      setIsDeleting(false);
-      setRoleIndex((prev) => (prev + 1) % PERSONAL_INFO.roles.length);
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setDisplayText((prev) =>
-        isDeleting ? currentRole.substring(0, prev.length - 1) : currentRole.substring(0, prev.length + 1)
-      );
-    }, typingSpeed);
-
-    return () => clearTimeout(timer);
-  }, [displayText, isDeleting, roleIndex]);
+  const handleCopyEmail = () => {
+    sounds.playClick();
+    navigator.clipboard.writeText(PERSONAL_INFO.email);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
 
   return (
-    <section className="relative min-h-screen pt-32 pb-20 flex items-center justify-center overflow-hidden">
-      {/* Background radial glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-[#FF6B00]/15 via-orange-600/5 to-transparent rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/3 right-10 w-[350px] h-[350px] bg-[#00F0FF]/10 rounded-full blur-3xl pointer-events-none" />
+    <section className="relative pt-32 pb-20 overflow-hidden">
+      {/* Soft subtle radial ambient backdrop */}
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[650px] h-[350px] bg-gradient-to-b from-orange-500/10 via-amber-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
+        {/* Main Headline & Intro */}
+        <div className="max-w-3xl space-y-6 mb-14">
           
-          {/* Main Hero Column */}
-          <div className="lg:col-span-8 space-y-6 text-left">
-            
-            {/* System Status Pill */}
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-900/90 border border-orange-500/30 text-xs font-mono backdrop-blur-md shadow-[0_0_15px_rgba(255,107,0,0.15)]">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-              </span>
-              <span className="text-slate-300">SYS_STATUS:</span>
-              <span className="text-[#FF6B00] font-bold">ONLINE</span>
-              <span className="text-slate-600">|</span>
-              <span className="text-[#00F0FF] hidden sm:inline">MUMBAI, IN</span>
-              <span className="text-slate-600 hidden sm:inline">|</span>
-              <span className="text-slate-400 hidden sm:inline">RAIT • DYPU</span>
-            </div>
-
-            {/* Main Name & Title */}
-            <div className="space-y-3">
-              <p className="text-xs sm:text-sm font-mono tracking-widest text-[#FF8A00] uppercase font-bold flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#FF6B00]" />
-                Identity Protocol // Verified Engineer
-              </p>
-              
-              <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white font-display uppercase">
-                Asmit <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] via-[#FF8A00] to-amber-300">Jogdand</span>
-              </h1>
-
-              {/* Dynamic Typewriter Box */}
-              <div className="h-12 sm:h-14 flex items-center font-mono text-xl sm:text-3xl text-slate-200">
-                <span className="text-[#00F0FF] mr-3">&gt;</span>
-                <span className="text-white font-bold tracking-wide">
-                  {displayText}
-                </span>
-                <span className="inline-block w-2.5 h-6 ml-1.5 bg-[#FF6B00] animate-pulse" />
-              </div>
-            </div>
-
-            {/* Bio Paragraph */}
-            <p className="text-base sm:text-lg text-slate-300 max-w-2xl leading-relaxed font-sans">
-              B.Tech in Computer Engineering at <span className="text-[#FF6B00] font-semibold">Ramrao Adik Institute of Technology (RAIT)</span>. 
-              Engineering scalable cloud architectures, high-concurrency microservices, AI CLI agents, and interactive web realities.
-            </p>
-
-            {/* Core Action CTAs */}
-            <div className="flex flex-wrap items-center gap-4 pt-4">
-              <a
-                href="#projects"
-                onClick={() => sounds.playClick()}
-                onMouseEnter={() => sounds.playHover()}
-                className="group relative inline-flex items-center gap-3 px-7 py-3.5 rounded-xl bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] text-black font-bold font-mono text-sm tracking-wider uppercase transition-all shadow-[0_0_25px_rgba(255,107,0,0.4)] hover:shadow-[0_0_35px_rgba(255,107,0,0.7)] hover:scale-105 active:scale-95"
-              >
-                <span>Holo-Vault</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
-              </a>
-
-              <button
-                onClick={() => {
-                  sounds.playWarp();
-                  onOpenTerminal();
-                }}
-                onMouseEnter={() => sounds.playHover()}
-                className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-orange-500/40 hover:border-[#FF6B00] text-slate-200 hover:text-white font-mono text-sm tracking-wide transition-all shadow-lg active:scale-95 group"
-              >
-                <Terminal className="w-4 h-4 text-[#00F0FF] group-hover:rotate-12 transition-transform" />
-                <span>Command CLI</span>
-                <span className="px-1.5 py-0.5 rounded bg-black/60 border border-slate-700 text-[11px] text-slate-400 font-mono">
-                  Ctrl+K
-                </span>
-              </button>
-
-              <a
-                href={PERSONAL_INFO.socials.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => sounds.playClick()}
-                onMouseEnter={() => sounds.playHover()}
-                className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-slate-800 hover:border-slate-600 text-slate-300 hover:text-white font-mono text-sm transition-all"
-              >
-                <span>LinkedIn</span>
-                <span className="text-[#00F0FF]">↗</span>
-              </a>
-            </div>
-
-            {/* Quick Metrics Bar */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-slate-800/80">
-              {PERSONAL_INFO.metrics.map((metric, i) => (
-                <div key={i} className="space-y-1">
-                  <div className="text-2xl sm:text-3xl font-black font-mono text-white flex items-baseline gap-1">
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-amber-400">
-                      {metric.value}
-                    </span>
-                  </div>
-                  <div className="text-xs font-mono font-bold text-slate-200 tracking-wider">
-                    {metric.label}
-                  </div>
-                  <div className="text-[11px] text-slate-500">
-                    {metric.detail}
-                  </div>
-                </div>
-              ))}
-            </div>
-
+          {/* Status Badge */}
+          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-white/10 text-xs font-mono text-slate-300 backdrop-blur-md">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Available for SWE Internships & Collaborations</span>
           </div>
 
-          {/* Right Column: Interactive 3D Cyber Emblem / Hologram Card */}
-          <div className="lg:col-span-4 flex justify-center lg:justify-end">
-            <div className="w-full max-w-sm cyber-card rounded-2xl p-6 relative overflow-hidden border border-orange-500/30 group">
-              
-              {/* Scanline effect */}
-              <div className="scanline-overlay pointer-events-none" />
+          <div className="space-y-4">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white font-display leading-[1.1]">
+              Hey, I&apos;m{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400">
+                Asmit Jogdand
+              </span>
+              .
+            </h1>
 
-              {/* Glowing Corner Accents */}
-              <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-[#FF6B00]" />
-              <div className="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-[#FF6B00]" />
-              <div className="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-[#FF6B00]" />
-              <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-[#FF6B00]" />
+            <p className="text-xl sm:text-2xl text-slate-300 font-normal leading-snug">
+              Full-stack software engineer &amp; cloud architect based in Mumbai. Known online as{' '}
+              <span className="text-[#FF8A00] font-semibold">@SmitroniX</span>.
+            </p>
+          </div>
 
-              {/* Card Header HUD */}
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
-                  <Cpu className="w-4 h-4 text-[#FF6B00]" />
-                  <span>CORE.KERNEL // v4.2</span>
-                </div>
-                <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  OPTIMIZED
-                </span>
-              </div>
+          <p className="text-base sm:text-lg text-slate-400 leading-relaxed font-sans max-w-2xl">
+            Currently studying Computer Engineering at <span className="text-slate-200 font-medium">Ramrao Adik Institute of Technology (RAIT)</span>. 
+            I build high-concurrency systems, campus platforms like <span className="text-slate-200 font-medium">DYPU Connect</span>, 
+            and scalable cloud microservices with a strong focus on architecture and polish.
+          </p>
 
-              {/* Visual Avatar / Emblem */}
-              <div className="my-6 relative flex flex-col items-center">
-                <div className="relative w-36 h-36 rounded-2xl overflow-hidden border-2 border-orange-500/50 shadow-[0_0_30px_rgba(255,107,0,0.3)] bg-gradient-to-b from-slate-900 to-black p-1 group-hover:border-[#00F0FF] transition-all">
-                  <img
-                    src="https://avatars.githubusercontent.com/u/142213284?v=4"
-                    alt="Asmit Jogdand"
-                    className="w-full h-full object-cover rounded-xl grayscale contrast-125 group-hover:grayscale-0 transition-all duration-500"
-                  />
-                  {/* Digital overlay grid */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                  <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center text-[10px] font-mono text-orange-400">
-                    <span>ASMIT_J</span>
-                    <span>99.8%</span>
-                  </div>
-                </div>
+          {/* Action Row */}
+          <div className="flex flex-wrap items-center gap-3 pt-3">
+            <a
+              href="#projects"
+              onClick={() => sounds.playClick()}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-medium text-sm transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+            >
+              <span>View Projects</span>
+              <ArrowRight className="w-4 h-4" />
+            </a>
 
-                <div className="mt-4 text-center">
-                  <div className="text-sm font-mono font-bold text-white tracking-widest uppercase">
-                    Asmit Jogdand
-                  </div>
-                  <div className="text-xs font-mono text-[#00F0FF]">
-                    @SmitroniX
-                  </div>
-                </div>
-              </div>
+            <button
+              onClick={handleCopyEmail}
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-900/90 hover:bg-slate-800/90 border border-white/10 hover:border-white/20 text-slate-200 text-sm font-medium transition-all"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span className="text-emerald-400">Email Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4 text-slate-400" />
+                  <span>Copy Email</span>
+                </>
+              )}
+            </button>
 
-              {/* Quick specs */}
-              <div className="space-y-2 text-xs font-mono pt-3 border-t border-slate-800/80">
-                <div className="flex justify-between text-slate-400">
-                  <span>Specialization:</span>
-                  <span className="text-slate-200">Cloud & Full Stack</span>
-                </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>Institute:</span>
-                  <span className="text-[#FF8A00]">RAIT (DY Patil)</span>
-                </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>Favorite Stack:</span>
-                  <span className="text-emerald-400">React • Node • Python</span>
-                </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>Status:</span>
-                  <span className="text-[#00F0FF]">Ready to Build ⚡</span>
-                </div>
-              </div>
-
-              {/* Interactive Audio Trigger on Card */}
-              <button
-                onClick={() => {
-                  sounds.playLaser();
-                }}
-                className="mt-5 w-full py-2 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-xs font-mono text-[#FF8A00] flex items-center justify-center gap-2 transition-colors"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Transmit Neural Pulse</span>
-              </button>
-
-            </div>
+            <button
+              onClick={() => {
+                sounds.playWarp();
+                onOpenTerminal();
+              }}
+              className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-900/60 hover:bg-slate-800/80 border border-white/10 text-slate-300 text-sm font-mono transition-all"
+              title="Open Command Palette"
+            >
+              <Terminal className="w-4 h-4 text-[#FF8A00]" />
+              <span className="hidden sm:inline">Command Palette</span>
+              <kbd className="px-1.5 py-0.5 text-[10px] rounded bg-black/50 border border-slate-700 text-slate-400">
+                ⌘K
+              </kbd>
+            </button>
           </div>
 
         </div>
+
+        {/* Hero Bento Grid: Personal Snapshots */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          
+          {/* Bento 1: Live Mumbai Clock & Location */}
+          <SpotlightCard className="p-5 flex flex-col justify-between">
+            <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
+              <span className="flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-[#FF8A00]" /> Mumbai, IN
+              </span>
+              <span className="flex items-center gap-1 text-slate-500">
+                <Clock className="w-3.5 h-3.5" /> IST
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              <div className="text-2xl font-bold font-mono tracking-tight text-white">
+                {time || 'Loading...'}
+              </div>
+              <p className="text-xs text-slate-400">
+                UTC+5:30 • Usually hacking or reviewing PRs
+              </p>
+            </div>
+          </SpotlightCard>
+
+          {/* Bento 2: Currently Building */}
+          <SpotlightCard className="md:col-span-2 p-5 flex flex-col justify-between">
+            <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
+              <span className="flex items-center gap-1.5 text-emerald-400">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                Current Focus
+              </span>
+              <span className="text-[11px] text-slate-500 font-mono">v2.0 Beta</span>
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="text-base font-semibold text-white">
+                {PERSONAL_INFO.currently.building}
+              </h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Empowering university students with real-time community tools, anonymous confession moderation, and decentralized campus exchange.
+              </p>
+            </div>
+          </SpotlightCard>
+
+          {/* Bento 3: GitHub Pulse */}
+          <SpotlightCard className="p-5 flex flex-col justify-between group">
+            <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
+              <span className="flex items-center gap-1.5">
+                <GithubIcon className="w-3.5 h-3.5 text-slate-300" /> GitHub
+              </span>
+              <a
+                href={PERSONAL_INFO.socials.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+
+            <div className="space-y-1">
+              <div className="text-2xl font-bold font-mono text-white flex items-baseline gap-2">
+                <span>52+</span>
+                <span className="text-xs font-normal text-slate-400 font-sans">Repositories</span>
+              </div>
+              <p className="text-xs text-slate-400">
+                Active open-source repos, bot infrastructures, and web engines.
+              </p>
+            </div>
+          </SpotlightCard>
+
+        </div>
+
       </div>
     </section>
   );
