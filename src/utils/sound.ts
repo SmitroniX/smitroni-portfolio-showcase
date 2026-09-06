@@ -175,6 +175,113 @@ class SoundEngine {
       osc.stop(now + 0.02);
     } catch {}
   }
+
+  // Red Alert Klaxon Alarm
+  public playAlarm() {
+    if (!this.soundEnabled) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      
+      // Siren pulse 1 & 2
+      [0, 0.22].forEach((offset) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(880, now + offset);
+        osc.frequency.exponentialRampToValueAtTime(520, now + offset + 0.18);
+
+        gain.gain.setValueAtTime(0.04, now + offset);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.18);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.18);
+      });
+    } catch {}
+  }
+
+  // Cyber Glitch noise burst
+  public playGlitch() {
+    if (!this.soundEnabled) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      
+      for (let i = 0; i < 4; i++) {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = i % 2 === 0 ? 'sawtooth' : 'square';
+        osc.frequency.setValueAtTime(200 + Math.random() * 1600, now + i * 0.03);
+        
+        gain.gain.setValueAtTime(0.03, now + i * 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.03 + 0.04);
+        
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc.start(now + i * 0.03);
+        osc.stop(now + i * 0.03 + 0.04);
+      }
+    } catch {}
+  }
+
+  // Heavy Cyber Security Access Granted
+  public playAccessGranted() {
+    if (!this.soundEnabled) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+
+      const subOsc = this.ctx.createOscillator();
+      const subGain = this.ctx.createGain();
+      subOsc.type = 'triangle';
+      subOsc.frequency.setValueAtTime(65, now);
+      subOsc.frequency.exponentialRampToValueAtTime(130, now + 0.1);
+      subOsc.frequency.exponentialRampToValueAtTime(40, now + 0.4);
+
+      subGain.gain.setValueAtTime(0.06, now);
+      subGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+
+      subOsc.connect(subGain);
+      subGain.connect(this.ctx.destination);
+
+      subOsc.start(now);
+      subOsc.stop(now + 0.4);
+    } catch {}
+  }
+
+  // In-game Memory / Code Injection chirp
+  public playInject() {
+    if (!this.soundEnabled) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(240, now);
+      osc.frequency.exponentialRampToValueAtTime(1400, now + 0.08);
+      osc.frequency.exponentialRampToValueAtTime(800, now + 0.18);
+
+      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.18);
+    } catch {}
+  }
 }
 
 export const sounds = new SoundEngine();

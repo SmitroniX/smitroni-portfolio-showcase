@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Terminal, ArrowRight, ExternalLink, Mail, Copy, Check, X, Sparkles, FolderGit2, User, Code2, Play } from 'lucide-react';
+import { Search, Terminal, ArrowRight, ExternalLink, Mail, Copy, Check, X, Sparkles, FolderGit2, User, Code2, Play, Skull } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './BrandIcons';
 import { PERSONAL_INFO, PROJECTS } from '../data/portfolioData';
 import { sounds } from '../utils/sound';
@@ -9,9 +9,10 @@ interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenCompiler?: () => void;
+  onOpenDarkSide?: () => void;
 }
 
-export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onOpenCompiler }) => {
+export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onOpenCompiler, onOpenDarkSide }) => {
   const [search, setSearch] = useState('');
   const [copied, setCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -49,6 +50,15 @@ export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose, 
   };
 
   const navigationActions = [
+    {
+      title: '💀 [RESTRICTED] Unlock The Dark Side Dossier',
+      desc: 'Interpol Cyber Threat Dossier: Black Hat Hacker, Game Cheat Maker & Ring-0 Reverser (CS2, Valorant, GTA5, Minecraft, Phasmophobia)',
+      icon: <Skull className="w-4 h-4 text-red-500 animate-pulse" />,
+      action: () => {
+        onClose();
+        if (onOpenDarkSide) onOpenDarkSide();
+      },
+    },
     {
       title: 'Launch Online Compiler (IDE)',
       desc: 'Full-screen Programiz-style runner for Python, C++, Java, Rust, JS',

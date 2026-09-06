@@ -10,6 +10,7 @@ import { Footer } from './components/Footer';
 import { ThreeCanvas } from './components/ThreeCanvas';
 import { CustomCursor } from './components/CustomCursor';
 import { TerminalModal } from './components/TerminalModal';
+import { DarkSideModal } from './components/DarkSideModal';
 import { CompilerPage } from './pages/CompilerPage';
 import { sounds } from './utils/sound';
 import { Terminal, ArrowRight, Play } from 'lucide-react';
@@ -28,6 +29,13 @@ export function App() {
   });
 
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [darkSideOpen, setDarkSideOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.hash.includes('darkside') || window.location.hash.includes('classified');
+    }
+    return false;
+  });
+  const keySequenceRef = React.useRef<string>('');
 
   // Sync route with URL hash & popstate
   useEffect(() => {
@@ -37,6 +45,9 @@ export function App() {
         setCurrentPage('compiler');
       } else {
         setCurrentPage('portfolio');
+      }
+      if (hash.includes('darkside') || hash.includes('classified')) {
+        setDarkSideOpen(true);
       }
     };
 
@@ -59,21 +70,39 @@ export function App() {
     }
   };
 
-  // Global hotkeys (Cmd+K / Ctrl+K)
+  // Global hotkeys (Cmd+K / Ctrl+K & secret 'darkside' sequence)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         sounds.playClick();
         setCommandPaletteOpen((prev) => !prev);
-      } else if (e.key === 'Escape' && commandPaletteOpen) {
-        setCommandPaletteOpen(false);
+      } else if (e.key === 'Escape') {
+        if (darkSideOpen) {
+          setDarkSideOpen(false);
+        } else if (commandPaletteOpen) {
+          setCommandPaletteOpen(false);
+        }
+      }
+
+      // Secret sequence detection (typing "darkside", "blackhat", or "cheat")
+      if (!['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) {
+        keySequenceRef.current = (keySequenceRef.current + e.key.toLowerCase()).slice(-10);
+        if (
+          keySequenceRef.current.includes('darkside') ||
+          keySequenceRef.current.includes('blackhat') ||
+          keySequenceRef.current.includes('cheat')
+        ) {
+          keySequenceRef.current = '';
+          sounds.playAlarm();
+          setDarkSideOpen(true);
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [commandPaletteOpen]);
+  }, [commandPaletteOpen, darkSideOpen]);
 
   // If viewing the standalone Programiz-style compiler page
   if (currentPage === 'compiler') {
@@ -95,6 +124,7 @@ export function App() {
       <Navbar
         onOpenCommandPalette={() => setCommandPaletteOpen(true)}
         onOpenCompiler={() => navigateTo('compiler')}
+        onOpenDarkSide={() => setDarkSideOpen(true)}
       />
 
       {/* Main Flow */}
@@ -138,14 +168,21 @@ export function App() {
         <ContactSection />
       </main>
 
-      {/* Minimal Footer */}
-      <Footer />
+      {/* Minimal Footer with Secret Dark Side Trigger */}
+      <Footer onOpenDarkSide={() => setDarkSideOpen(true)} />
 
       {/* Command Palette (⌘K) */}
       <TerminalModal
         isOpen={commandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}
         onOpenCompiler={() => navigateTo('compiler')}
+        onOpenDarkSide={() => setDarkSideOpen(true)}
+      />
+
+      {/* Secret Easter Egg: The Dark Side Dossier Modal */}
+      <DarkSideModal
+        isOpen={darkSideOpen}
+        onClose={() => setDarkSideOpen(false)}
       />
     </div>
   );

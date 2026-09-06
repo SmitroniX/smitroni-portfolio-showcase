@@ -157,3 +157,51 @@
   color: #E0AF68 !important; /* gold @Override */
 }
 
+/* =========================================================================
+   Classified Cyber / Black Hat CRT & Glitch Styles
+   ========================================================================= */
+
+.crt-scanlines {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.35) 50%
+  ),
+  linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.03)
+  );
+  background-size: 100% 3px, 6px 100%;
+  pointer-events: none;
+}
+
+@keyframes crt-flicker {
+  0% { opacity: 0.98; }
+  50% { opacity: 1; }
+  52% { opacity: 0.94; }
+  54% { opacity: 1; }
+  80% { opacity: 0.97; }
+  100% { opacity: 1; }
+}
+
+.crt-flicker {
+  animation: crt-flicker 0.15s infinite;
+}
+
+.shadow-crimson-glow {
+  box-shadow: 0 0 50px -10px rgba(239, 68, 68, 0.45), inset 0 0 30px rgba(239, 68, 68, 0.12);
+}
+
+.classified-stamp {
+  border: 3px solid #EF4444;
+  color: #EF4444;
+  font-family: monospace;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transform: rotate(-7deg);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+
+

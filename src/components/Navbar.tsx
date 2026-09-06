@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, VolumeX, Menu, X, ArrowUpRight, Command, Terminal } from 'lucide-react';
+import { Volume2, VolumeX, Menu, X, ArrowUpRight, Command, Terminal, Skull } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './BrandIcons';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { sounds } from '../utils/sound';
@@ -7,12 +7,27 @@ import { sounds } from '../utils/sound';
 interface NavbarProps {
   onOpenCommandPalette: () => void;
   onOpenCompiler: () => void;
+  onOpenDarkSide?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette, onOpenCompiler }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette, onOpenCompiler, onOpenDarkSide }) => {
   const [scrolled, setScrolled] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoClicks, setLogoClicks] = useState(0);
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    sounds.playClick();
+    const next = logoClicks + 1;
+    if (next >= 5) {
+      setLogoClicks(0);
+      sounds.playAlarm();
+      if (onOpenDarkSide) onOpenDarkSide();
+    } else {
+      setLogoClicks(next);
+      setTimeout(() => setLogoClicks(0), 3000);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -44,23 +59,27 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette, onOpenComp
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         
         {/* Identity Logo */}
-        <a
-          href="#"
-          onClick={() => sounds.playClick()}
-          className="flex items-center gap-3 group"
-        >
-          <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/10 bg-slate-900 flex items-center justify-center text-xs font-bold font-mono text-[#FF8A00] group-hover:border-[#FF8A00]/50 transition-colors">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleLogoClick}
+            className="w-8 h-8 rounded-lg overflow-hidden border border-white/10 bg-slate-900 flex items-center justify-center text-xs font-bold font-mono text-[#FF8A00] hover:border-[#FF8A00]/50 transition-colors cursor-pointer group"
+            title="Asmit Jogdand (Click 5x to trigger secret)"
+          >
             AJ
-          </div>
-          <div className="flex flex-col">
+          </button>
+          <a
+            href="#"
+            onClick={() => sounds.playClick()}
+            className="flex flex-col group"
+          >
             <span className="text-sm font-bold text-white tracking-tight group-hover:text-slate-200 transition-colors">
               Asmit Jogdand
             </span>
             <span className="text-[11px] font-mono text-slate-400">
               @SmitroniX
             </span>
-          </div>
-        </a>
+          </a>
+        </div>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-1">
@@ -197,6 +216,24 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette, onOpenComp
             <span>Search &amp; Command Palette</span>
             <span className="px-1.5 py-0.5 rounded bg-white/10">⌘K</span>
           </button>
+
+          {onOpenDarkSide && (
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                sounds.playAlarm();
+                onOpenDarkSide();
+              }}
+              className="w-full flex items-center justify-between py-2 text-xs font-mono text-red-400 border-t border-white/5"
+            >
+              <span className="flex items-center gap-2">
+                <Skull className="w-4 h-4 text-red-500 animate-pulse" /> The Dark Side [Classified]
+              </span>
+              <span className="px-1.5 py-0.5 rounded bg-red-600/20 text-[10px] text-red-300 font-bold border border-red-500/30">
+                RESTRICTED
+              </span>
+            </button>
+          )}
         </div>
       )}
     </header>
