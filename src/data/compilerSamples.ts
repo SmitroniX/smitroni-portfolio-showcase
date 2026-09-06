@@ -11,6 +11,23 @@ export interface CodeSample {
 export const SAMPLE_CODES: Record<string, CodeSample[]> = {
   java: [
     {
+      id: 'java-default',
+      title: 'Main.java (Default)',
+      tag: 'Starter',
+      description: 'Standard Programiz starter template: "Start small. Ship something."',
+      defaultStdin: '',
+      isInteractive: false,
+      code: `// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+
+class Main {
+    public static void main(String[] args) {
+        System.out.println("Start small. Ship something.");
+    }
+}
+`
+    },
+    {
       id: 'java-inheritance',
       title: 'OOP Multi-Level Inheritance (Circle, Area, Volume)',
       tag: 'Interactive Input',
@@ -71,7 +88,7 @@ public class Main {
       id: 'java-fibonacci',
       title: 'Fibonacci Series with User Input',
       tag: 'Interactive',
-      description: 'Prompts for N terms and prints the Fibonacci series.',
+      description: 'Prompts for N terms via Scanner and prints the Fibonacci series.',
       defaultStdin: '8',
       isInteractive: true,
       code: `import java.util.Scanner;
@@ -143,6 +160,19 @@ public class Main {
 
   python: [
     {
+      id: 'py-default',
+      title: 'main.py (Default)',
+      tag: 'Starter',
+      description: 'Standard Programiz starter template: "Start small. Ship something."',
+      defaultStdin: '',
+      isInteractive: false,
+      code: `# Online Python compiler (interpreter) to run Python online.
+# Write Python 3 code in this online editor and run it.
+
+print("Start small. Ship something.")
+`
+    },
+    {
       id: 'py-circle-geometry',
       title: 'Circle Area & Sphere Volume Calculator',
       tag: 'Interactive Input',
@@ -195,36 +225,28 @@ if result:
 else:
     print(f"No two numbers sum to {target}")
 `
-    },
-    {
-      id: 'py-cluster-monitor',
-      title: 'Cloud Cluster Health & Latency Monitor',
-      tag: 'Cloud & DevOps',
-      description: 'Simulates microservice health checks and latency benchmarks.',
-      defaultStdin: '',
-      isInteractive: false,
-      code: `# Cloud Microservice Health Monitor
-import time
-
-nodes = [
-    {"region": "Mumbai (ap-south-1)", "latency": 14, "status": "UP"},
-    {"region": "Singapore (ap-southeast-1)", "latency": 38, "status": "UP"},
-    {"region": "Frankfurt (eu-central-1)", "latency": 112, "status": "UP"},
-]
-
-print("=== SmitroniX Cloud Telemetry ===")
-total_latency = 0
-for node in nodes:
-    print(f"• {node['region'].ljust(30)} -> {node['latency']}ms [{node['status']}]")
-    total_latency += node['latency']
-
-avg = total_latency / len(nodes)
-print(f"\\nAverage Cluster Latency: {avg:.1f}ms | Availability: 99.9%")
-`
     }
   ],
 
   cpp: [
+    {
+      id: 'cpp-default',
+      title: 'main.cpp (Default)',
+      tag: 'Starter',
+      description: 'Standard Programiz starter template: "Start small. Ship something."',
+      defaultStdin: '',
+      isInteractive: false,
+      code: `// Online C++ compiler to run C++ program online
+#include <iostream>
+
+int main() {
+    // Write C++ code here
+    std::cout << "Start small. Ship something.\n";
+
+    return 0;
+}
+`
+    },
     {
       id: 'cpp-circle-inheritance',
       title: 'Circle & Sphere OOP Class Hierarchy',
@@ -276,105 +298,134 @@ int main() {
     return 0;
 }
 `
-    },
+    }
+  ],
+
+  c: [
     {
-      id: 'cpp-vectors-stl',
-      title: 'C++ STL Vectors & Lambda Sorting',
-      tag: 'Modern C++14',
-      description: 'Demonstrates modern STL algorithm transformations.',
+      id: 'c-default',
+      title: 'main.c (Default)',
+      tag: 'Starter',
+      description: 'Standard Programiz starter template: "Start small. Ship something."',
       defaultStdin: '',
       isInteractive: false,
-      code: `#include <iostream>
-#include <vector>
-#include <algorithm>
-
-using namespace std;
+      code: `// Online C compiler to run C program online
+#include <stdio.h>
 
 int main() {
-    cout << "=== Modern C++14 STL Transformations ===" << endl;
-    vector<int> numbers = {64, 34, 25, 12, 22, 11, 90};
+    // Write C code here
+    printf("Start small. Ship something.\n");
 
-    cout << "Original Vector: ";
-    for (int n : numbers) cout << n << " ";
-    cout << endl;
+    return 0;
+}
+`
+    },
+    {
+      id: 'c-circle-calc',
+      title: 'Radius Input & Geometry (scanf)',
+      tag: 'Interactive Input',
+      description: 'Accepts radius through scanf, calculates circle area and sphere volume.',
+      defaultStdin: '5',
+      isInteractive: true,
+      code: `#include <stdio.h>
 
-    sort(numbers.begin(), numbers.end(), [](int a, int b) {
-        return a < b;
-    });
-
-    cout << "Sorted with Lambda: ";
-    for (int n : numbers) cout << n << " ";
-    cout << endl;
-
+int main() {
+    double r, area, volume;
+    printf("Enter Radius: ");
+    if (scanf("%lf", &r) == 1) {
+        area = 3.1415926535 * r * r;
+        volume = (4.0 / 3.0) * 3.1415926535 * r * r * r;
+        printf("\nArea of Circle = %.4f\n", area);
+        printf("Volume of Sphere = %.4f\n", volume);
+    } else {
+        printf("Invalid input.\n");
+    }
     return 0;
 }
 `
     }
   ],
 
-  c: [
+  csharp: [
     {
-      id: 'c-circle-scanf',
-      title: 'Circle & Sphere Calculator (scanf input)',
-      tag: 'Interactive Input',
-      description: 'Standard C implementation accepting radius and computing values.',
-      defaultStdin: '5',
-      isInteractive: true,
-      code: `#include <stdio.h>
+      id: 'csharp-default',
+      title: 'Main.cs (Default)',
+      tag: 'Starter',
+      description: 'Standard C# starter template',
+      defaultStdin: '',
+      isInteractive: false,
+      code: `// Online C# compiler
+using System;
 
-int main() {
-    double r;
-    printf("Enter Radius: ");
-    scanf("%lf", &r);
-
-    double area = 3.14 * r * r;
-    double volume = (4.0 / 3.0) * 3.14 * r * r * r;
-
-    printf("\\nArea of Circle = %.2lf\\n", area);
-    printf("Volume of Sphere = %.2lf\\n", volume);
-    return 0;
+class MainClass {
+    public static void Main (string[] args) {
+        Console.WriteLine ("Start small. Ship something.");
+    }
 }
 `
     },
     {
-      id: 'c-bubble-sort',
-      title: 'Bubble Sort with Pointer Swapping',
-      tag: 'Algorithms',
-      description: 'Classical sorting with explicit memory pointers in C.',
-      defaultStdin: '',
-      isInteractive: false,
-      code: `#include <stdio.h>
+      id: 'csharp-circle',
+      title: 'Circle & Sphere Calculation',
+      tag: 'Interactive Input',
+      description: 'Prompts for radius via Console.ReadLine and calculates geometric properties.',
+      defaultStdin: '5',
+      isInteractive: true,
+      code: `using System;
 
-void swap(int *a, int *b) {
-    int temp = *a;
-    *a = *b;
-    *b = temp;
-}
-
-void bubbleSort(int arr[], int n) {
-    for (int i = 0; i < n - 1; i++) {
-        for (int j = 0; j < n - i - 1; j++) {
-            if (arr[j] > arr[j + 1]) {
-                swap(&arr[j], &arr[j + 1]);
-            }
-        }
+class Circle {
+    public double r;
+    public void Accept() {
+        Console.Write("Enter Radius: ");
+        r = double.Parse(Console.ReadLine() ?? "5");
     }
 }
 
-int main() {
-    int arr[] = {64, 34, 25, 12, 22, 11, 90};
-    int n = sizeof(arr) / sizeof(arr[0]);
+class Program : Circle {
+    public static void Main() {
+        Program p = new Program();
+        p.Accept();
+        double area = Math.PI * p.r * p.r;
+        double volume = (4.0 / 3.0) * Math.PI * Math.Pow(p.r, 3);
+        Console.WriteLine($"Area of Circle = {area:F2}");
+        Console.WriteLine($"Volume of Sphere = {volume:F2}");
+    }
+}
+`
+    }
+  ],
 
-    printf("Original array: ");
-    for (int i = 0; i < n; i++) printf("%d ", arr[i]);
-    printf("\\n");
+  kotlin: [
+    {
+      id: 'kotlin-default',
+      title: 'Main.kt (Default)',
+      tag: 'Starter',
+      description: 'Standard Kotlin starter template',
+      defaultStdin: '',
+      isInteractive: false,
+      code: `// Online Kotlin compiler
+fun main() {
+    println("Start small. Ship something.")
+}
+`
+    },
+    {
+      id: 'kotlin-geometry',
+      title: 'Interactive Geometry in Kotlin',
+      tag: 'Interactive Input',
+      description: 'Accepts radius and computes geometry.',
+      defaultStdin: '5',
+      isInteractive: true,
+      code: `import java.util.Scanner
 
-    bubbleSort(arr, n);
-
-    printf("Sorted array:   ");
-    for (int i = 0; i < n; i++) printf("%d ", arr[i]);
-    printf("\\n");
-    return 0;
+fun main() {
+    val sc = Scanner(System.\`in\`)
+    print("Enter Radius: ")
+    val r = sc.nextDouble()
+    val area = 3.14 * r * r
+    val volume = (4.0 / 3.0) * 3.14 * r * r * r
+    println("Area of Circle = $area")
+    println("Volume of Sphere = $volume")
 }
 `
     }
@@ -382,198 +433,218 @@ int main() {
 
   javascript: [
     {
-      id: 'js-geometry-class',
-      title: 'ES6 Geometry Classes & Inheritance',
-      tag: 'OOP Classes',
-      description: 'Class hierarchy in modern JavaScript computing area & volume.',
-      defaultStdin: '5',
-      isInteractive: true,
-      code: `// ES6 Class Inheritance - Geometry Engine
-class Circle {
-  constructor(r = 5) {
-    this.r = r;
-  }
-}
+      id: 'js-default',
+      title: 'main.js (Default)',
+      tag: 'Starter',
+      description: 'Standard JavaScript starter template: "Start small. Ship something."',
+      defaultStdin: '',
+      isInteractive: false,
+      code: `// Online Javascript Editor for free
+// Write, Edit and Run your Javascript code using JS Online Compiler
 
-class Area extends Circle {
-  calculateArea() {
-    this.area = 3.14 * this.r * this.r;
-    return this.area;
-  }
-}
-
-class Volume extends Area {
-  calculateVolume() {
-    this.volume = (4.0 / 3.0) * 3.14 * Math.pow(this.r, 3);
-    return this.volume;
-  }
-
-  display() {
-    console.log("Radius = " + this.r);
-    console.log("Area of Circle = " + this.calculateArea());
-    console.log("Volume of Sphere = " + this.calculateVolume());
-  }
-}
-
-const obj = new Volume(5);
-obj.display();
+console.log("Start small. Ship something.");
 `
     },
     {
-      id: 'js-async-queue',
-      title: 'Async Task Queue & Promise Handling',
-      tag: 'Async / Node',
-      description: 'Simulates high-concurrency event loops and microtasks.',
-      defaultStdin: '',
-      isInteractive: false,
-      code: `// Async Task Dispatcher
-console.log("=== Initializing Microtask Pipeline ===");
+      id: 'js-geometry',
+      title: 'Interactive Circle & Sphere Geometry',
+      tag: 'Interactive Input',
+      description: 'Calculates Circle Area and Sphere Volume for radius.',
+      defaultStdin: '5',
+      isInteractive: true,
+      code: `// Node.js Geometry Calculation
+const radius = 5.0; // Input radius
+const area = Math.PI * radius * radius;
+const volume = (4 / 3) * Math.PI * Math.pow(radius, 3);
 
-const tasks = [
-  { id: "TASK_01", type: "DB_SYNC", priority: "HIGH" },
-  { id: "TASK_02", type: "CACHE_INVALIDATE", priority: "MED" },
-  { id: "TASK_03", type: "BROADCAST_WEBSOCKET", priority: "LOW" },
-];
-
-tasks.forEach((t, i) => {
-  console.log(\`[DISPATCH #\${i + 1}] Processing \${t.id} (\${t.type}) - Priority: \${t.priority}\`);
-});
-
-console.log("\\nAll 3 tasks processed with zero rejected promises.");
+console.log("Enter Radius:", radius);
+console.log("Area of Circle =", area.toFixed(2));
+console.log("Volume of Sphere =", volume.toFixed(2));
 `
     }
   ],
 
   typescript: [
     {
-      id: 'ts-strict-interfaces',
-      title: 'Type-Safe Geometric Model & Interfaces',
-      tag: 'TypeScript 5.6',
-      description: 'Defines strict contract interfaces and implements OOP geometry.',
-      defaultStdin: '5',
-      isInteractive: true,
-      code: `interface IGeometry {
-  radius: number;
-  calculateArea(): number;
-  calculateVolume(): number;
-}
-
-class SphereCalculator implements IGeometry {
-  constructor(public radius: number = 5) {}
-
-  calculateArea(): number {
-    return 3.14 * this.radius * this.radius;
-  }
-
-  calculateVolume(): number {
-    return (4.0 / 3.0) * 3.14 * Math.pow(this.radius, 3);
-  }
-
-  display(): void {
-    console.log("=== TypeScript 5.6 Strict Geometric Model ===");
-    console.log(\`Radius: \${this.radius}\`);
-    console.log(\`Area:   \${this.calculateArea()}\`);
-    console.log(\`Volume: \${this.calculateVolume()}\`);
-  }
-}
-
-const calc = new SphereCalculator(5);
-calc.display();
-`
-    }
-  ],
-
-  rust: [
-    {
-      id: 'rust-geometry',
-      title: 'Rust Structs & Method Implementation',
-      tag: 'Memory Safe',
-      description: 'Demonstrates memory-safe struct methods in Rust.',
-      defaultStdin: '5',
-      isInteractive: true,
-      code: `struct Circle {
-    r: f64,
-}
-
-impl Circle {
-    fn new(r: f64) -> Self {
-        Circle { r }
-    }
-
-    fn area(&self) -> f64 {
-        3.14 * self.r * self.r
-    }
-
-    fn volume(&self) -> f64 {
-        (4.0 / 3.0) * 3.14 * self.r.powi(3)
-    }
-}
-
-fn main() {
-    let circle = Circle::new(5.0);
-    println!("=== Rust 1.85 Geometry Engine ===");
-    println!("Radius = {}", circle.r);
-    println!("Area of Circle = {}", circle.area());
-    println!("Volume of Sphere = {}", circle.volume());
-}
+      id: 'ts-default',
+      title: 'main.ts (Default)',
+      tag: 'Starter',
+      description: 'Standard TypeScript starter template',
+      defaultStdin: '',
+      isInteractive: false,
+      code: `// Online TypeScript compiler
+console.log("Start small. Ship something.");
 `
     }
   ],
 
   go: [
     {
+      id: 'go-default',
+      title: 'main.go (Default)',
+      tag: 'Starter',
+      description: 'Standard Go starter template: "Start small. Ship something."',
+      defaultStdin: '',
+      isInteractive: false,
+      code: `// Online Go compiler to run Go program online
+package main
+import "fmt"
+
+func main() {
+    fmt.Println("Start small. Ship something.")
+}
+`
+    },
+    {
       id: 'go-geometry',
-      title: 'Go Geometry Structs & Goroutines',
-      tag: 'Concurrency',
-      description: 'Go struct methods and concurrency channel dispatching.',
+      title: 'Interactive Geometry with fmt.Scan',
+      tag: 'Interactive Input',
+      description: 'Accepts radius via stdin and computes area and volume.',
       defaultStdin: '5',
       isInteractive: true,
       code: `package main
-
 import (
-	"fmt"
-	"math"
+    "fmt"
+    "math"
 )
 
-type Circle struct {
-	radius float64
-}
-
-func (c Circle) Area() float64 {
-	return math.Pi * c.radius * c.radius
-}
-
-func (c Circle) Volume() float64 {
-	return (4.0 / 3.0) * math.Pi * math.Pow(c.radius, 3)
-}
-
 func main() {
-	c := Circle{radius: 5.0}
-	fmt.Println("=== Go 1.23 Online Engine ===")
-	fmt.Printf("Radius = %.1f\\n", c.radius)
-	fmt.Printf("Area of Circle = %.4f\\n", c.Area())
-	fmt.Printf("Volume of Sphere = %.4f\\n", c.Volume())
+    var r float64
+    fmt.Print("Enter Radius: ")
+    fmt.Scan(&r)
+    area := math.Pi * r * r
+    volume := (4.0 / 3.0) * math.Pi * math.Pow(r, 3)
+    fmt.Printf("Area of Circle = %.2f\\n", area)
+    fmt.Printf("Volume of Sphere = %.2f\\n", volume)
 }
 `
     }
   ],
 
-  bash: [
+  rust: [
     {
-      id: 'bash-math-telemetry',
-      title: 'UNIX Shell Math & Kernel Telemetry',
-      tag: 'Shell Script',
-      description: 'Shell script demonstrating variables, arithmetic, and system status.',
+      id: 'rust-default',
+      title: 'main.rs (Default)',
+      tag: 'Starter',
+      description: 'Standard Rust starter template',
       defaultStdin: '',
       isInteractive: false,
-      code: `#!/usr/bin/env bash
-echo "=== UNIX Bash Execution ==="
-RADIUS=5
-AREA=$(echo "scale=2; 3.14 * $RADIUS * $RADIUS" | bc 2>/dev/null || echo "78.50")
-echo "Radius: $RADIUS"
-echo "Computed Area: $AREA"
-echo "System Host: $(uname -s -m 2>/dev/null || echo 'Linux x86_64')"
-echo "Timestamp: $(date -u)"
+      code: `// Online Rust compiler
+fn main() {
+    println!("Start small. Ship something.");
+}
+`
+    },
+    {
+      id: 'rust-geometry',
+      title: 'Geometry & stdin Reader in Rust',
+      tag: 'Interactive Input',
+      description: 'Reads radius from standard input and computes sphere volume.',
+      defaultStdin: '5',
+      isInteractive: true,
+      code: `use std::io::{self, Write};
+
+fn main() {
+    print!("Enter Radius: ");
+    io::stdout().flush().unwrap();
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).expect("Failed to read line");
+    let r: f64 = input.trim().parse().unwrap_or(5.0);
+
+    let area = std::f64::consts::PI * r * r;
+    let volume = (4.0 / 3.0) * std::f64::consts::PI * r.powi(3);
+
+    println!("Area of Circle = {:.2}", area);
+    println!("Volume of Sphere = {:.2}", volume);
+}
+`
+    }
+  ],
+
+  php: [
+    {
+      id: 'php-default',
+      title: 'main.php (Default)',
+      tag: 'Starter',
+      description: 'Standard PHP starter template',
+      defaultStdin: '',
+      isInteractive: false,
+      code: `<?php
+// Online PHP compiler
+echo "Start small. Ship something.\n";
+?>
+`
+    }
+  ],
+
+  swift: [
+    {
+      id: 'swift-default',
+      title: 'main.swift (Default)',
+      tag: 'Starter',
+      description: 'Standard Swift starter template',
+      defaultStdin: '',
+      isInteractive: false,
+      code: `// Online Swift compiler
+print("Start small. Ship something.")
+`
+    }
+  ],
+
+  r: [
+    {
+      id: 'r-default',
+      title: 'main.r (Default)',
+      tag: 'Starter',
+      description: 'Standard R starter template',
+      defaultStdin: '',
+      isInteractive: false,
+      code: `# Online R compiler
+cat("Start small. Ship something.\n")
+`
+    }
+  ],
+
+  sql: [
+    {
+      id: 'sql-default',
+      title: 'main.sql (Default)',
+      tag: 'Starter',
+      description: 'Standard SQL SQLite template',
+      defaultStdin: '',
+      isInteractive: false,
+      code: `-- Online SQL compiler (SQLite)
+CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT);
+INSERT INTO users VALUES (1, 'Start small. Ship something.');
+SELECT * FROM users;
+`
+    }
+  ],
+
+  html: [
+    {
+      id: 'html-default',
+      title: 'index.html (Default)',
+      tag: 'Web',
+      description: 'Standard HTML5 template with live browser preview',
+      defaultStdin: '',
+      isInteractive: false,
+      code: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Start Small</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; padding: 2rem; }
+    h1 { color: #38bdf8; font-size: 1.8rem; }
+    p { color: #94a3b8; font-size: 1.1rem; }
+  </style>
+</head>
+<body>
+  <h1>Start small. Ship something.</h1>
+  <p>Live Web Preview powered by SmitroniX</p>
+</body>
+</html>
 `
     }
   ]
