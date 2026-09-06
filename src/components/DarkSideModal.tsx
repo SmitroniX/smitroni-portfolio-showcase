@@ -440,12 +440,12 @@ export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose, o
                     sounds.playClick();
                     onOpenImGui();
                   }}
-                  className="px-3 py-1.5 rounded-lg bg-red-600/30 hover:bg-red-600/50 border border-red-500/60 text-red-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(239,68,68,0.4)] hover:shadow-[0_0_18px_rgba(239,68,68,0.7)]"
-                  title="Open Draggable DirectX ImGui Cheat Menu Overlay (Insert Key)"
+                  className="px-2.5 sm:px-3 py-1.5 rounded-lg bg-red-600/30 hover:bg-red-600/50 border border-red-500/60 text-red-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(239,68,68,0.4)] active:scale-95 shrink-0"
+                  title="Open DirectX ImGui Cheat Menu Overlay"
                 >
                   <Sliders className="w-3.5 h-3.5 text-amber-300" />
-                  <span className="hidden sm:inline">IMGUI OVERLAY</span>
-                  <span className="px-1 py-0.5 rounded bg-black/60 text-[10px] text-amber-300 font-mono">[INS]</span>
+                  <span>IMGUI MENU</span>
+                  <span className="hidden sm:inline text-amber-300 font-mono text-[10px]">[INS]</span>
                 </button>
               )}
 
