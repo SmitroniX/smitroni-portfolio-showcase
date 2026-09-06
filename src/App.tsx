@@ -3,6 +3,7 @@ import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { Projects } from './components/Projects';
 import { DevOpsArchitecture } from './components/DevOpsArchitecture';
+import { OnlineCompiler } from './components/OnlineCompiler';
 import { SkillsRadar } from './components/SkillsRadar';
 import { ExperienceTimeline } from './components/ExperienceTimeline';
 import { ContactSection } from './components/ContactSection';
@@ -50,6 +51,7 @@ export function App() {
         <Hero onOpenTerminal={() => setCommandPaletteOpen(true)} />
         <Projects />
         <DevOpsArchitecture />
+        <OnlineCompiler />
         <SkillsRadar />
         <ExperienceTimeline />
         <ContactSection />
