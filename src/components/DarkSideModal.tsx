@@ -23,9 +23,11 @@ import {
   Layers,
   FileCode2,
   Binary,
-  Maximize2
+  Maximize2,
+  Target
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
+import { EspRadarSimulator } from './EspRadarSimulator';
 
 interface DarkSideModalProps {
   isOpen: boolean;
@@ -233,7 +235,7 @@ Vector3 PredictImpactPosition(Vector3 targetPos, Vector3 targetVel, float bullet
 
 export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose }) => {
   const [phase, setPhase] = useState<'breach' | 'dossier'>('breach');
-  const [activeTab, setActiveTab] = useState<'games' | 'arsenal' | 'simulator'>('games');
+  const [activeTab, setActiveTab] = useState<'radar' | 'games' | 'arsenal' | 'simulator'>('radar');
   const [selectedGame, setSelectedGame] = useState<GameExploit>(GAME_EXPLOITS[0]);
   const [breachProgress, setBreachProgress] = useState(0);
   const [breachText, setBreachText] = useState('INITIALIZING BIOMETRIC OVERRIDE...');
@@ -501,20 +503,38 @@ export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose })
             </div>
 
             {/* Interactive Dossier Navigation Tabs */}
-            <div className="flex items-center gap-2 border-b border-red-900/40 pb-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 border-b border-red-900/40 pb-2 overflow-x-auto">
+              <button
+                onClick={() => {
+                  sounds.playClick();
+                  setActiveTab('radar');
+                }}
+                className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+                  activeTab === 'radar'
+                    ? 'bg-red-600 text-white shadow-lg shadow-red-600/30'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Target className="w-3.5 h-3.5 text-amber-300" />
+                <span>Live ESP &amp; Aimbot Radar</span>
+                <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-[9px] text-amber-300 font-bold">
+                  PLAYABLE
+                </span>
+              </button>
+
               <button
                 onClick={() => {
                   sounds.playClick();
                   setActiveTab('games');
                 }}
-                className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                   activeTab === 'games'
                     ? 'bg-red-600 text-white shadow-lg shadow-red-600/30'
                     : 'text-slate-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 <Crosshair className="w-3.5 h-3.5" />
-                <span>Game Engine Reversing &amp; Cheats ({GAME_EXPLOITS.length})</span>
+                <span>Game Engine Reversing ({GAME_EXPLOITS.length})</span>
               </button>
 
               <button
@@ -522,14 +542,14 @@ export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose })
                   sounds.playClick();
                   setActiveTab('simulator');
                 }}
-                className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                   activeTab === 'simulator'
                     ? 'bg-red-600 text-white shadow-lg shadow-red-600/30'
                     : 'text-slate-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 <Terminal className="w-3.5 h-3.5" />
-                <span>Live Payload Injector Simulator</span>
+                <span>Payload Injector Simulator</span>
               </button>
 
               <button
@@ -537,7 +557,7 @@ export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose })
                   sounds.playClick();
                   setActiveTab('arsenal');
                 }}
-                className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                   activeTab === 'arsenal'
                     ? 'bg-red-600 text-white shadow-lg shadow-red-600/30'
                     : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -547,6 +567,11 @@ export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose })
                 <span>Black Hat Cyber Arsenal</span>
               </button>
             </div>
+
+            {/* TAB 0: Interactive ESP & Aimbot Radar Simulator */}
+            {activeTab === 'radar' && (
+              <EspRadarSimulator />
+            )}
 
             {/* TAB 1: Game Engine Reversing & Modding Vault */}
             {activeTab === 'games' && (
