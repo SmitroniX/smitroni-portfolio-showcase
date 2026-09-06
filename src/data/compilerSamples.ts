@@ -28,6 +28,40 @@ class Main {
 `
     },
     {
+      id: 'java-palindrome',
+      title: 'Palindrome String Checker',
+      tag: 'Interactive Input',
+      description: 'Checks if a user input string is a palindrome using StringBuffer.',
+      defaultStdin: 'madam',
+      isInteractive: true,
+      code: `import java.util.Scanner;
+
+class Palindrome {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter a String: ");
+        String str = sc.nextLine();
+
+        StringBuffer sb = new StringBuffer(str);
+
+        // Reverse the string
+        sb.reverse();
+
+        String rev = sb.toString();
+
+        if (str.equalsIgnoreCase(rev)) {
+            System.out.println("String is a Palindrome.");
+        } else {
+            System.out.println("String is not a Palindrome.");
+        }
+
+        sc.close();
+    }
+}
+`
+    },
+    {
       id: 'java-inheritance',
       title: 'OOP Multi-Level Inheritance (Circle, Area, Volume)',
       tag: 'Interactive Input',

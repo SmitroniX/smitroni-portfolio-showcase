@@ -228,6 +228,40 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     }
   };
 
+  // Helper to ensure any Java class with main(...) runs seamlessly on Judge0 (which executes java Main)
+  const prepareJavaSourceCode = (source: string): string => {
+    const hasMainClass = /(?:class|interface|record|enum)\s+Main\b/.test(source);
+    if (hasMainClass) {
+      return source.replace(/public\s+class\s+(?!Main\b)(\w+)/g, 'class $1');
+    }
+
+    // Look for any class defining public static void main
+    const mainMethodClassMatch = source.match(/(?:public\s+)?class\s+(\w+)[^{]*\{[\s\S]*?public\s+static\s+void\s+main\s*\(/);
+    if (mainMethodClassMatch && mainMethodClassMatch[1]) {
+      const entryClassName = mainMethodClassMatch[1];
+      const cleanedSource = source.replace(/public\s+class\s+/g, 'class ');
+      return `${cleanedSource}\n\npublic class Main {\n    public static void main(String[] args) throws Throwable {\n        ${entryClassName}.main(args);\n    }\n}\n`;
+    }
+
+    // Fallback if class name exists without public static void main match
+    const anyClassMatch = source.match(/(?:public\s+)?class\s+(\w+)/);
+    if (anyClassMatch && anyClassMatch[1]) {
+      const className = anyClassMatch[1];
+      const cleanedSource = source.replace(/public\s+class\s+/g, 'class ');
+      return `${cleanedSource}\n\npublic class Main {\n    public static void main(String[] args) throws Throwable {\n        ${className}.main(args);\n    }\n}\n`;
+    }
+
+    return source;
+  };
+
+  // Quick suggestion chips based on code context
+  const quickChips = useMemo(() => {
+    if (code.includes('String') || code.includes('Palindrome') || code.includes('nextLine')) {
+      return ['madam', 'racecar', 'hello', 'radar'];
+    }
+    return ['5', '10', '15', '25'];
+  }, [code]);
+
   // Core execution engine with interactive input
   const executeCode = async (overrideStdin?: string) => {
     sounds.playWarp();
@@ -243,10 +277,13 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     if (requiresInput && !effectiveStdin.trim()) {
       setIsRunning(false);
       setIsWaitingForInput(true);
-      if (code.includes('Enter Radius:')) {
-        setOutput('Enter Radius: ');
-      } else if (code.includes('Enter number')) {
-        setOutput('Enter number: ');
+      const promptMatch = code.match(/System\.out\.print(?:ln)?\s*\(\s*"([^"]+)"\s*\)/) ||
+                         code.match(/cout\s*<<\s*"([^"]+)"/) ||
+                         code.match(/printf\s*\(\s*"([^"]+)"\s*\)/) ||
+                         code.match(/input\s*\(\s*"([^"]+)"\s*\)/);
+      const detectedPrompt = promptMatch ? promptMatch[1] : null;
+      if (detectedPrompt) {
+        setOutput(detectedPrompt);
       } else {
         setOutput('Program is waiting for input (stdin)...\nEnter your value below in the output section and press Enter:\n');
       }
@@ -260,13 +297,15 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     setOutput('Compiling and executing code on cloud worker...\n');
     const startTime = performance.now();
 
+    const processedSource = selectedLang.id === 'java' ? prepareJavaSourceCode(code) : code;
+
     try {
       const response = await fetch('https://ce.judge0.com/submissions?wait=true', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           language_id: selectedLang.judge0Id,
-          source_code: code,
+          source_code: processedSource,
           stdin: effectiveStdin.trim() ? `${effectiveStdin.trim()}\n` : undefined,
         }),
       });
@@ -279,11 +318,16 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
         let finalOut = '';
         if (result.stdout) {
           let stdout = result.stdout;
-          // Format prompt with echoed user input if needed (e.g. "Enter Radius: Area of Circle" -> "Enter Radius: 5\nArea of Circle")
-          if (effectiveStdin.trim() && stdout.startsWith('Enter Radius: Area of Circle')) {
-            stdout = `Enter Radius: ${effectiveStdin.trim()}\n` + stdout.substring('Enter Radius: '.length);
-          } else if (effectiveStdin.trim() && stdout.startsWith('Enter Radius: ') && !stdout.includes(`Enter Radius: ${effectiveStdin.trim()}`)) {
-            stdout = stdout.replace('Enter Radius: ', `Enter Radius: ${effectiveStdin.trim()}\n`);
+          // Format prompt with echoed user input for any prompt (e.g. "Enter a String: " or "Enter Radius: ")
+          if (effectiveStdin.trim()) {
+            const colonIndex = stdout.indexOf(': ');
+            if (colonIndex !== -1 && colonIndex < 80) {
+              const promptPart = stdout.substring(0, colonIndex + 2);
+              const rest = stdout.substring(colonIndex + 2);
+              if (!rest.trim().startsWith(effectiveStdin.trim())) {
+                stdout = `${promptPart}${effectiveStdin.trim()}\n${rest}`;
+              }
+            }
           }
           finalOut += stdout;
         }
@@ -345,7 +389,16 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
       const area = 3.14 * radiusVal * radiusVal;
       const volume = (4.0 / 3.0) * 3.14 * radiusVal * radiusVal * radiusVal;
 
-      if (code.includes('Circle') && code.includes('Volume')) {
+      if (code.includes('Palindrome')) {
+        const inputStr = effectiveStdin.trim() || 'madam';
+        const rev = inputStr.split('').reverse().join('');
+        const isPalin = inputStr.toLowerCase() === rev.toLowerCase();
+        setOutput(
+          `Enter a String: ${inputStr}\n` +
+          `String is ${isPalin ? 'a' : 'not a'} Palindrome.\n\n` +
+          `[Process completed with exit code 0: Accepted]`
+        );
+      } else if (code.includes('Circle') && code.includes('Volume')) {
         setOutput(
           `Enter Radius: ${radiusVal}\n` +
           `Area of Circle = ${area.toFixed(1)}\n` +
@@ -828,7 +881,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
                 {/* Quick mobile tap chips for input */}
                 <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
                   <span className="text-[10px] text-slate-400 font-mono">Quick:</span>
-                  {['5', '10', '15', '25'].map((chip) => (
+                  {quickChips.map((chip) => (
                     <button
                       key={chip}
                       type="button"
