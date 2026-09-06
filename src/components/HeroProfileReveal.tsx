@@ -30,9 +30,34 @@ export const HeroProfileReveal: React.FC = () => {
     });
   };
 
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!cardRef.current || !e.touches[0]) return;
+    const touch = e.touches[0];
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = ((y - centerY) / centerY) * -12;
+    const rotateY = ((x - centerX) / centerX) * 12;
+
+    setRotation({ x: rotateX, y: rotateY });
+    setGlarePos({
+      x: (x / rect.width) * 100,
+      y: (y / rect.height) * 100,
+    });
+  };
+
   const handleMouseLeave = () => {
     setRotation({ x: 0, y: 0 });
   };
+
+  const handleTouchEnd = () => {
+    setRotation({ x: 0, y: 0 });
+  };
+
 
   const triggerReveal = () => {
     sounds.playWarp();
@@ -80,12 +105,14 @@ export const HeroProfileReveal: React.FC = () => {
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         onClick={triggerReveal}
         style={{
           transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
           transition: 'transform 0.15s ease-out',
         }}
-        className="relative w-72 sm:w-80 h-[380px] sm:h-[420px] rounded-3xl p-3 bg-gradient-to-b from-white/15 via-white/5 to-transparent border border-white/20 shadow-2xl backdrop-blur-xl cursor-pointer group overflow-hidden"
+        className="relative w-[280px] sm:w-80 h-[380px] sm:h-[420px] max-w-[90vw] rounded-3xl p-3 bg-gradient-to-b from-white/15 via-white/5 to-transparent border border-white/20 shadow-2xl backdrop-blur-xl cursor-pointer group overflow-hidden touch-pan-y"
       >
         {/* Dynamic Specular Glare */}
         <div

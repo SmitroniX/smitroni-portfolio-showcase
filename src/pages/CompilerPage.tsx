@@ -1,5 +1,23 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Play, RotateCcw, Copy, Check, Terminal, Clock, Cpu, ArrowLeft, Trash2, Sparkles, ChevronDown, FileCode2, Sliders, CornerDownLeft, BookOpen, Send } from 'lucide-react';
+import {
+  Play,
+  RotateCcw,
+  Copy,
+  Check,
+  Terminal,
+  Clock,
+  Cpu,
+  ArrowLeft,
+  Trash2,
+  Sparkles,
+  ChevronDown,
+  FileCode2,
+  Sliders,
+  CornerDownLeft,
+  BookOpen,
+  Send,
+  Code2
+} from 'lucide-react';
 import { sounds } from '../utils/sound';
 import { SAMPLE_CODES, CodeSample } from '../data/compilerSamples';
 import confetti from 'canvas-confetti';
@@ -22,6 +40,7 @@ interface CompilerPageProps {
 interface LanguageOption {
   id: string;
   name: string;
+  shortName: string;
   judge0Id: number;
   icon: string;
   extension: string;
@@ -29,15 +48,15 @@ interface LanguageOption {
 }
 
 const COMPILER_LANGUAGES: LanguageOption[] = [
-  { id: 'java', name: 'Java (JDK 17)', judge0Id: 91, icon: '☕', extension: 'java', version: 'JDK 17' },
-  { id: 'python', name: 'Python 3', judge0Id: 100, icon: '🐍', extension: 'py', version: '3.12' },
-  { id: 'cpp', name: 'C++ (GCC 14)', judge0Id: 105, icon: '⚙️', extension: 'cpp', version: 'GCC 14.1' },
-  { id: 'c', name: 'C (GCC 14)', judge0Id: 103, icon: '🔤', extension: 'c', version: 'GCC 14.1' },
-  { id: 'javascript', name: 'JavaScript (Node.js)', judge0Id: 97, icon: '⚡', extension: 'js', version: 'v20.17' },
-  { id: 'typescript', name: 'TypeScript', judge0Id: 101, icon: '🔷', extension: 'ts', version: 'v5.6' },
-  { id: 'rust', name: 'Rust', judge0Id: 108, icon: '🦀', extension: 'rs', version: '1.85' },
-  { id: 'go', name: 'Go', judge0Id: 107, icon: '🐹', extension: 'go', version: '1.23' },
-  { id: 'bash', name: 'Bash', judge0Id: 46, icon: '🐚', extension: 'sh', version: 'v5.0' },
+  { id: 'java', name: 'Java (JDK 17)', shortName: 'Java', judge0Id: 91, icon: '☕', extension: 'java', version: 'JDK 17' },
+  { id: 'python', name: 'Python 3', shortName: 'Python', judge0Id: 100, icon: '🐍', extension: 'py', version: '3.12' },
+  { id: 'cpp', name: 'C++ (GCC 14)', shortName: 'C++', judge0Id: 105, icon: '⚙️', extension: 'cpp', version: 'GCC 14.1' },
+  { id: 'c', name: 'C (GCC 14)', shortName: 'C', judge0Id: 103, icon: '🔤', extension: 'c', version: 'GCC 14.1' },
+  { id: 'javascript', name: 'JavaScript', shortName: 'JS', judge0Id: 97, icon: '⚡', extension: 'js', version: 'Node 20' },
+  { id: 'typescript', name: 'TypeScript', shortName: 'TS', judge0Id: 101, icon: '🔷', extension: 'ts', version: 'v5.6' },
+  { id: 'rust', name: 'Rust', shortName: 'Rust', judge0Id: 108, icon: '🦀', extension: 'rs', version: '1.85' },
+  { id: 'go', name: 'Go', shortName: 'Go', judge0Id: 107, icon: '🐹', extension: 'go', version: '1.23' },
+  { id: 'bash', name: 'Bash', shortName: 'Bash', judge0Id: 46, icon: '🐚', extension: 'sh', version: 'v5.0' },
 ];
 
 export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
@@ -127,7 +146,6 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
   }, [code, selectedLang.id]);
-
 
   // Check if code expects user input
   const detectInputRequirement = (source: string) => {
@@ -355,6 +373,14 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     executeCode(submittedInput);
   };
 
+  // Quick preset input chip click
+  const handleQuickInput = (val: string) => {
+    setInteractiveInput(val);
+    setStdin(val);
+    setIsWaitingForInput(false);
+    executeCode(val);
+  };
+
   // Keyboard shortcut (⌘+Enter / Ctrl+Enter) & Tab indentation
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
@@ -378,19 +404,19 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
   const isInputRequired = detectInputRequirement(code);
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-[#070B13] text-slate-100 font-sans overflow-hidden select-none">
+    <div className="h-[100dvh] w-full max-w-[100vw] flex flex-col bg-[#070B13] text-slate-100 font-sans overflow-hidden select-none">
       
-      {/* Top Header Bar */}
-      <header className="h-14 border-b border-white/10 bg-[#0B101B] px-4 flex items-center justify-between shrink-0 z-30">
+      {/* Top Header Bar (Responsive for Mobile & Desktop) */}
+      <header className="h-14 border-b border-white/10 bg-[#0B101B] px-3 sm:px-4 flex items-center justify-between shrink-0 z-30">
         
         {/* Left: Back & Platform Logo */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <button
             onClick={() => {
               sounds.playClick();
               onBackToHome();
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-medium text-slate-300 hover:text-white transition-colors border border-white/5"
+            className="flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-medium text-slate-300 hover:text-white transition-colors border border-white/5"
             title="Return to Portfolio"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
@@ -399,9 +425,10 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
 
           <div className="h-4 w-px bg-white/10 hidden sm:block" />
 
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-white tracking-tight flex items-center gap-1.5">
-              <span className="text-[#FF8A00]">SmitroniX</span> Compiler
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs sm:text-sm font-bold text-white tracking-tight flex items-center gap-1">
+              <span className="text-[#FF8A00]">SmitroniX</span>
+              <span className="hidden xs:inline text-slate-300 font-medium">Compiler</span>
             </span>
             <span className="hidden xl:inline-block px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               ● Online
@@ -409,22 +436,23 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
           </div>
         </div>
 
-        {/* Center: Language Selector & Sample Code Dropdown */}
-        <div className="flex items-center gap-2">
+        {/* Center: Responsive Language Selector & Desktop Sample Dropdown */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
           
           {/* Language Selector Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-              className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900 border border-white/10 hover:border-white/20 text-xs font-mono font-semibold text-white shadow-sm transition-all"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-slate-900 border border-white/10 hover:border-white/20 text-xs font-mono font-semibold text-white shadow-sm transition-all"
             >
               <span>{selectedLang.icon}</span>
-              <span>{selectedLang.name}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              <span className="hidden sm:inline">{selectedLang.name}</span>
+              <span className="sm:hidden">{selectedLang.shortName}</span>
+              <ChevronDown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400" />
             </button>
 
             {isLangDropdownOpen && (
-              <div className="absolute top-full mt-1.5 left-0 sm:left-1/2 sm:-translate-x-1/2 w-56 rounded-2xl bg-[#0C121E] border border-white/15 shadow-2xl py-1 z-50 overflow-hidden backdrop-blur-xl">
+              <div className="absolute top-full mt-1.5 left-0 sm:left-1/2 sm:-translate-x-1/2 w-52 sm:w-56 rounded-2xl bg-[#0C121E] border border-white/15 shadow-2xl py-1 z-50 overflow-hidden backdrop-blur-xl">
                 <div className="px-3 py-1.5 text-[10px] font-mono text-slate-500 uppercase tracking-wider border-b border-white/5">
                   Select Language
                 </div>
@@ -451,11 +479,11 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
             )}
           </div>
 
-          {/* Sample Code Dropdown for Selected Language */}
-          <div className="relative hidden md:block" ref={sampleDropdownRef}>
+          {/* Desktop Sample Code Dropdown */}
+          <div className="relative hidden lg:block" ref={sampleDropdownRef}>
             <button
               onClick={() => setIsSampleDropdownOpen(!isSampleDropdownOpen)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-slate-200 transition-all max-w-[200px] truncate"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-slate-200 transition-all max-w-[180px] truncate"
               title="Select Sample Code"
             >
               <BookOpen className="w-3.5 h-3.5 text-[#FF8A00] shrink-0" />
@@ -498,45 +526,45 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
         </div>
 
         {/* Right: Quick Tools & Green Run Button */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           
           <button
             onClick={() => setShowStdinDrawer(!showStdinDrawer)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors hidden sm:inline-flex items-center gap-1 ${
+            className={`p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-mono transition-colors hidden sm:inline-flex items-center gap-1 ${
               showStdinDrawer ? 'bg-white/20 text-white' : 'bg-white/5 hover:bg-white/10 text-slate-300'
             }`}
             title="Toggle Stdin Batch Drawer"
           >
             <Sliders className="w-3.5 h-3.5" />
-            <span className="hidden lg:inline">Batch stdin</span>
+            <span className="hidden xl:inline">Batch stdin</span>
           </button>
 
           <button
             onClick={handleCopyCode}
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+            className="p-1.5 sm:p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
             title="Copy Code"
           >
-            {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+            {copied ? <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
           </button>
 
           <button
             onClick={handleResetCode}
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+            className="p-1.5 sm:p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors hidden xs:block"
             title="Reset to Sample"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
 
-          {/* Programiz-Style Big Green Run Button */}
+          {/* Prominent Green Run Button (Easily tappable on mobile) */}
           <button
             onClick={() => executeCode()}
             disabled={isRunning}
-            className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] hover:from-[#16A34A] hover:to-[#15803D] text-white font-bold font-mono text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-60"
+            className="flex items-center gap-1.5 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] hover:from-[#16A34A] hover:to-[#15803D] text-white font-bold font-mono text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-60 shrink-0"
           >
             {isRunning ? (
               <>
                 <Sparkles className="w-3.5 h-3.5 animate-spin" />
-                <span>Running...</span>
+                <span>Running</span>
               </>
             ) : (
               <>
@@ -550,28 +578,36 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
         </div>
       </header>
 
-      {/* Mobile Tab Selector */}
-      <div className="md:hidden flex items-center border-b border-white/10 bg-[#0B101B]">
+      {/* Mobile Tab Selector (High Contrast & Clear Badges) */}
+      <div className="md:hidden flex items-center border-b border-white/10 bg-[#0B101B] shrink-0">
         <button
           onClick={() => setActiveMobileTab('editor')}
-          className={`flex-1 py-2.5 text-xs font-mono text-center border-b-2 transition-colors ${
+          className={`flex-1 py-2.5 text-xs font-mono text-center border-b-2 flex items-center justify-center gap-1.5 transition-colors ${
             activeMobileTab === 'editor'
-              ? 'border-[#FF8A00] text-[#FF8A00] font-bold'
+              ? 'border-[#FF8A00] text-[#FF8A00] font-bold bg-white/[0.02]'
               : 'border-transparent text-slate-400'
           }`}
         >
-          Editor (Main.{selectedLang.extension})
+          <Code2 className="w-3.5 h-3.5" />
+          <span>Editor ({selectedLang.extension})</span>
         </button>
         <button
           onClick={() => setActiveMobileTab('output')}
           className={`flex-1 py-2.5 text-xs font-mono text-center border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
             activeMobileTab === 'output'
-              ? 'border-emerald-400 text-emerald-400 font-bold'
+              ? 'border-emerald-400 text-emerald-400 font-bold bg-white/[0.02]'
               : 'border-transparent text-slate-400'
           }`}
         >
+          <Terminal className="w-3.5 h-3.5" />
           <span>Terminal Output</span>
-          {executionStats && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
+          {isWaitingForInput ? (
+            <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-amber-500/20 text-amber-300 font-bold animate-pulse">
+              Input ↵
+            </span>
+          ) : executionStats ? (
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          ) : null}
         </button>
       </div>
 
@@ -585,33 +621,67 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
           }`}
         >
           {/* Editor Header Tab Bar */}
-          <div className="h-9 border-b border-white/5 bg-[#090E17] px-4 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
+          <div className="h-9 border-b border-white/5 bg-[#090E17] px-3 sm:px-4 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
             <div className="flex items-center gap-2">
               <FileCode2 className="w-3.5 h-3.5 text-[#FF8A00]" />
               <span className="font-semibold text-white">Main.{selectedLang.extension}</span>
               <span className="text-slate-600">•</span>
               <span className="text-[11px] text-slate-400">{lineCount} lines</span>
-              {isInputRequired && (
-                <span className="px-2 py-0.2 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-                  <span>Interactive I/O</span>
-                </span>
+            </div>
+
+            {/* Mobile & Desktop Sample Picker in Editor Header */}
+            <div className="relative" ref={sampleDropdownRef}>
+              <button
+                onClick={() => setIsSampleDropdownOpen(!isSampleDropdownOpen)}
+                className="flex items-center gap-1 px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 border border-white/10 text-[11px] font-mono text-slate-200 transition-all max-w-[130px] sm:max-w-[200px] truncate"
+                title="Select Sample Code"
+              >
+                <BookOpen className="w-3 h-3 text-[#FF8A00] shrink-0" />
+                <span className="truncate">{selectedSample?.title || 'Samples'}</span>
+                <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
+              </button>
+
+              {isSampleDropdownOpen && (
+                <div className="absolute top-full mt-1.5 right-0 sm:left-0 w-72 rounded-2xl bg-[#0C121E] border border-white/15 shadow-2xl py-1 z-50 overflow-hidden backdrop-blur-xl">
+                  <div className="px-3 py-1.5 text-[10px] font-mono text-slate-500 uppercase tracking-wider border-b border-white/5">
+                    {selectedLang.name} Samples
+                  </div>
+                  <div className="max-h-64 overflow-y-auto py-1">
+                    {currentSamples.map((sample) => (
+                      <button
+                        key={sample.id}
+                        onClick={() => selectSample(sample)}
+                        className={`w-full flex flex-col px-3 py-2 text-xs font-mono transition-colors text-left border-b border-white/5 last:border-none ${
+                          selectedSample?.id === sample.id
+                            ? 'bg-[#FF8A00]/15 text-[#FF8A00]'
+                            : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="font-semibold text-white truncate">{sample.title}</span>
+                          <span className="text-[9px] px-1.5 py-0.2 rounded bg-white/10 text-[#FF8A00] shrink-0">
+                            {sample.tag}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">
+                          {sample.description}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
 
-            {/* Mobile Sample Picker Indicator */}
-            <div className="md:hidden text-[11px] text-slate-400">
-              {selectedSample?.tag}
-            </div>
-
-            <div className="text-[11px] text-slate-500 hidden sm:block">
+            <div className="text-[11px] text-slate-500 hidden xl:block">
               UTF-8 • Tab = 4 Spaces
             </div>
           </div>
 
           {/* Optional Stdin Drawer */}
           {showStdinDrawer && (
-            <div className="p-3 bg-slate-900/90 border-b border-white/10 flex items-center gap-3 shrink-0">
-              <span className="text-xs font-mono text-[#FF8A00] shrink-0">Batch stdin:</span>
+            <div className="p-2 sm:p-3 bg-slate-900/90 border-b border-white/10 flex items-center gap-2 sm:gap-3 shrink-0">
+              <span className="text-xs font-mono text-[#FF8A00] shrink-0">stdin:</span>
               <input
                 type="text"
                 value={stdin}
@@ -619,7 +689,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
                   setStdin(e.target.value);
                   setInteractiveInput(e.target.value);
                 }}
-                placeholder="Enter input values separated by spaces or newlines..."
+                placeholder="Batch stdin values..."
                 className="flex-1 bg-transparent border-none outline-none text-xs font-mono text-white placeholder-slate-500"
               />
             </div>
@@ -628,12 +698,12 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
           {/* Code Textarea with Line Numbers Gutter */}
           <div className="flex-1 flex overflow-hidden relative select-text">
             
-            {/* Dynamic Line Numbers Gutter */}
+            {/* Dynamic Line Numbers Gutter (Compact on mobile) */}
             <div
-              className="w-12 py-3 bg-[#05080E] border-r border-white/5 select-none font-mono text-[12px] text-slate-600 text-right pr-2.5 overflow-hidden shrink-0 leading-[22px]"
+              className="w-8 sm:w-12 py-2.5 sm:py-3 bg-[#05080E] border-r border-white/5 select-none font-mono text-[11px] sm:text-[12px] text-slate-600 text-right pr-1 sm:pr-2.5 overflow-hidden shrink-0 leading-[20px] sm:leading-[22px]"
               aria-hidden="true"
             >
-              {Array.from({ length: Math.max(lineCount, 30) }, (_, i) => (
+              {Array.from({ length: Math.max(lineCount, 25) }, (_, i) => (
                 <div key={i}>{i + 1}</div>
               ))}
             </div>
@@ -644,7 +714,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
               <pre
                 ref={preRef}
                 aria-hidden="true"
-                className="absolute inset-0 p-3 m-0 font-mono text-[13px] leading-[22px] pointer-events-none overflow-hidden whitespace-pre font-normal select-none"
+                className="absolute inset-0 p-2.5 sm:p-3 m-0 font-mono text-[12px] sm:text-[13px] leading-[20px] sm:leading-[22px] pointer-events-none overflow-hidden whitespace-pre font-normal select-none"
                 style={{ tabSize: 4 }}
                 dangerouslySetInnerHTML={{ __html: highlightedCodeHtml + '\n' }}
               />
@@ -660,7 +730,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
                 autoCapitalize="off"
                 autoComplete="off"
                 autoCorrect="off"
-                className="absolute inset-0 p-3 m-0 font-mono text-[13px] leading-[22px] outline-none resize-none overflow-auto whitespace-pre bg-transparent text-transparent caret-emerald-400 selection:bg-emerald-500/25 selection:text-transparent"
+                className="absolute inset-0 p-2.5 sm:p-3 m-0 font-mono text-[12px] sm:text-[13px] leading-[20px] sm:leading-[22px] outline-none resize-none overflow-auto whitespace-pre bg-transparent text-transparent caret-emerald-400 selection:bg-emerald-500/25 selection:text-transparent"
                 style={{ tabSize: 4 }}
                 placeholder="Write your code here..."
               />
@@ -669,10 +739,10 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
           </div>
 
           {/* Editor Status Bottom Strip */}
-          <div className="border-t border-white/10 bg-[#090E17] px-4 py-2 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
-            <div className="flex items-center gap-2 truncate">
-              <span className="text-[#FF8A00]">Sample:</span>
-              <span className="text-slate-200 truncate">{selectedSample?.title}</span>
+          <div className="border-t border-white/10 bg-[#090E17] px-3 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
+            <div className="flex items-center gap-1.5 truncate">
+              <span className="text-[#FF8A00] text-[11px]">Active:</span>
+              <span className="text-slate-200 text-[11px] truncate">{selectedSample?.title}</span>
             </div>
 
             <div className="text-[11px] text-slate-500 shrink-0 ml-2 hidden sm:block">
@@ -689,7 +759,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
           }`}
         >
           {/* Terminal Header */}
-          <div className="h-9 border-b border-white/5 bg-[#070A10] px-4 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
+          <div className="h-9 border-b border-white/5 bg-[#070A10] px-3 sm:px-4 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
             <div className="flex items-center gap-2">
               <Terminal className="w-3.5 h-3.5 text-emerald-400" />
               <span className="font-semibold text-slate-200">Terminal Output</span>
@@ -700,16 +770,16 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
               )}
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               {executionStats && (
-                <div className="flex items-center gap-3 text-[11px] font-mono">
+                <div className="flex items-center gap-2 sm:gap-3 text-[11px] font-mono">
                   {executionStats.time && (
                     <span className="flex items-center gap-1 text-emerald-400">
                       <Clock className="w-3 h-3" /> {executionStats.time}
                     </span>
                   )}
                   {executionStats.memory && (
-                    <span className="flex items-center gap-1 text-cyan-400">
+                    <span className="flex items-center gap-1 text-cyan-400 hidden sm:flex">
                       <Cpu className="w-3 h-3" /> {executionStats.memory}
                     </span>
                   )}
@@ -730,7 +800,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
           <div
             ref={outputScreenRef}
             onClick={handleOutputClick}
-            className="flex-1 p-4 font-mono text-[13px] leading-relaxed overflow-auto select-text bg-[#04060A] cursor-text flex flex-col justify-between"
+            className="flex-1 p-3 sm:p-4 font-mono text-[12px] sm:text-[13px] leading-relaxed overflow-auto select-text bg-[#04060A] cursor-text flex flex-col justify-between"
           >
             <div>
               {output ? (
@@ -738,33 +808,53 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
                   {output}
                 </pre>
               ) : (
-                <div className="text-slate-500 text-xs italic">
+                <div className="text-slate-500 text-xs italic py-1">
                   {isRunning ? 'Compiling and executing code on cloud worker...' : 'Click "Run" or press ⌘+Enter to execute.\nYou can write input directly in the input bar below.'}
                 </div>
               )}
             </div>
 
-            {/* Waiting for input indicator */}
+            {/* Waiting for input interactive panel with Quick Input Chips */}
             {isWaitingForInput && (
-              <div className="my-2 p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-500/30 text-xs flex items-center justify-between">
-                <span className="text-emerald-300 font-semibold flex items-center gap-1.5">
-                  <CornerDownLeft className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                  <span>Waiting for input: Type value in the output section below</span>
-                </span>
-                <span className="text-slate-400 text-[11px]">Press Enter ↵ to submit</span>
+              <div className="my-2 p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-emerald-300 font-semibold flex items-center gap-1.5">
+                    <CornerDownLeft className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                    <span>Program waiting for input</span>
+                  </span>
+                  <span className="text-slate-400 text-[10px]">Type or tap below:</span>
+                </div>
+
+                {/* Quick mobile tap chips for input */}
+                <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                  <span className="text-[10px] text-slate-400 font-mono">Quick:</span>
+                  {['5', '10', '15', '25'].map((chip) => (
+                    <button
+                      key={chip}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleQuickInput(chip);
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-mono font-bold border border-emerald-500/30 active:scale-95 transition-all"
+                    >
+                      {chip}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
-          {/* INTERACTIVE TERMINAL INPUT BAR (Where user can write input in output section) */}
-          <div className="border-t border-white/10 bg-[#070C15] p-3 shrink-0">
-            <form onSubmit={handleInteractiveInputSubmit} className="space-y-2">
+          {/* INTERACTIVE TERMINAL INPUT BAR (Touch-Friendly for Mobile) */}
+          <div className="border-t border-white/10 bg-[#070C15] p-2.5 sm:p-3 shrink-0">
+            <form onSubmit={handleInteractiveInputSubmit} className="space-y-1.5 sm:space-y-2">
               <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
-                <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                <div className="flex items-center gap-1 text-emerald-400 font-semibold">
                   <CornerDownLeft className="w-3.5 h-3.5" />
-                  <span>Interactive Terminal Input (stdin):</span>
+                  <span>Terminal Input (stdin):</span>
                 </div>
-                <span className="text-slate-500 hidden sm:inline">Click output or press Enter ↵ to send</span>
+                <span className="text-slate-500 hidden sm:inline">Press Enter ↵ to send</span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -775,32 +865,32 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
                     type="text"
                     value={interactiveInput}
                     onChange={(e) => setInteractiveInput(e.target.value)}
-                    placeholder="Enter input (e.g. 5, radius, text)..."
-                    className="w-full bg-transparent border-none outline-none font-mono text-xs text-white placeholder-slate-600 focus:ring-0"
+                    placeholder="Enter input (e.g. 5)..."
+                    className="w-full bg-transparent border-none outline-none font-mono text-sm sm:text-xs text-white placeholder-slate-600 focus:ring-0"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isRunning}
-                  className="px-4 py-1.5 rounded-xl bg-[#22C55E] hover:bg-[#16A34A] text-white font-bold font-mono text-xs uppercase flex items-center gap-1.5 transition-colors shadow-md shrink-0 disabled:opacity-50"
+                  className="h-9 sm:h-auto px-4 py-1.5 rounded-xl bg-[#22C55E] hover:bg-[#16A34A] text-white font-bold font-mono text-xs uppercase flex items-center justify-center gap-1.5 transition-colors shadow-md shrink-0 disabled:opacity-50 active:scale-95 min-w-[70px]"
                   title="Send input and execute"
                 >
                   <Send className="w-3 h-3" />
-                  <span>Send ↵</span>
+                  <span>Send</span>
                 </button>
               </div>
             </form>
           </div>
 
           {/* Terminal Bottom Status Bar */}
-          <div className="h-8 border-t border-white/5 bg-[#06080E] px-4 flex items-center justify-between text-[11px] font-mono text-slate-500 shrink-0">
-            <div className="flex items-center gap-2">
+          <div className="h-7 sm:h-8 border-t border-white/5 bg-[#06080E] px-3 sm:px-4 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-slate-500 shrink-0">
+            <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
               <span>SmitroniX Cloud Engine</span>
             </div>
             <div className="text-slate-400">
-              {selectedLang.name} • Status: {executionStats?.status || 'Ready'}
+              {selectedLang.shortName} • {executionStats?.status || 'Ready'}
             </div>
           </div>
 
