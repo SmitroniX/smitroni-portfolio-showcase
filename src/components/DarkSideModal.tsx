@@ -24,7 +24,8 @@ import {
   FileCode2,
   Binary,
   Maximize2,
-  Target
+  Target,
+  Sliders
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
 import { EspRadarSimulator } from './EspRadarSimulator';
@@ -32,6 +33,7 @@ import { EspRadarSimulator } from './EspRadarSimulator';
 interface DarkSideModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpenImGui?: () => void;
 }
 
 interface GameExploit {
@@ -233,7 +235,7 @@ Vector3 PredictImpactPosition(Vector3 targetPos, Vector3 targetVel, float bullet
   }
 ];
 
-export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose }) => {
+export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose, onOpenImGui }) => {
   const [phase, setPhase] = useState<'breach' | 'dossier'>('breach');
   const [activeTab, setActiveTab] = useState<'radar' | 'games' | 'arsenal' | 'simulator'>('radar');
   const [selectedGame, setSelectedGame] = useState<GameExploit>(GAME_EXPLOITS[0]);
@@ -428,6 +430,21 @@ export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose })
             </div>
 
             <div className="flex items-center gap-2">
+              {onOpenImGui && (
+                <button
+                  onClick={() => {
+                    sounds.playClick();
+                    onOpenImGui();
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-red-600/30 hover:bg-red-600/50 border border-red-500/60 text-red-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(239,68,68,0.4)] hover:shadow-[0_0_18px_rgba(239,68,68,0.7)]"
+                  title="Open Draggable DirectX ImGui Cheat Menu Overlay (Insert Key)"
+                >
+                  <Sliders className="w-3.5 h-3.5 text-amber-300" />
+                  <span className="hidden sm:inline">IMGUI OVERLAY</span>
+                  <span className="px-1 py-0.5 rounded bg-black/60 text-[10px] text-amber-300 font-mono">[INS]</span>
+                </button>
+              )}
+
               <button
                 onClick={() => {
                   sounds.playClick();

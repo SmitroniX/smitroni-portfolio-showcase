@@ -11,6 +11,7 @@ import { ThreeCanvas } from './components/ThreeCanvas';
 import { CustomCursor } from './components/CustomCursor';
 import { TerminalModal } from './components/TerminalModal';
 import { DarkSideModal } from './components/DarkSideModal';
+import { ImGuiCheatMenu } from './components/ImGuiCheatMenu';
 import { CompilerPage } from './pages/CompilerPage';
 import { sounds } from './utils/sound';
 import { Terminal, ArrowRight, Play } from 'lucide-react';
@@ -35,6 +36,7 @@ export function App() {
     }
     return false;
   });
+  const [imGuiMenuOpen, setImGuiMenuOpen] = useState(false);
   const keySequenceRef = React.useRef<string>('');
 
   // Sync route with URL hash & popstate
@@ -70,28 +72,35 @@ export function App() {
     }
   };
 
-  // Global hotkeys (Cmd+K / Ctrl+K & secret 'darkside' sequence)
+  // Global hotkeys (Cmd+K / Ctrl+K, Insert for ImGui, & secret 'darkside' sequence)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      if (e.key === 'Insert') {
+        e.preventDefault();
+        sounds.playClick();
+        setImGuiMenuOpen((prev) => !prev);
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         sounds.playClick();
         setCommandPaletteOpen((prev) => !prev);
       } else if (e.key === 'Escape') {
-        if (darkSideOpen) {
+        if (imGuiMenuOpen) {
+          setImGuiMenuOpen(false);
+        } else if (darkSideOpen) {
           setDarkSideOpen(false);
         } else if (commandPaletteOpen) {
           setCommandPaletteOpen(false);
         }
       }
 
-      // Secret sequence detection (typing "darkside", "blackhat", or "cheat")
+      // Secret sequence detection (typing "darkside", "blackhat", "cheat", or "imgui")
       if (!['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) {
         keySequenceRef.current = (keySequenceRef.current + e.key.toLowerCase()).slice(-10);
         if (
           keySequenceRef.current.includes('darkside') ||
           keySequenceRef.current.includes('blackhat') ||
-          keySequenceRef.current.includes('cheat')
+          keySequenceRef.current.includes('cheat') ||
+          keySequenceRef.current.includes('imgui')
         ) {
           keySequenceRef.current = '';
           sounds.playAlarm();
@@ -102,7 +111,7 @@ export function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [commandPaletteOpen, darkSideOpen]);
+  }, [commandPaletteOpen, darkSideOpen, imGuiMenuOpen]);
 
   // If viewing the standalone Programiz-style compiler page
   if (currentPage === 'compiler') {
@@ -183,7 +192,31 @@ export function App() {
       <DarkSideModal
         isOpen={darkSideOpen}
         onClose={() => setDarkSideOpen(false)}
+        onOpenImGui={() => setImGuiMenuOpen(true)}
       />
+
+      {/* Feature 2: Floating DirectX ImGui Cheat Menu (Toggle via [INSERT] key or click) */}
+      <ImGuiCheatMenu
+        isOpen={imGuiMenuOpen}
+        onClose={() => setImGuiMenuOpen(false)}
+        onLaunchDarkSide={() => setDarkSideOpen(true)}
+      />
+
+      {/* Mobile-Friendly / Desktop Quick Trigger Badge for ImGui Cheat Menu */}
+      {!imGuiMenuOpen && (
+        <button
+          onClick={() => {
+            sounds.playClick();
+            setImGuiMenuOpen(true);
+          }}
+          className="fixed bottom-4 right-4 z-40 px-3 py-2 rounded-xl bg-black/85 hover:bg-[#12080a] border border-red-500/40 hover:border-red-400 text-red-300 font-mono text-xs font-bold shadow-lg shadow-red-950/60 transition-all flex items-center gap-2 backdrop-blur-md group active:scale-95"
+          title="Toggle DirectX ImGui Cheat Menu Overlay (or press INSERT key)"
+        >
+          <div className="w-2 h-2 rounded-full bg-red-500 group-hover:animate-ping" />
+          <span className="hidden sm:inline text-amber-400 font-mono">[INS]</span>
+          <span className="tracking-wide">IMGUI CHEAT</span>
+        </button>
+      )}
     </div>
   );
 }
