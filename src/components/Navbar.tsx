@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, VolumeX, Menu, X, ArrowUpRight, Command } from 'lucide-react';
+import { Volume2, VolumeX, Menu, X, ArrowUpRight, Command, Terminal } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './BrandIcons';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { sounds } from '../utils/sound';
 
 interface NavbarProps {
   onOpenCommandPalette: () => void;
+  onOpenCompiler: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette, onOpenCompiler }) => {
   const [scrolled, setScrolled] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -27,7 +28,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette }) => {
   const navLinks = [
     { name: 'Projects', href: '#projects' },
     { name: 'DevOps', href: '#devops' },
-    { name: 'Compiler', href: '#compiler' },
     { name: 'Stack', href: '#skills' },
     { name: 'Experience', href: '#experience' },
     { name: 'Contact', href: '#contact' },
@@ -74,6 +74,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette }) => {
               {link.name}
             </a>
           ))}
+
+          {/* Standalone Compiler Page Link */}
+          <button
+            onClick={() => {
+              sounds.playClick();
+              onOpenCompiler();
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-emerald-500/20 transition-all ml-1"
+          >
+            <Terminal className="w-3.5 h-3.5" />
+            <span>Online Compiler</span>
+          </button>
         </nav>
 
         {/* Right Tools & Actions */}
@@ -161,6 +173,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette }) => {
               {link.name}
             </a>
           ))}
+
+          <button
+            onClick={() => {
+              setMobileMenuOpen(false);
+              onOpenCompiler();
+            }}
+            className="w-full flex items-center justify-between py-2 text-xs font-mono text-emerald-400 border-t border-white/5"
+          >
+            <span className="flex items-center gap-2">
+              <Terminal className="w-4 h-4" /> Launch Online Compiler
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-[10px]">NEW</span>
+          </button>
 
           <button
             onClick={() => {

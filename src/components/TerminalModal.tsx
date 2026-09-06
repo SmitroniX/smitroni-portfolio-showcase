@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Terminal, ArrowRight, ExternalLink, Mail, Copy, Check, X, Sparkles, FolderGit2, User, Code2 } from 'lucide-react';
+import { Search, Terminal, ArrowRight, ExternalLink, Mail, Copy, Check, X, Sparkles, FolderGit2, User, Code2, Play } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './BrandIcons';
 import { PERSONAL_INFO, PROJECTS } from '../data/portfolioData';
 import { sounds } from '../utils/sound';
@@ -8,9 +8,10 @@ import confetti from 'canvas-confetti';
 interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpenCompiler?: () => void;
 }
 
-export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose }) => {
+export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onOpenCompiler }) => {
   const [search, setSearch] = useState('');
   const [copied, setCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -49,6 +50,15 @@ export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose }
 
   const navigationActions = [
     {
+      title: 'Launch Online Compiler (IDE)',
+      desc: 'Full-screen Programiz-style runner for Python, C++, Java, Rust, JS',
+      icon: <Play className="w-4 h-4 text-emerald-400 fill-current" />,
+      action: () => {
+        onClose();
+        if (onOpenCompiler) onOpenCompiler();
+      },
+    },
+    {
       title: 'View Projects',
       desc: 'Explore DYPU Connect, AniPlex, and cloud APIs',
       icon: <FolderGit2 className="w-4 h-4 text-[#FF8A00]" />,
@@ -58,9 +68,18 @@ export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose }
       },
     },
     {
-      title: 'Technical Arsenal & Skills',
+      title: 'DevOps & Architecture Pipeline',
+      desc: 'CI/CD, Docker multi-stage builds, and cloud orchestration',
+      icon: <Terminal className="w-4 h-4 text-cyan-400" />,
+      action: () => {
+        window.location.hash = '#devops';
+        onClose();
+      },
+    },
+    {
+      title: 'Technical Arsenal & Stack',
       desc: 'React, TypeScript, Node.js, AWS, and databases',
-      icon: <Code2 className="w-4 h-4 text-cyan-400" />,
+      icon: <Code2 className="w-4 h-4 text-amber-400" />,
       action: () => {
         window.location.hash = '#skills';
         onClose();
@@ -69,7 +88,7 @@ export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose }
     {
       title: 'Experience & Background',
       desc: 'Naviotech, RAIT Social Wing, and Hypixel',
-      icon: <User className="w-4 h-4 text-emerald-400" />,
+      icon: <User className="w-4 h-4 text-purple-400" />,
       action: () => {
         window.location.hash = '#experience';
         onClose();
@@ -139,7 +158,7 @@ export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose }
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Type a command or search projects, skills, links..."
+            placeholder="Type a command or search projects, compiler, skills..."
             className="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder-slate-500 font-sans"
           />
           <kbd className="px-2 py-0.5 text-[10px] font-mono text-slate-400 bg-white/5 border border-white/10 rounded">
