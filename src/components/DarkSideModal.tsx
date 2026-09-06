@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
 import { EspRadarSimulator } from './EspRadarSimulator';
+import { AntiCheatBattleArena } from './AntiCheatBattleArena';
 
 interface DarkSideModalProps {
   isOpen: boolean;
@@ -237,7 +238,7 @@ Vector3 PredictImpactPosition(Vector3 targetPos, Vector3 targetVel, float bullet
 
 export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose, onOpenImGui }) => {
   const [phase, setPhase] = useState<'breach' | 'dossier'>('breach');
-  const [activeTab, setActiveTab] = useState<'radar' | 'games' | 'arsenal' | 'simulator'>('radar');
+  const [activeTab, setActiveTab] = useState<'radar' | 'battle' | 'games' | 'arsenal' | 'simulator'>('radar');
   const [selectedGame, setSelectedGame] = useState<GameExploit>(GAME_EXPLOITS[0]);
   const [breachProgress, setBreachProgress] = useState(0);
   const [breachText, setBreachText] = useState('INITIALIZING BIOMETRIC OVERRIDE...');
@@ -535,7 +536,25 @@ export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose, o
                 <Target className="w-3.5 h-3.5 text-amber-300" />
                 <span>Live ESP &amp; Aimbot Radar</span>
                 <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-[9px] text-amber-300 font-bold">
-                  PLAYABLE
+                  SIMULATOR
+                </span>
+              </button>
+
+              <button
+                onClick={() => {
+                  sounds.playClick();
+                  setActiveTab('battle');
+                }}
+                className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+                  activeTab === 'battle'
+                    ? 'bg-red-600 text-white shadow-lg shadow-red-600/30'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
+                <span>Anti-Cheat Boss Duel</span>
+                <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-[9px] text-rose-300 font-bold">
+                  BATTLE
                 </span>
               </button>
 
@@ -588,6 +607,11 @@ export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose, o
             {/* TAB 0: Interactive ESP & Aimbot Radar Simulator */}
             {activeTab === 'radar' && (
               <EspRadarSimulator />
+            )}
+
+            {/* TAB 0.5: Turn-Based Anti-Cheat vs Hacker Duel Arena */}
+            {activeTab === 'battle' && (
+              <AntiCheatBattleArena />
             )}
 
             {/* TAB 1: Game Engine Reversing & Modding Vault */}
