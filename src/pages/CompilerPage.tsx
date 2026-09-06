@@ -32,6 +32,17 @@ import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-rust';
 import 'prismjs/components/prism-go';
 import 'prismjs/components/prism-bash';
+import {
+  JavaIcon,
+  PythonIcon,
+  CppIcon,
+  CIcon,
+  JavaScriptIcon,
+  TypeScriptIcon,
+  RustIcon,
+  GoIcon,
+  BashIcon
+} from '../components/BrandIcons';
 
 interface CompilerPageProps {
   onBackToHome: () => void;
@@ -42,21 +53,21 @@ interface LanguageOption {
   name: string;
   shortName: string;
   judge0Id: number;
-  icon: string;
+  icon: React.ReactNode;
   extension: string;
   version: string;
 }
 
 const COMPILER_LANGUAGES: LanguageOption[] = [
-  { id: 'java', name: 'Java (JDK 17)', shortName: 'Java', judge0Id: 91, icon: '☕', extension: 'java', version: 'JDK 17' },
-  { id: 'python', name: 'Python 3', shortName: 'Python', judge0Id: 100, icon: '🐍', extension: 'py', version: '3.12' },
-  { id: 'cpp', name: 'C++ (GCC 14)', shortName: 'C++', judge0Id: 105, icon: '⚙️', extension: 'cpp', version: 'GCC 14.1' },
-  { id: 'c', name: 'C (GCC 14)', shortName: 'C', judge0Id: 103, icon: '🔤', extension: 'c', version: 'GCC 14.1' },
-  { id: 'javascript', name: 'JavaScript', shortName: 'JS', judge0Id: 97, icon: '⚡', extension: 'js', version: 'Node 20' },
-  { id: 'typescript', name: 'TypeScript', shortName: 'TS', judge0Id: 101, icon: '🔷', extension: 'ts', version: 'v5.6' },
-  { id: 'rust', name: 'Rust', shortName: 'Rust', judge0Id: 108, icon: '🦀', extension: 'rs', version: '1.85' },
-  { id: 'go', name: 'Go', shortName: 'Go', judge0Id: 107, icon: '🐹', extension: 'go', version: '1.23' },
-  { id: 'bash', name: 'Bash', shortName: 'Bash', judge0Id: 46, icon: '🐚', extension: 'sh', version: 'v5.0' },
+  { id: 'java', name: 'Java (JDK 17)', shortName: 'Java', judge0Id: 91, icon: <JavaIcon className="w-4 h-4 shrink-0" />, extension: 'java', version: 'JDK 17' },
+  { id: 'python', name: 'Python 3', shortName: 'Python', judge0Id: 100, icon: <PythonIcon className="w-4 h-4 shrink-0" />, extension: 'py', version: '3.12' },
+  { id: 'cpp', name: 'C++ (GCC 14)', shortName: 'C++', judge0Id: 105, icon: <CppIcon className="w-4 h-4 shrink-0" />, extension: 'cpp', version: 'GCC 14.1' },
+  { id: 'c', name: 'C (GCC 14)', shortName: 'C', judge0Id: 103, icon: <CIcon className="w-4 h-4 shrink-0" />, extension: 'c', version: 'GCC 14.1' },
+  { id: 'javascript', name: 'JavaScript', shortName: 'JS', judge0Id: 97, icon: <JavaScriptIcon className="w-4 h-4 shrink-0" />, extension: 'js', version: 'Node 20' },
+  { id: 'typescript', name: 'TypeScript', shortName: 'TS', judge0Id: 101, icon: <TypeScriptIcon className="w-4 h-4 shrink-0" />, extension: 'ts', version: 'v5.6' },
+  { id: 'rust', name: 'Rust', shortName: 'Rust', judge0Id: 108, icon: <RustIcon className="w-4 h-4 shrink-0" />, extension: 'rs', version: '1.85' },
+  { id: 'go', name: 'Go', shortName: 'Go', judge0Id: 107, icon: <GoIcon className="w-4 h-4 shrink-0" />, extension: 'go', version: '1.23' },
+  { id: 'bash', name: 'Bash', shortName: 'Bash', judge0Id: 46, icon: <BashIcon className="w-4 h-4 shrink-0" />, extension: 'sh', version: 'v5.0' },
 ];
 
 export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
@@ -496,9 +507,9 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-slate-900 border border-white/10 hover:border-white/20 text-xs font-mono font-semibold text-white shadow-sm transition-all"
+              className="flex items-center gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-slate-900 border border-white/10 hover:border-white/20 text-xs font-mono font-semibold text-white shadow-sm transition-all"
             >
-              <span>{selectedLang.icon}</span>
+              <span className="flex items-center shrink-0">{selectedLang.icon}</span>
               <span className="hidden sm:inline">{selectedLang.name}</span>
               <span className="sm:hidden">{selectedLang.shortName}</span>
               <ChevronDown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400" />
@@ -520,8 +531,8 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
                           : 'text-slate-300 hover:bg-white/5 hover:text-white'
                       }`}
                     >
-                      <span className="flex items-center gap-2">
-                        <span>{lang.icon}</span>
+                      <span className="flex items-center gap-2.5">
+                        <span className="flex items-center shrink-0">{lang.icon}</span>
                         <span>{lang.name}</span>
                       </span>
                       <span className="text-[10px] text-slate-500">{lang.version}</span>
@@ -676,7 +687,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
           {/* Editor Header Tab Bar */}
           <div className="h-9 border-b border-white/5 bg-[#090E17] px-3 sm:px-4 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
             <div className="flex items-center gap-2">
-              <FileCode2 className="w-3.5 h-3.5 text-[#FF8A00]" />
+              <span className="flex items-center shrink-0">{selectedLang.icon}</span>
               <span className="font-semibold text-white">Main.{selectedLang.extension}</span>
               <span className="text-slate-600">•</span>
               <span className="text-[11px] text-slate-400">{lineCount} lines</span>
