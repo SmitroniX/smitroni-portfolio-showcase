@@ -1,8 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Play, RotateCcw, Copy, Check, Terminal, Clock, Cpu, ArrowLeft, Trash2, Sparkles, ChevronDown, FileCode2, Sliders, CornerDownLeft, BookOpen, Send } from 'lucide-react';
 import { sounds } from '../utils/sound';
 import { SAMPLE_CODES, CodeSample } from '../data/compilerSamples';
 import confetti from 'canvas-confetti';
+import Prism from 'prismjs';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-csharp';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-rust';
+import 'prismjs/components/prism-go';
+import 'prismjs/components/prism-bash';
 
 interface CompilerPageProps {
   onBackToHome: () => void;
@@ -53,10 +64,70 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
   const [showStdinDrawer, setShowStdinDrawer] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const preRef = useRef<HTMLPreElement>(null);
   const terminalInputRef = useRef<HTMLInputElement>(null);
   const outputScreenRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const sampleDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Sync scroll between transparent textarea and highlighted pre underlay
+  const handleEditorScroll = () => {
+    if (textareaRef.current && preRef.current) {
+      preRef.current.scrollTop = textareaRef.current.scrollTop;
+      preRef.current.scrollLeft = textareaRef.current.scrollLeft;
+    }
+  };
+
+  // Sync scroll on code or language switch
+  useEffect(() => {
+    if (textareaRef.current && preRef.current) {
+      preRef.current.scrollTop = textareaRef.current.scrollTop;
+      preRef.current.scrollLeft = textareaRef.current.scrollLeft;
+    }
+  }, [code, selectedLang]);
+
+  // Retrieve Prism language grammar
+  const getPrismGrammar = (langId: string) => {
+    switch (langId) {
+      case 'java':
+        return Prism.languages.java;
+      case 'python':
+        return Prism.languages.python;
+      case 'cpp':
+        return Prism.languages.cpp;
+      case 'c':
+        return Prism.languages.c;
+      case 'javascript':
+        return Prism.languages.javascript;
+      case 'typescript':
+        return Prism.languages.typescript || Prism.languages.javascript;
+      case 'rust':
+        return Prism.languages.rust;
+      case 'go':
+        return Prism.languages.go;
+      case 'bash':
+        return Prism.languages.bash;
+      default:
+        return Prism.languages.clike;
+    }
+  };
+
+  // Colorized syntax highlighting HTML according to active language
+  const highlightedCodeHtml = useMemo(() => {
+    try {
+      const grammar = getPrismGrammar(selectedLang.id);
+      if (grammar) {
+        return Prism.highlight(code, grammar, selectedLang.id);
+      }
+    } catch (e) {
+      console.error('Highlighting error:', e);
+    }
+    return code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }, [code, selectedLang.id]);
+
 
   // Check if code expects user input
   const detectInputRequirement = (source: string) => {
@@ -567,19 +638,33 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
               ))}
             </div>
 
-            {/* Editable Text Area */}
-            <textarea
-              ref={textareaRef}
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              onKeyDown={handleKeyDown}
-              spellCheck={false}
-              autoCapitalize="off"
-              autoComplete="off"
-              autoCorrect="off"
-              className="flex-1 p-3 bg-transparent text-slate-100 font-mono text-[13px] leading-[22px] outline-none resize-none overflow-auto whitespace-pre selection:bg-[#FF8A00]/30 selection:text-white"
-              placeholder="Write your code here..."
-            />
+            {/* Syntax Highlighted Code Editor */}
+            <div className="relative flex-1 overflow-hidden bg-[#060A11]">
+              {/* Highlighted Prism Code Underlay */}
+              <pre
+                ref={preRef}
+                aria-hidden="true"
+                className="absolute inset-0 p-3 m-0 font-mono text-[13px] leading-[22px] pointer-events-none overflow-hidden whitespace-pre font-normal select-none"
+                style={{ tabSize: 4 }}
+                dangerouslySetInnerHTML={{ __html: highlightedCodeHtml + '\n' }}
+              />
+
+              {/* Transparent Textarea for Typing, Selection & Keystrokes */}
+              <textarea
+                ref={textareaRef}
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                onScroll={handleEditorScroll}
+                onKeyDown={handleKeyDown}
+                spellCheck={false}
+                autoCapitalize="off"
+                autoComplete="off"
+                autoCorrect="off"
+                className="absolute inset-0 p-3 m-0 font-mono text-[13px] leading-[22px] outline-none resize-none overflow-auto whitespace-pre bg-transparent text-transparent caret-emerald-400 selection:bg-emerald-500/25 selection:text-transparent"
+                style={{ tabSize: 4 }}
+                placeholder="Write your code here..."
+              />
+            </div>
 
           </div>
 
