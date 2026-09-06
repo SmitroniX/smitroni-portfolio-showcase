@@ -195,28 +195,12 @@ export function App() {
         onOpenImGui={() => setImGuiMenuOpen(true)}
       />
 
-      {/* Feature 2: Floating DirectX ImGui Cheat Menu (Toggle via [INSERT] key or click) */}
+      {/* Feature 2: Floating DirectX ImGui Cheat Menu (Toggle via [INSERT] key or inside Dark Side Dossier) */}
       <ImGuiCheatMenu
         isOpen={imGuiMenuOpen}
         onClose={() => setImGuiMenuOpen(false)}
         onLaunchDarkSide={() => setDarkSideOpen(true)}
       />
-
-      {/* Mobile-Friendly / Desktop Quick Trigger Badge for ImGui Cheat Menu */}
-      {!imGuiMenuOpen && (
-        <button
-          onClick={() => {
-            sounds.playClick();
-            setImGuiMenuOpen(true);
-          }}
-          className="fixed bottom-4 right-4 z-40 px-3 py-2 rounded-xl bg-black/85 hover:bg-[#12080a] border border-red-500/40 hover:border-red-400 text-red-300 font-mono text-xs font-bold shadow-lg shadow-red-950/60 transition-all flex items-center gap-2 backdrop-blur-md group active:scale-95"
-          title="Toggle DirectX ImGui Cheat Menu Overlay (or press INSERT key)"
-        >
-          <div className="w-2 h-2 rounded-full bg-red-500 group-hover:animate-ping" />
-          <span className="hidden sm:inline text-amber-400 font-mono">[INS]</span>
-          <span className="tracking-wide">IMGUI CHEAT</span>
-        </button>
-      )}
     </div>
   );
 }
