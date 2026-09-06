@@ -1,0 +1,140 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: #FF6B00;
+    --color-secondary: #00F0FF;
+    --color-bg: #05070B;
+  }
+
+  body {
+    background-color: #05070B;
+    color: #F3F4F6;
+    overflow-x: hidden;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Custom Cyber Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #070A0F;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #FF6B00;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #FF8A00;
+    box-shadow: 0 0 10px #FF6B00;
+  }
+}
+
+/* Glassmorphism Cyber card */
+.cyber-card {
+  background: rgba(13, 17, 23, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 107, 0, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cyber-card:hover {
+  border-color: rgba(255, 107, 0, 0.5);
+  box-shadow: 0 12px 40px 0 rgba(255, 107, 0, 0.15), 0 0 20px rgba(255, 107, 0, 0.1);
+  transform: translateY(-4px);
+}
+
+.cyber-card-cyan:hover {
+  border-color: rgba(0, 240, 255, 0.5);
+  box-shadow: 0 12px 40px 0 rgba(0, 240, 255, 0.15), 0 0 20px rgba(0, 240, 255, 0.1);
+  transform: translateY(-4px);
+}
+
+/* Glowing Neon Text */
+.glow-text-orange {
+  text-shadow: 0 0 10px rgba(255, 107, 0, 0.6), 0 0 25px rgba(255, 107, 0, 0.3);
+}
+
+.glow-text-cyan {
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6), 0 0 25px rgba(0, 240, 255, 0.3);
+}
+
+/* Cyber Grid Background Pattern */
+.cyber-grid {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 107, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 107, 0, 0.05) 1px, transparent 1px);
+}
+
+.cyber-grid-cyan {
+  background-size: 50px 50px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+}
+
+/* Glitch animation text effect */
+@keyframes glitch-skew {
+  0% { transform: skew(0deg); }
+  20% { transform: skew(-2deg); }
+  40% { transform: skew(2deg); }
+  60% { transform: skew(-1deg); }
+  80% { transform: skew(1deg); }
+  100% { transform: skew(0deg); }
+}
+
+.glitch-hover:hover {
+  animation: glitch-skew 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+}
+
+/* Scanline Overlay */
+.scanline-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0),
+    rgba(255,255,255,0) 50%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 0.3)
+  );
+  background-size: 100% 4px;
+  opacity: 0.25;
+}
+
+/* Corner bracket accents */
+.corner-brackets {
+  position: relative;
+}
+.corner-brackets::before,
+.corner-brackets::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: #FF6B00;
+  pointer-events: none;
+}
+.corner-brackets::before {
+  top: -2px;
+  left: -2px;
+  border-top: 2px solid;
+  border-left: 2px solid;
+}
+.corner-brackets::after {
+  bottom: -2px;
+  right: -2px;
+  border-bottom: 2px solid;
+  border-right: 2px solid;
+}
