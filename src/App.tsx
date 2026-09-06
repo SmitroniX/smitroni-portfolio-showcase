@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { Projects } from './components/Projects';
+import { DevOpsArchitecture } from './components/DevOpsArchitecture';
 import { SkillsRadar } from './components/SkillsRadar';
 import { ExperienceTimeline } from './components/ExperienceTimeline';
 import { ContactSection } from './components/ContactSection';
@@ -48,6 +49,7 @@ export function App() {
       <main className="relative z-10">
         <Hero onOpenTerminal={() => setCommandPaletteOpen(true)} />
         <Projects />
+        <DevOpsArchitecture />
         <SkillsRadar />
         <ExperienceTimeline />
         <ContactSection />

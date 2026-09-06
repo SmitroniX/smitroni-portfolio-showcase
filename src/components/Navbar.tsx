@@ -26,6 +26,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette }) => {
 
   const navLinks = [
     { name: 'Projects', href: '#projects' },
+    { name: 'DevOps & Architecture', href: '#devops' },
     { name: 'Stack', href: '#skills' },
     { name: 'Experience', href: '#experience' },
     { name: 'Contact', href: '#contact' },
