@@ -21,16 +21,10 @@ import { SpotlightCard } from './components/SpotlightCard';
 export function App() {
   const [showAppleHello, setShowAppleHello] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
       const hash = window.location.hash;
-      if (urlParams.get('hello') === 'true' || hash.includes('hello')) {
-        return true;
-      }
       if (hash.includes('compiler') || hash.includes('darkside') || hash.includes('classified')) {
         return false;
       }
-      const hasSeen = sessionStorage.getItem('hasSeenAppleHello');
-      return !hasSeen;
     }
     return true;
   });
