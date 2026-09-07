@@ -152,6 +152,42 @@ class SoundEngine {
     } catch {}
   }
 
+  // Authentic Apple Startup Chime (F# Major resonant acoustic chord)
+  public playAppleChime() {
+    if (!this.soundEnabled) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      // F# major rich chord frequencies
+      const freqs = [92.5, 138.59, 185.0, 233.08, 277.18, 369.99, 554.37, 739.99];
+      const duration = 3.2;
+
+      freqs.forEach((freq, idx) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        // Use warm sine with fundamental warmth
+        osc.type = idx === 0 ? 'triangle' : 'sine';
+        // Add subtle detune for authentic acoustic fullness
+        const detune = (idx % 2 === 0 ? 1 : -1) * (idx * 1.5);
+        osc.frequency.setValueAtTime(freq + detune * 0.1, now);
+
+        const peakGain = 0.042 / (idx * 0.3 + 1);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.linearRampToValueAtTime(peakGain, now + 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + duration);
+      });
+    } catch {}
+  }
+
   // Keypress tick for terminal
   public playKeyTick() {
     if (!this.soundEnabled) return;

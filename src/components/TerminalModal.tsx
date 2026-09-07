@@ -10,9 +10,10 @@ interface CommandPaletteProps {
   onClose: () => void;
   onOpenCompiler?: () => void;
   onOpenDarkSide?: () => void;
+  onReplayHello?: () => void;
 }
 
-export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onOpenCompiler, onOpenDarkSide }) => {
+export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onOpenCompiler, onOpenDarkSide, onReplayHello }) => {
   const [search, setSearch] = useState('');
   const [copied, setCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -66,6 +67,15 @@ export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose, 
       action: () => {
         onClose();
         if (onOpenCompiler) onOpenCompiler();
+      },
+    },
+    {
+      title: '🍎 Replay Apple "Hello" Welcome Screen',
+      desc: 'Authentic Apple cursive handwriting animation with multilingual greetings & startup chime',
+      icon: <Sparkles className="w-4 h-4 text-amber-400" />,
+      action: () => {
+        onClose();
+        if (onReplayHello) onReplayHello();
       },
     },
     {

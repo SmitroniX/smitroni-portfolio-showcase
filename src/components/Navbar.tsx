@@ -8,9 +8,10 @@ interface NavbarProps {
   onOpenCommandPalette: () => void;
   onOpenCompiler: () => void;
   onOpenDarkSide?: () => void;
+  onReplayHello?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette, onOpenCompiler, onOpenDarkSide }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette, onOpenCompiler, onOpenDarkSide, onReplayHello }) => {
   const [scrolled, setScrolled] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -109,7 +110,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette, onOpenComp
 
         {/* Right Tools & Actions */}
         <div className="flex items-center gap-2">
-          
+          {/* Apple Hello Intro Trigger */}
+          {onReplayHello && (
+            <button
+              onClick={() => {
+                sounds.playClick();
+                onReplayHello();
+              }}
+              className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all group"
+              title="Replay Apple Hello Welcome Animation"
+            >
+              <span className="font-serif italic text-xs tracking-wider text-slate-200 group-hover:text-amber-400 transition-colors">hello.</span>
+            </button>
+          )}
+
           {/* Command Palette Trigger */}
           <button
             onClick={() => {
@@ -216,6 +230,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette, onOpenComp
             <span>Search &amp; Command Palette</span>
             <span className="px-1.5 py-0.5 rounded bg-white/10">⌘K</span>
           </button>
+
+          {onReplayHello && (
+            <button
+              onClick={() => {
+                sounds.playClick();
+                setMobileMenuOpen(false);
+                onReplayHello();
+              }}
+              className="w-full flex items-center justify-between py-2 text-xs text-slate-300 hover:text-white border-t border-white/5"
+            >
+              <span className="flex items-center gap-2">
+                <span className="font-serif italic text-sm text-amber-400">hello.</span>
+                <span>Apple Welcome Intro</span>
+              </span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-slate-300">Replay</span>
+            </button>
+          )}
 
           {onOpenDarkSide && (
             <button

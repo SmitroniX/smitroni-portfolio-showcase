@@ -12,12 +12,29 @@ import { CustomCursor } from './components/CustomCursor';
 import { TerminalModal } from './components/TerminalModal';
 import { DarkSideModal } from './components/DarkSideModal';
 import { ImGuiCheatMenu } from './components/ImGuiCheatMenu';
+import { AppleHelloWelcome } from './components/AppleHelloWelcome';
 import { CompilerPage } from './pages/CompilerPage';
 import { sounds } from './utils/sound';
 import { Terminal, ArrowRight, Play } from 'lucide-react';
 import { SpotlightCard } from './components/SpotlightCard';
 
 export function App() {
+  const [showAppleHello, setShowAppleHello] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const hash = window.location.hash;
+      if (urlParams.get('hello') === 'true' || hash.includes('hello')) {
+        return true;
+      }
+      if (hash.includes('compiler') || hash.includes('darkside') || hash.includes('classified')) {
+        return false;
+      }
+      const hasSeen = sessionStorage.getItem('hasSeenAppleHello');
+      return !hasSeen;
+    }
+    return true;
+  });
+
   const [currentPage, setCurrentPage] = useState<'portfolio' | 'compiler'>(() => {
     if (typeof window !== 'undefined') {
       const hash = window.location.hash;
@@ -43,6 +60,9 @@ export function App() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
+      if (hash.includes('hello')) {
+        setShowAppleHello(true);
+      }
       if (hash.includes('compiler')) {
         setCurrentPage('compiler');
       } else {
@@ -134,6 +154,7 @@ export function App() {
         onOpenCommandPalette={() => setCommandPaletteOpen(true)}
         onOpenCompiler={() => navigateTo('compiler')}
         onOpenDarkSide={() => setDarkSideOpen(true)}
+        onReplayHello={() => setShowAppleHello(true)}
       />
 
       {/* Main Flow */}
@@ -186,6 +207,7 @@ export function App() {
         onClose={() => setCommandPaletteOpen(false)}
         onOpenCompiler={() => navigateTo('compiler')}
         onOpenDarkSide={() => setDarkSideOpen(true)}
+        onReplayHello={() => setShowAppleHello(true)}
       />
 
       {/* Secret Easter Egg: The Dark Side Dossier Modal */}
@@ -201,6 +223,18 @@ export function App() {
         onClose={() => setImGuiMenuOpen(false)}
         onLaunchDarkSide={() => setDarkSideOpen(true)}
       />
+
+      {/* Apple "Hello" Cinematic Welcome Experience */}
+      {showAppleHello && (
+        <AppleHelloWelcome
+          onComplete={() => {
+            setShowAppleHello(false);
+            if (typeof window !== 'undefined' && window.location.hash.includes('hello')) {
+              window.location.hash = '';
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
