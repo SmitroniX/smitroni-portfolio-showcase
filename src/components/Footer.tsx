@@ -36,7 +36,8 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDarkSide }) => {
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
-              title="GitHub"
+              title="Asmit Jogdand GitHub Profile (@SmitroniX)"
+              aria-label="Asmit Jogdand GitHub Profile (@SmitroniX)"
             >
               <GithubIcon className="w-4 h-4" />
             </a>
@@ -46,7 +47,8 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDarkSide }) => {
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
-              title="LinkedIn"
+              title="Asmit Jogdand LinkedIn Profile"
+              aria-label="Asmit Jogdand LinkedIn Profile"
             >
               <LinkedinIcon className="w-4 h-4" />
             </a>

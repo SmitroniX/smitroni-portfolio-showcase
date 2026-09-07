@@ -1,0 +1,6 @@
+# Robots.txt for Asmit Jogdand (SmitroniX) Portfolio
+User-agent: *
+Allow: /
+
+# Direct search engine crawlers to the sitemap
+Sitemap: https://smitronix.dev/sitemap.xml

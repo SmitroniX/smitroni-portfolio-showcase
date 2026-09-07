@@ -186,6 +186,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
                 href={PERSONAL_INFO.socials.github}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Asmit Jogdand GitHub Profile (@SmitroniX)"
+                title="View Asmit Jogdand GitHub Repositories (@SmitroniX)"
                 className="text-slate-400 hover:text-white transition-colors"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
