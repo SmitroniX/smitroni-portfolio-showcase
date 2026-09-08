@@ -18,6 +18,7 @@ export const AppleHelloWelcome: React.FC<AppleHelloWelcomeProps> = ({ onComplete
   const pathRef = useRef<SVGPathElement>(null);
   const [pathLength, setPathLength] = useState(9838);
   const hasExitedRef = useRef(false);
+  const exitTimerRef = useRef<number | null>(null);
 
   // Lock body scroll so page doesn't shift behind welcome screen
   useEffect(() => {
@@ -25,6 +26,9 @@ export const AppleHelloWelcome: React.FC<AppleHelloWelcomeProps> = ({ onComplete
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = originalOverflow;
+      if (exitTimerRef.current !== null) {
+        clearTimeout(exitTimerRef.current);
+      }
     };
   }, []);
 
@@ -43,7 +47,7 @@ export const AppleHelloWelcome: React.FC<AppleHelloWelcomeProps> = ({ onComplete
     hasExitedRef.current = true;
     setIsExiting(true);
 
-    setTimeout(() => {
+    exitTimerRef.current = window.setTimeout(() => {
       onComplete();
     }, 750);
   };

@@ -134,6 +134,10 @@ export const HeroProfileReveal: React.FC = () => {
           <img
             src="https://avatars.githubusercontent.com/u/142213284?v=4"
             alt="Asmit Jogdand (SmitroniX)"
+            loading="eager"
+            onError={(e) => {
+              e.currentTarget.src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><rect width='200' height='200' fill='%230f172a'/><circle cx='100' cy='75' r='40' fill='%23f97316'/><path d='M30 180 C30 130, 170 130, 170 180' fill='%23334155'/></svg>";
+            }}
             className={`w-full h-full object-cover transition-all duration-700 ${
               isRevealed
                 ? 'scale-105 filter brightness-105 contrast-110 saturate-110'

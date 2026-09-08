@@ -138,7 +138,7 @@ export const ThreeCanvas: React.FC = () => {
       ringGeo.dispose();
       ringMat.dispose();
       renderer.dispose();
-      if (mountRef.current && renderer.domElement) {
+      if (mountRef.current && renderer.domElement && mountRef.current.contains(renderer.domElement)) {
         mountRef.current.removeChild(renderer.domElement);
       }
     };

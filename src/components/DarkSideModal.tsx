@@ -299,6 +299,15 @@ export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose, o
   });
 
   const logsEndRef = useRef<HTMLDivElement>(null);
+  const simTimeoutIdsRef = useRef<number[]>([]);
+
+  // Clear timers on modal close or unmount
+  useEffect(() => {
+    return () => {
+      simTimeoutIdsRef.current.forEach((id) => clearTimeout(id));
+      simTimeoutIdsRef.current = [];
+    };
+  }, [isOpen]);
 
   // Trigger sound and breach animation on open
   useEffect(() => {
@@ -377,8 +386,11 @@ export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose, o
 
     setSimLogs([`[+] Initiating stealth injection into ${simProcess}...`]);
 
+    simTimeoutIdsRef.current.forEach((id) => clearTimeout(id));
+    simTimeoutIdsRef.current = [];
+
     newLogs.forEach((log, index) => {
-      setTimeout(() => {
+      const timer = window.setTimeout(() => {
         setSimLogs((prev) => [...prev, log]);
         sounds.playKeyTick();
         if (index === newLogs.length - 1) {
@@ -387,6 +399,7 @@ export const DarkSideModal: React.FC<DarkSideModalProps> = ({ isOpen, onClose, o
           sounds.playSuccess();
         }
       }, (index + 1) * 220);
+      simTimeoutIdsRef.current.push(timer);
     });
   };
 

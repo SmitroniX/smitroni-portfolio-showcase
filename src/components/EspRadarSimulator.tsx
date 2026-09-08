@@ -596,10 +596,40 @@ export const EspRadarSimulator: React.FC = () => {
             const rect = e.currentTarget.getBoundingClientRect();
             const scaleX = e.currentTarget.width / rect.width;
             const scaleY = e.currentTarget.height / rect.height;
-            mousePosRef.current = {
-              x: (e.clientX - rect.left) * scaleX,
-              y: (e.clientY - rect.top) * scaleY
-            };
+            const posX = (e.clientX - rect.left) * scaleX;
+            const posY = (e.clientY - rect.top) * scaleY;
+            mousePosRef.current = { x: posX, y: posY };
+
+            const locked = entitiesRef.current.find(
+              (t) => !t.isDead && Math.hypot(posX - (t.x + t.width / 2), posY - (t.y + t.height * 0.2)) < fovRadius
+            );
+            setLockedTargetId(locked ? locked.id : null);
+          }}
+          onTouchMove={(e) => {
+            if (!e.touches[0]) return;
+            const t = e.touches[0];
+            const rect = e.currentTarget.getBoundingClientRect();
+            const scaleX = e.currentTarget.width / rect.width;
+            const scaleY = e.currentTarget.height / rect.height;
+            const posX = (t.clientX - rect.left) * scaleX;
+            const posY = (t.clientY - rect.top) * scaleY;
+            mousePosRef.current = { x: posX, y: posY };
+
+            const locked = entitiesRef.current.find(
+              (tgt) => !tgt.isDead && Math.hypot(posX - (tgt.x + tgt.width / 2), posY - (tgt.y + tgt.height * 0.2)) < fovRadius
+            );
+            setLockedTargetId(locked ? locked.id : null);
+          }}
+          onTouchStart={(e) => {
+            if (!e.touches[0]) return;
+            const t = e.touches[0];
+            const rect = e.currentTarget.getBoundingClientRect();
+            const scaleX = e.currentTarget.width / rect.width;
+            const scaleY = e.currentTarget.height / rect.height;
+            const posX = (t.clientX - rect.left) * scaleX;
+            const posY = (t.clientY - rect.top) * scaleY;
+            mousePosRef.current = { x: posX, y: posY };
+            handleShoot();
           }}
           onClick={handleShoot}
         />

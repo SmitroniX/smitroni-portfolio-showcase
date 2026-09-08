@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
 import { SAMPLE_CODES, CodeSample } from '../data/compilerSamples';
+import { executeUniversalCode } from '../utils/codeRunner';
 import confetti from 'canvas-confetti';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-c';
@@ -149,8 +150,8 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
       if (grammar) {
         return Prism.highlight(code, grammar, selectedLang.id);
       }
-    } catch (e) {
-      console.error('Highlighting error:', e);
+    } catch {
+      // Fallback cleanly to escaped plaintext if grammar throws
     }
     return code
       .replace(/&/g, '&amp;')
@@ -239,31 +240,6 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     }
   };
 
-  // Helper to ensure any Java class with main(...) runs seamlessly on Judge0 (which executes java Main)
-  const prepareJavaSourceCode = (source: string): string => {
-    const hasMainClass = /(?:class|interface|record|enum)\s+Main\b/.test(source);
-    if (hasMainClass) {
-      return source.replace(/public\s+class\s+(?!Main\b)(\w+)/g, 'class $1');
-    }
-
-    // Look for any class defining public static void main
-    const mainMethodClassMatch = source.match(/(?:public\s+)?class\s+(\w+)[^{]*\{[\s\S]*?public\s+static\s+void\s+main\s*\(/);
-    if (mainMethodClassMatch && mainMethodClassMatch[1]) {
-      const entryClassName = mainMethodClassMatch[1];
-      const cleanedSource = source.replace(/public\s+class\s+/g, 'class ');
-      return `${cleanedSource}\n\npublic class Main {\n    public static void main(String[] args) throws Throwable {\n        ${entryClassName}.main(args);\n    }\n}\n`;
-    }
-
-    // Fallback if class name exists without public static void main match
-    const anyClassMatch = source.match(/(?:public\s+)?class\s+(\w+)/);
-    if (anyClassMatch && anyClassMatch[1]) {
-      const className = anyClassMatch[1];
-      const cleanedSource = source.replace(/public\s+class\s+/g, 'class ');
-      return `${cleanedSource}\n\npublic class Main {\n    public static void main(String[] args) throws Throwable {\n        ${className}.main(args);\n    }\n}\n`;
-    }
-
-    return source;
-  };
 
   // Quick suggestion chips based on code context
   const quickChips = useMemo(() => {
@@ -305,126 +281,36 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     }
 
     setIsWaitingForInput(false);
-    setOutput('Compiling and executing code on cloud worker...\n');
-    const startTime = performance.now();
-
-    const processedSource = selectedLang.id === 'java' ? prepareJavaSourceCode(code) : code;
+    setOutput('Compiling and executing code on SmitroniX execution cluster...\n');
 
     try {
-      const response = await fetch('https://ce.judge0.com/submissions?wait=true', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          language_id: selectedLang.judge0Id,
-          source_code: processedSource,
-          stdin: effectiveStdin.trim() ? `${effectiveStdin.trim()}\n` : undefined,
-        }),
+      const result = await executeUniversalCode(
+        selectedLang.id,
+        selectedLang.judge0Id,
+        code,
+        effectiveStdin
+      );
+
+      setOutput(result.stdout || (result.stderr ? `[ERROR]:\n${result.stderr}` : '[Process completed with 0 errors]'));
+      setExecutionStats({
+        time: result.duration,
+        memory: result.memory,
+        status: result.status,
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        const duration = result.time ? `${(parseFloat(result.time) * 1000).toFixed(0)}ms` : `${(performance.now() - startTime).toFixed(0)}ms`;
-        const memoryKb = result.memory ? `${(result.memory / 1024).toFixed(1)} MB` : '17.4 MB';
-
-        let finalOut = '';
-        if (result.stdout) {
-          let stdout = result.stdout;
-          // Format prompt with echoed user input for any prompt (e.g. "Enter a String: " or "Enter Radius: ")
-          if (effectiveStdin.trim()) {
-            const colonIndex = stdout.indexOf(': ');
-            if (colonIndex !== -1 && colonIndex < 80) {
-              const promptPart = stdout.substring(0, colonIndex + 2);
-              const rest = stdout.substring(colonIndex + 2);
-              if (!rest.trim().startsWith(effectiveStdin.trim())) {
-                stdout = `${promptPart}${effectiveStdin.trim()}\n${rest}`;
-              }
-            }
-          }
-          finalOut += stdout;
-        }
-        if (result.stderr) {
-          finalOut += `\n[RUNTIME ERROR]:\n${result.stderr}`;
-        }
-        if (result.compile_output) {
-          finalOut += `\n[COMPILATION ERROR]:\n${result.compile_output}`;
-        }
-        if (!finalOut.trim()) {
-          finalOut = `[Process completed with exit code ${result.status?.id === 3 ? 0 : result.status?.id || 1}: ${result.status?.description || 'Finished'}]`;
-        }
-
-        setOutput(finalOut);
-        setExecutionStats({
-          time: duration,
-          memory: memoryKb,
-          status: result.status?.description || 'Finished',
-        });
-
-        if (result.status?.id === 3) {
-          sounds.playSuccess();
-          confetti({ particleCount: 30, spread: 55, origin: { y: 0.6 } });
-        } else {
-          sounds.playClick();
-        }
-
-        setIsRunning(false);
-        return;
-      }
-    } catch {
-      // If network unreachable, use client-side simulation
-    }
-
-    // Client-side fallback
-    if (selectedLang.id === 'javascript' || selectedLang.id === 'typescript') {
-      try {
-        const logs: string[] = [];
-        const customConsole = {
-          log: (...args: unknown[]) => logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ')),
-          error: (...args: unknown[]) => logs.push(`[ERROR]: ${args.join(' ')}`),
-          warn: (...args: unknown[]) => logs.push(`[WARN]: ${args.join(' ')}`),
-        };
-
-        const runner = new Function('console', code);
-        runner(customConsole);
-
-        const duration = `${(performance.now() - startTime).toFixed(0)}ms`;
-        setOutput(logs.join('\n') || '[Process completed with 0 errors]');
-        setExecutionStats({ time: duration, memory: '1.8 MB', status: 'Accepted' });
+      if (result.isSuccess) {
         sounds.playSuccess();
-      } catch (err) {
-        setOutput(`[Runtime Error]: ${err instanceof Error ? err.message : String(err)}`);
-        setExecutionStats({ status: 'Error' });
-      }
-    } else {
-      // Geometric client-side evaluation fallback
-      const radiusVal = parseFloat(effectiveStdin) || 5.0;
-      const area = 3.14 * radiusVal * radiusVal;
-      const volume = (4.0 / 3.0) * 3.14 * radiusVal * radiusVal * radiusVal;
-
-      if (code.includes('Palindrome')) {
-        const inputStr = effectiveStdin.trim() || 'madam';
-        const rev = inputStr.split('').reverse().join('');
-        const isPalin = inputStr.toLowerCase() === rev.toLowerCase();
-        setOutput(
-          `Enter a String: ${inputStr}\n` +
-          `String is ${isPalin ? 'a' : 'not a'} Palindrome.\n\n` +
-          `[Process completed with exit code 0: Accepted]`
-        );
-      } else if (code.includes('Circle') && code.includes('Volume')) {
-        setOutput(
-          `Enter Radius: ${radiusVal}\n` +
-          `Area of Circle = ${area.toFixed(1)}\n` +
-          `Volume of Sphere = ${volume}\n\n` +
-          `[Process completed with exit code 0: Accepted]`
-        );
+        confetti({ particleCount: 30, spread: 55, origin: { y: 0.6 } });
       } else {
-        setOutput('Start small. Ship something.\n\n[Process completed with exit code 0: Accepted]');
+        sounds.playClick();
       }
-      setExecutionStats({ time: '34ms', memory: '17.2 MB', status: 'Accepted' });
-      sounds.playSuccess();
-      confetti({ particleCount: 25, spread: 50, origin: { y: 0.6 } });
+    } catch (err) {
+      setOutput(`[Execution Error]: ${err instanceof Error ? err.message : String(err)}`);
+      setExecutionStats({ status: 'Error', time: '0ms', memory: '0 MB' });
+      sounds.playClick();
+    } finally {
+      setIsRunning(false);
     }
-
-    setIsRunning(false);
   };
 
   // Interactive input submit in terminal
