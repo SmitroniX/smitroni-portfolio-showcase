@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
 import { SAMPLE_CODES, CodeSample } from '../data/compilerSamples';
-import { executeUniversalCode } from '../utils/codeRunner';
+import { executeInteractiveSession } from '../utils/codeRunner';
 import confetti from 'canvas-confetti';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-c';
@@ -80,9 +80,21 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
   const [code, setCode] = useState<string>(currentSamples[0]?.code || '');
   const [stdin, setStdin] = useState<string>(currentSamples[0]?.defaultStdin || '');
   
-  // Output & interactive terminal state
-  const [output, setOutput] = useState<string>('');
-  const [interactiveInput, setInteractiveInput] = useState<string>('');
+  // Unified Real-Time Terminal Stream State (VS Code Style)
+  const [terminalLines, setTerminalLines] = useState<Array<{ id: string; type: 'stdout' | 'stderr' | 'stdin' | 'system'; text: string }>>([
+    {
+      id: 'welcome-1',
+      type: 'system',
+      text: 'SmitroniX Cloud Terminal [v2.4.0-universal]',
+    },
+    {
+      id: 'welcome-2',
+      type: 'system',
+      text: 'Type "run" or press ⌘+Enter to execute.\nInteractive inputs are typed directly inside this terminal.',
+    },
+  ]);
+  const [terminalInputValue, setTerminalInputValue] = useState<string>('');
+  const [activePrompt, setActivePrompt] = useState<string>('');
   const [isWaitingForInput, setIsWaitingForInput] = useState<boolean>(false);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [executionStats, setExecutionStats] = useState<{ time?: string; memory?: string; status?: string } | null>(null);
@@ -96,10 +108,18 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
+  const terminalScrollRef = useRef<HTMLDivElement>(null);
   const terminalInputRef = useRef<HTMLInputElement>(null);
-  const outputScreenRef = useRef<HTMLDivElement>(null);
+  const inputResolverRef = useRef<((val: string) => void) | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const sampleDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll terminal to bottom on any new line, prompt, or user keystroke
+  useEffect(() => {
+    if (terminalScrollRef.current) {
+      terminalScrollRef.current.scrollTop = terminalScrollRef.current.scrollHeight;
+    }
+  }, [terminalLines, activePrompt, terminalInputValue]);
 
   // Sync scroll between transparent textarea and highlighted pre underlay
   const handleEditorScroll = () => {
@@ -174,12 +194,20 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
       setSelectedSample(firstSample);
       setCode(firstSample.code);
       setStdin(firstSample.defaultStdin || '');
-      setInteractiveInput(firstSample.defaultStdin || '');
     }
-    setOutput('');
     setExecutionStats(null);
     setIsWaitingForInput(false);
+    setActivePrompt('');
+    inputResolverRef.current = null;
     setIsLangDropdownOpen(false);
+    setTerminalLines((prev) => [
+      ...prev,
+      {
+        id: `lang-${Date.now()}`,
+        type: 'system',
+        text: `Switched environment to ${lang.name}. Click "Run" or type "run" to execute.`,
+      },
+    ]);
   };
 
   // Sample switch handler
@@ -188,11 +216,19 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     setSelectedSample(sample);
     setCode(sample.code);
     setStdin(sample.defaultStdin || '');
-    setInteractiveInput(sample.defaultStdin || '');
-    setOutput('');
     setExecutionStats(null);
     setIsWaitingForInput(false);
+    setActivePrompt('');
+    inputResolverRef.current = null;
     setIsSampleDropdownOpen(false);
+    setTerminalLines((prev) => [
+      ...prev,
+      {
+        id: `sample-${Date.now()}`,
+        type: 'system',
+        text: `Loaded sample: "${sample.title}" (${sample.tag}).`,
+      },
+    ]);
   };
 
   // Close dropdowns on outside click
@@ -220,26 +256,28 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     sounds.playClick();
     setCode(selectedSample.code);
     setStdin(selectedSample.defaultStdin || '');
-    setInteractiveInput(selectedSample.defaultStdin || '');
-    setOutput('');
     setExecutionStats(null);
     setIsWaitingForInput(false);
+    setActivePrompt('');
+    inputResolverRef.current = null;
+    setTerminalLines((prev) => [
+      ...prev,
+      {
+        id: `reset-${Date.now()}`,
+        type: 'system',
+        text: `Reset editor to template "${selectedSample.title}".`,
+      },
+    ]);
   };
 
   const handleClearOutput = () => {
     sounds.playClick();
-    setOutput('');
+    setTerminalLines([]);
     setExecutionStats(null);
     setIsWaitingForInput(false);
+    setActivePrompt('');
+    inputResolverRef.current = null;
   };
-
-  // Focus input when user clicks in the output screen
-  const handleOutputClick = () => {
-    if (terminalInputRef.current) {
-      terminalInputRef.current.focus();
-    }
-  };
-
 
   // Quick suggestion chips based on code context
   const quickChips = useMemo(() => {
@@ -249,49 +287,71 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     return ['5', '10', '15', '25'];
   }, [code]);
 
-  // Core execution engine with interactive input
-  const executeCode = async (overrideStdin?: string) => {
+  // Core execution engine with unified real-time interactive terminal (VS Code Style)
+  const executeCode = async () => {
+    if (isRunning && !isWaitingForInput) return;
     sounds.playWarp();
     setIsRunning(true);
     setActiveMobileTab('output');
     setExecutionStats(null);
-
-    const requiresInput = detectInputRequirement(code);
-    const effectiveStdin = overrideStdin !== undefined ? overrideStdin : (interactiveInput || stdin);
-
-    // If code expects user input and nothing has been typed yet:
-    // Display prompt and wait for user to type input directly in the output section!
-    if (requiresInput && !effectiveStdin.trim()) {
-      setIsRunning(false);
-      setIsWaitingForInput(true);
-      const promptMatch = code.match(/System\.out\.print(?:ln)?\s*\(\s*"([^"]+)"\s*\)/) ||
-                         code.match(/cout\s*<<\s*"([^"]+)"/) ||
-                         code.match(/printf\s*\(\s*"([^"]+)"\s*\)/) ||
-                         code.match(/input\s*\(\s*"([^"]+)"\s*\)/);
-      const detectedPrompt = promptMatch ? promptMatch[1] : null;
-      if (detectedPrompt) {
-        setOutput(detectedPrompt);
-      } else {
-        setOutput('Program is waiting for input (stdin)...\nEnter your value below in the output section and press Enter:\n');
-      }
-      setTimeout(() => {
-        terminalInputRef.current?.focus();
-      }, 50);
-      return;
-    }
-
     setIsWaitingForInput(false);
-    setOutput('Compiling and executing code on SmitroniX execution cluster...\n');
+    setActivePrompt('');
+
+    const startTimestamp = Date.now();
+    const fileName = `${selectedSample.title.toLowerCase().replace(/[^a-z0-9]/g, '_')}.${selectedLang.extension}`;
+    setTerminalLines((prev) => [
+      ...prev,
+      {
+        id: `cmd-${startTimestamp}`,
+        type: 'system',
+        text: `smitronix@cloud:~$ run ${fileName}`,
+      },
+    ]);
+
+    setTimeout(() => {
+      terminalInputRef.current?.focus();
+    }, 60);
 
     try {
-      const result = await executeUniversalCode(
+      const result = await executeInteractiveSession(
         selectedLang.id,
         selectedLang.judge0Id,
         code,
-        effectiveStdin
+        {
+          onStdout: (text: string) => {
+            setTerminalLines((prev) => [
+              ...prev,
+              {
+                id: `stdout-${Date.now()}-${Math.random()}`,
+                type: 'stdout',
+                text,
+              },
+            ]);
+          },
+          onStderr: (text: string) => {
+            setTerminalLines((prev) => [
+              ...prev,
+              {
+                id: `stderr-${Date.now()}-${Math.random()}`,
+                type: 'stderr',
+                text,
+              },
+            ]);
+          },
+          onRequestInput: (promptText: string) => {
+            return new Promise<string>((resolve) => {
+              setIsWaitingForInput(true);
+              setActivePrompt(promptText || '> ');
+              setTerminalInputValue('');
+              inputResolverRef.current = resolve;
+              setTimeout(() => {
+                terminalInputRef.current?.focus();
+              }, 40);
+            });
+          },
+        }
       );
 
-      setOutput(result.stdout || (result.stderr ? `[ERROR]:\n${result.stderr}` : '[Process completed with 0 errors]'));
       setExecutionStats({
         time: result.duration,
         memory: result.memory,
@@ -305,30 +365,111 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
         sounds.playClick();
       }
     } catch (err) {
-      setOutput(`[Execution Error]: ${err instanceof Error ? err.message : String(err)}`);
+      const msg = err instanceof Error ? err.message : String(err);
+      setTerminalLines((prev) => [
+        ...prev,
+        {
+          id: `err-${Date.now()}`,
+          type: 'stderr',
+          text: `[Runtime Error]: ${msg}`,
+        },
+      ]);
       setExecutionStats({ status: 'Error', time: '0ms', memory: '0 MB' });
       sounds.playClick();
     } finally {
       setIsRunning(false);
+      setIsWaitingForInput(false);
+      setActivePrompt('');
+      inputResolverRef.current = null;
     }
   };
 
-  // Interactive input submit in terminal
-  const handleInteractiveInputSubmit = (e: React.FormEvent) => {
+  // Interactive input submission directly in the unified terminal
+  const handleTerminalSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!interactiveInput.trim()) return;
-    const submittedInput = interactiveInput.trim();
-    setStdin(submittedInput);
-    setIsWaitingForInput(false);
-    executeCode(submittedInput);
+    const val = terminalInputValue;
+    setTerminalInputValue('');
+
+    // If active execution is waiting for an interactive prompt:
+    if (isWaitingForInput && inputResolverRef.current) {
+      setTerminalLines((prev) => [
+        ...prev,
+        {
+          id: `stdin-${Date.now()}-${Math.random()}`,
+          type: 'stdin',
+          text: `${activePrompt}${val}`,
+        },
+      ]);
+
+      const resolver = inputResolverRef.current;
+      inputResolverRef.current = null;
+      setIsWaitingForInput(false);
+      setActivePrompt('');
+      resolver(val);
+      return;
+    }
+
+    // CLI Shell Commands when idle
+    const trimmed = val.trim();
+    if (!trimmed) return;
+
+    setTerminalLines((prev) => [
+      ...prev,
+      {
+        id: `cmd-${Date.now()}-${Math.random()}`,
+        type: 'stdin',
+        text: `smitronix@cloud:~$ ${val}`,
+      },
+    ]);
+
+    if (trimmed === 'clear' || trimmed === 'cls') {
+      setTerminalLines([]);
+      return;
+    }
+
+    if (trimmed === 'help') {
+      setTerminalLines((prev) => [
+        ...prev,
+        {
+          id: `sys-${Date.now()}`,
+          type: 'system',
+          text: 'Available Commands:\n  run   - Execute current code\n  clear - Clear terminal\n  reset - Reset to starter template\n  help  - Show commands',
+        },
+      ]);
+      return;
+    }
+
+    if (trimmed === 'reset') {
+      handleResetCode();
+      return;
+    }
+
+    if (trimmed === 'run' || trimmed.startsWith('run ') || trimmed.startsWith('python') || trimmed.startsWith('node') || trimmed.startsWith('java')) {
+      executeCode();
+      return;
+    }
+
+    // Default: execute code
+    executeCode();
   };
 
-  // Quick preset input chip click
+  // Quick suggestion chip click (resolves active input immediately)
   const handleQuickInput = (val: string) => {
-    setInteractiveInput(val);
-    setStdin(val);
-    setIsWaitingForInput(false);
-    executeCode(val);
+    if (isWaitingForInput && inputResolverRef.current) {
+      setTerminalLines((prev) => [
+        ...prev,
+        {
+          id: `stdin-${Date.now()}-${Math.random()}`,
+          type: 'stdin',
+          text: `${activePrompt}${val}`,
+        },
+      ]);
+      const resolver = inputResolverRef.current;
+      inputResolverRef.current = null;
+      setIsWaitingForInput(false);
+      setActivePrompt('');
+      resolver(val);
+    }
   };
 
   // Keyboard shortcut (⌘+Enter / Ctrl+Enter) & Tab indentation
@@ -637,7 +778,6 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
                 value={stdin}
                 onChange={(e) => {
                   setStdin(e.target.value);
-                  setInteractiveInput(e.target.value);
                 }}
                 placeholder="Batch stdin values..."
                 className="flex-1 bg-transparent border-none outline-none text-xs font-mono text-white placeholder-slate-500"
@@ -746,38 +886,32 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
             </div>
           </div>
 
-          {/* Terminal Output Screen (Click anywhere to focus and write input) */}
+          {/* Terminal Screen (VS Code Integrated Console - Click anywhere to focus and type) */}
           <div
-            ref={outputScreenRef}
-            onClick={handleOutputClick}
-            className="flex-1 p-3 sm:p-4 font-mono text-[12px] sm:text-[13px] leading-relaxed overflow-auto select-text bg-[#04060A] cursor-text flex flex-col justify-between"
+            ref={terminalScrollRef}
+            onClick={() => terminalInputRef.current?.focus()}
+            className="flex-1 p-3 sm:p-4 font-mono text-[12px] sm:text-[13px] leading-relaxed overflow-y-auto select-text bg-[#04060A] cursor-text flex flex-col justify-between"
           >
-            <div>
-              {output ? (
-                <pre className="text-slate-200 whitespace-pre-wrap font-mono">
-                  {output}
-                </pre>
-              ) : (
-                <div className="text-slate-500 text-xs italic py-1">
-                  {isRunning ? 'Compiling and executing code on cloud worker...' : 'Click "Run" or press ⌘+Enter to execute.\nYou can write input directly in the input bar below.'}
+            <div className="space-y-1">
+              {/* Historical output stream */}
+              {terminalLines.map((line) => (
+                <div key={line.id} className="whitespace-pre-wrap break-words">
+                  {line.type === 'stdin' ? (
+                    <span className="text-emerald-400 font-semibold">{line.text}</span>
+                  ) : line.type === 'stderr' ? (
+                    <span className="text-rose-400">{line.text}</span>
+                  ) : line.type === 'system' ? (
+                    <span className="text-cyan-400/90 font-medium">{line.text}</span>
+                  ) : (
+                    <span className="text-slate-200">{line.text}</span>
+                  )}
                 </div>
-              )}
-            </div>
+              ))}
 
-            {/* Waiting for input interactive panel with Quick Input Chips */}
-            {isWaitingForInput && (
-              <div className="my-2 p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-xs space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-emerald-300 font-semibold flex items-center gap-1.5">
-                    <CornerDownLeft className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                    <span>Program waiting for input</span>
-                  </span>
-                  <span className="text-slate-400 text-[10px]">Type or tap below:</span>
-                </div>
-
-                {/* Quick mobile tap chips for input */}
-                <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                  <span className="text-[10px] text-slate-400 font-mono">Quick:</span>
+              {/* Quick suggestion chips when program is waiting for input */}
+              {isWaitingForInput && (
+                <div className="py-1.5 flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] text-amber-400/80 font-mono">Suggestions:</span>
                   {quickChips.map((chip) => (
                     <button
                       key={chip}
@@ -786,51 +920,56 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
                         e.stopPropagation();
                         handleQuickInput(chip);
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-mono font-bold border border-emerald-500/30 active:scale-95 transition-all"
+                      className="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[11px] font-mono font-bold border border-amber-500/30 active:scale-95 transition-all"
                     >
                       {chip}
                     </button>
                   ))}
                 </div>
-              </div>
-            )}
-          </div>
+              )}
 
-          {/* INTERACTIVE TERMINAL INPUT BAR (Touch-Friendly for Mobile) */}
-          <div className="border-t border-white/10 bg-[#070C15] p-2.5 sm:p-3 shrink-0">
-            <form onSubmit={handleInteractiveInputSubmit} className="space-y-1.5 sm:space-y-2">
-              <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
-                <div className="flex items-center gap-1 text-emerald-400 font-semibold">
-                  <CornerDownLeft className="w-3.5 h-3.5" />
-                  <span>Terminal Input (stdin):</span>
-                </div>
-                <span className="text-slate-500 hidden sm:inline">Press Enter ↵ to send</span>
-              </div>
+              {/* Active Inline Prompt (True VS Code Style: Prompt + Typing Line directly in stream) */}
+              <form
+                onSubmit={handleTerminalSubmit}
+                className="flex items-center flex-wrap gap-x-1 font-mono text-[12px] sm:text-[13px] pt-0.5"
+              >
+                <span
+                  className={
+                    isWaitingForInput
+                      ? 'text-amber-400 font-bold shrink-0'
+                      : 'text-emerald-400 font-semibold shrink-0'
+                  }
+                >
+                  {isWaitingForInput ? activePrompt : 'smitronix@cloud:~$ '}
+                </span>
 
-              <div className="flex items-center gap-2">
-                <div className="flex-1 flex items-center bg-black/70 border border-white/15 rounded-xl px-3 py-1.5 focus-within:border-[#22C55E] transition-colors">
-                  <span className="font-mono text-xs text-[#22C55E] mr-2 font-bold">&gt;</span>
+                <div className="relative flex-1 min-w-[140px] inline-flex items-center">
                   <input
                     ref={terminalInputRef}
                     type="text"
-                    value={interactiveInput}
-                    onChange={(e) => setInteractiveInput(e.target.value)}
-                    placeholder="Enter input (e.g. 5)..."
-                    className="w-full bg-transparent border-none outline-none font-mono text-sm sm:text-xs text-white placeholder-slate-600 focus:ring-0"
+                    value={terminalInputValue}
+                    onChange={(e) => setTerminalInputValue(e.target.value)}
+                    disabled={isRunning && !isWaitingForInput}
+                    placeholder={
+                      isRunning && !isWaitingForInput
+                        ? 'Executing...'
+                        : isWaitingForInput
+                        ? 'Type input & press Enter ↵'
+                        : 'Type "run" or press ⌘+Enter'
+                    }
+                    className="w-full bg-transparent border-none outline-none font-mono text-[12px] sm:text-[13px] text-white p-0 m-0 focus:ring-0 placeholder:text-slate-600 caret-emerald-400"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
                   />
+                  {/* Blinking cursor block when idle or prompt waiting */}
+                  {!terminalInputValue && !(isRunning && !isWaitingForInput) && (
+                    <span className="inline-block w-1.5 sm:w-2 h-4 bg-emerald-400 animate-pulse ml-0.5 pointer-events-none shrink-0" />
+                  )}
                 </div>
-
-                <button
-                  type="submit"
-                  disabled={isRunning}
-                  className="h-9 sm:h-auto px-4 py-1.5 rounded-xl bg-[#22C55E] hover:bg-[#16A34A] text-white font-bold font-mono text-xs uppercase flex items-center justify-center gap-1.5 transition-colors shadow-md shrink-0 disabled:opacity-50 active:scale-95 min-w-[70px]"
-                  title="Send input and execute"
-                >
-                  <Send className="w-3 h-3" />
-                  <span>Send</span>
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
 
           {/* Terminal Bottom Status Bar */}

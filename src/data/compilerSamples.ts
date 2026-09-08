@@ -28,6 +28,35 @@ class Main {
 `
     },
     {
+      id: 'java-multi-calculator',
+      title: 'Multi-Input Calculator (Sequential Inputs)',
+      tag: 'Interactive Input',
+      description: 'Sequential user inputs directly inside the terminal: takes multiple numbers and computes sum.',
+      defaultStdin: '15',
+      isInteractive: true,
+      code: `import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("=== SmitroniX Real-Time Terminal ===");
+
+        System.out.print("Enter first number: ");
+        int num1 = sc.nextInt();
+
+        System.out.print("Enter second number: ");
+        int num2 = sc.nextInt();
+
+        System.out.println("\\n--- Calculation Results ---");
+        System.out.println("Addition:       " + num1 + " + " + num2 + " = " + (num1 + num2));
+        System.out.println("Multiplication: " + num1 + " * " + num2 + " = " + (num1 * num2));
+
+        sc.close();
+    }
+}
+`
+    },
+    {
       id: 'java-palindrome',
       title: 'Palindrome String Checker',
       tag: 'Interactive Input',
@@ -207,6 +236,27 @@ print("Start small. Ship something.")
 `
     },
     {
+      id: 'py-multi-calculator',
+      title: 'Multi-Input Calculator (Sequential Inputs)',
+      tag: 'Interactive Input',
+      description: 'Sequential real-time inputs typed directly inside the terminal: computes arithmetic results.',
+      defaultStdin: '12',
+      isInteractive: true,
+      code: `# Real-time multi-input program in VS Code style terminal
+print("=== SmitroniX Real-Time Terminal ===")
+
+a = float(input("Enter first number: "))
+b = float(input("Enter second number: "))
+
+print("\\n--- Calculation Results ---")
+print(f"Addition:       {a} + {b} = {a + b}")
+print(f"Subtraction:    {a} - {b} = {a - b}")
+print(f"Multiplication: {a} * {b} = {a * b}")
+if b != 0:
+    print(f"Division:       {a} / {b} = {a / b:.2f}")
+`
+    },
+    {
       id: 'py-circle-geometry',
       title: 'Circle Area & Sphere Volume Calculator',
       tag: 'Interactive Input',
@@ -277,6 +327,33 @@ int main() {
     // Write C++ code here
     std::cout << "Start small. Ship something.\n";
 
+    return 0;
+}
+`
+    },
+    {
+      id: 'cpp-multi-calculator',
+      title: 'Multi-Input Calculator (Sequential Inputs)',
+      tag: 'Interactive Input',
+      description: 'Accepts multiple sequential inputs via cin and prints real-time computed outputs.',
+      defaultStdin: '25',
+      isInteractive: true,
+      code: `#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "=== SmitroniX Real-Time Terminal ===" << endl;
+    double a, b;
+
+    cout << "Enter first number: ";
+    cin >> a;
+
+    cout << "Enter second number: ";
+    cin >> b;
+
+    cout << "\n--- Calculation Results ---" << endl;
+    cout << "Addition:       " << a << " + " << b << " = " << (a + b) << endl;
+    cout << "Multiplication: " << a << " * " << b << " = " << (a * b) << endl;
     return 0;
 }
 `
