@@ -8,6 +8,66 @@ export interface CodeSample {
   isInteractive: boolean;
 }
 
+export const DEFAULT_STARTER_CODES: Record<string, string> = {
+  java: `// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+
+class Main {
+    public static void main(String[] args) {
+        System.out.println("Start small. Ship something.");
+    }
+}
+`,
+  python: `# Online Python compiler (interpreter) to run Python online.
+# Write Python 3 code in this online editor and run it.
+
+print("Start small. Ship something.")
+`,
+  cpp: `// Online C++ compiler to run C++ program online
+#include <iostream>
+
+int main() {
+    // Write C++ code here
+    std::cout << "Start small. Ship something.\\n";
+
+    return 0;
+}
+`,
+  c: `// Online C compiler to run C program online
+#include <stdio.h>
+
+int main() {
+    // Write C code here
+    printf("Start small. Ship something.\\n");
+
+    return 0;
+}
+`,
+  javascript: `// Online JavaScript (Node.js) runtime
+console.log("Start small. Ship something.");
+`,
+  typescript: `// Online TypeScript runtime
+const greeting: string = "Start small. Ship something.";
+console.log(greeting);
+`,
+  rust: `// Online Rust compiler
+fn main() {
+    println!("Start small. Ship something.");
+}
+`,
+  go: `// Online Go compiler
+package main
+import "fmt"
+
+func main() {
+    fmt.Println("Start small. Ship something.")
+}
+`,
+  bash: `# Online Bash shell
+echo "Start small. Ship something."
+`,
+};
+
 export const SAMPLE_CODES: Record<string, CodeSample[]> = {
   java: [
     {

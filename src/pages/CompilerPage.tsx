@@ -14,12 +14,11 @@ import {
   FileCode2,
   Sliders,
   CornerDownLeft,
-  BookOpen,
   Send,
   Code2
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
-import { SAMPLE_CODES, CodeSample } from '../data/compilerSamples';
+import { DEFAULT_STARTER_CODES } from '../data/compilerSamples';
 import { executeInteractiveSession } from '../utils/codeRunner';
 import confetti from 'canvas-confetti';
 import Prism from 'prismjs';
@@ -74,11 +73,9 @@ const COMPILER_LANGUAGES: LanguageOption[] = [
 export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
   const [selectedLang, setSelectedLang] = useState<LanguageOption>(COMPILER_LANGUAGES[0]);
   
-  // Current sample & code
-  const currentSamples = SAMPLE_CODES[selectedLang.id] || [];
-  const [selectedSample, setSelectedSample] = useState<CodeSample>(currentSamples[0]);
-  const [code, setCode] = useState<string>(currentSamples[0]?.code || '');
-  const [stdin, setStdin] = useState<string>(currentSamples[0]?.defaultStdin || '');
+  // Default starter code for current language
+  const [code, setCode] = useState<string>(DEFAULT_STARTER_CODES[COMPILER_LANGUAGES[0].id] || '');
+  const [stdin, setStdin] = useState<string>('');
   
   // Unified Real-Time Terminal Stream State (VS Code Style)
   const [terminalLines, setTerminalLines] = useState<Array<{ id: string; type: 'stdout' | 'stderr' | 'stdin' | 'system'; text: string }>>([
@@ -103,7 +100,6 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
   const [copied, setCopied] = useState<boolean>(false);
   const [activeMobileTab, setActiveMobileTab] = useState<'editor' | 'output'>('editor');
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
-  const [isSampleDropdownOpen, setIsSampleDropdownOpen] = useState(false);
   const [showStdinDrawer, setShowStdinDrawer] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -112,7 +108,6 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
   const terminalInputRef = useRef<HTMLInputElement>(null);
   const inputResolverRef = useRef<((val: string) => void) | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const sampleDropdownRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll terminal to bottom on any new line, prompt, or user keystroke
   useEffect(() => {
@@ -184,49 +179,22 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     return /(Scanner|cin\s*>>|input\s*\(|getline\s*\(|scanf\s*\(|readLine\s*\(|Console\.ReadLine)/.test(source);
   };
 
-  // Language switch handler
+  // Language switch handler - loads default starter template
   const selectLanguage = (lang: LanguageOption) => {
     sounds.playClick();
     setSelectedLang(lang);
-    const newSamples = SAMPLE_CODES[lang.id] || [];
-    const firstSample = newSamples[0];
-    if (firstSample) {
-      setSelectedSample(firstSample);
-      setCode(firstSample.code);
-      setStdin(firstSample.defaultStdin || '');
-    }
+    setCode(DEFAULT_STARTER_CODES[lang.id] || '');
+    setStdin('');
     setExecutionStats(null);
     setIsWaitingForInput(false);
     setActivePrompt('');
     inputResolverRef.current = null;
     setIsLangDropdownOpen(false);
-    setTerminalLines((prev) => [
-      ...prev,
+    setTerminalLines([
       {
         id: `lang-${Date.now()}`,
         type: 'system',
-        text: `Switched environment to ${lang.name}. Click "Run" or type "run" to execute.`,
-      },
-    ]);
-  };
-
-  // Sample switch handler
-  const selectSample = (sample: CodeSample) => {
-    sounds.playClick();
-    setSelectedSample(sample);
-    setCode(sample.code);
-    setStdin(sample.defaultStdin || '');
-    setExecutionStats(null);
-    setIsWaitingForInput(false);
-    setActivePrompt('');
-    inputResolverRef.current = null;
-    setIsSampleDropdownOpen(false);
-    setTerminalLines((prev) => [
-      ...prev,
-      {
-        id: `sample-${Date.now()}`,
-        type: 'system',
-        text: `Loaded sample: "${sample.title}" (${sample.tag}).`,
+        text: `Switched environment to ${lang.name} [Default Template].\nPress "Run" or ⌘+Enter to execute.`,
       },
     ]);
   };
@@ -236,9 +204,6 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsLangDropdownOpen(false);
-      }
-      if (sampleDropdownRef.current && !sampleDropdownRef.current.contains(e.target as Node)) {
-        setIsSampleDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -254,18 +219,17 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
 
   const handleResetCode = () => {
     sounds.playClick();
-    setCode(selectedSample.code);
-    setStdin(selectedSample.defaultStdin || '');
+    setCode(DEFAULT_STARTER_CODES[selectedLang.id] || '');
+    setStdin('');
     setExecutionStats(null);
     setIsWaitingForInput(false);
     setActivePrompt('');
     inputResolverRef.current = null;
-    setTerminalLines((prev) => [
-      ...prev,
+    setTerminalLines([
       {
         id: `reset-${Date.now()}`,
         type: 'system',
-        text: `Reset editor to template "${selectedSample.title}".`,
+        text: `Reset editor to ${selectedLang.name} default template.`,
       },
     ]);
   };
@@ -297,10 +261,10 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     setIsWaitingForInput(false);
     setActivePrompt('');
 
+    // EVERY RUN FIRST CLEAR THE OUTPUT AREA
     const startTimestamp = Date.now();
-    const fileName = `${selectedSample.title.toLowerCase().replace(/[^a-z0-9]/g, '_')}.${selectedLang.extension}`;
-    setTerminalLines((prev) => [
-      ...prev,
+    const fileName = selectedLang.extension === 'java' ? 'Main.java' : `main.${selectedLang.extension}`;
+    setTerminalLines([
       {
         id: `cmd-${startTimestamp}`,
         type: 'system',
@@ -570,50 +534,6 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
             )}
           </div>
 
-          {/* Desktop Sample Code Dropdown */}
-          <div className="relative hidden lg:block" ref={sampleDropdownRef}>
-            <button
-              onClick={() => setIsSampleDropdownOpen(!isSampleDropdownOpen)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-slate-200 transition-all max-w-[180px] truncate"
-              title="Select Sample Code"
-            >
-              <BookOpen className="w-3.5 h-3.5 text-[#FF8A00] shrink-0" />
-              <span className="truncate">{selectedSample?.title || 'Sample Code'}</span>
-              <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
-            </button>
-
-            {isSampleDropdownOpen && (
-              <div className="absolute top-full mt-1.5 left-0 w-72 rounded-2xl bg-[#0C121E] border border-white/15 shadow-2xl py-1 z-50 overflow-hidden backdrop-blur-xl">
-                <div className="px-3 py-1.5 text-[10px] font-mono text-slate-500 uppercase tracking-wider border-b border-white/5">
-                  {selectedLang.name} Samples
-                </div>
-                <div className="max-h-72 overflow-y-auto py-1">
-                  {currentSamples.map((sample) => (
-                    <button
-                      key={sample.id}
-                      onClick={() => selectSample(sample)}
-                      className={`w-full flex flex-col px-3 py-2 text-xs font-mono transition-colors text-left border-b border-white/5 last:border-none ${
-                        selectedSample?.id === sample.id
-                          ? 'bg-[#FF8A00]/15 text-[#FF8A00]'
-                          : 'text-slate-300 hover:bg-white/5 hover:text-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-1">
-                        <span className="font-semibold text-white truncate">{sample.title}</span>
-                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-white/10 text-[#FF8A00] shrink-0">
-                          {sample.tag}
-                        </span>
-                      </div>
-                      <span className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">
-                        {sample.description}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
         </div>
 
         {/* Right: Quick Tools & Green Run Button */}
@@ -641,7 +561,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
           <button
             onClick={handleResetCode}
             className="p-1.5 sm:p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors hidden xs:block"
-            title="Reset to Sample"
+            title="Reset to Default Template"
           >
             <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
@@ -720,52 +640,13 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
               <span className="text-[11px] text-slate-400">{lineCount} lines</span>
             </div>
 
-            {/* Mobile & Desktop Sample Picker in Editor Header */}
-            <div className="relative" ref={sampleDropdownRef}>
-              <button
-                onClick={() => setIsSampleDropdownOpen(!isSampleDropdownOpen)}
-                className="flex items-center gap-1 px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 border border-white/10 text-[11px] font-mono text-slate-200 transition-all max-w-[130px] sm:max-w-[200px] truncate"
-                title="Select Sample Code"
-              >
-                <BookOpen className="w-3 h-3 text-[#FF8A00] shrink-0" />
-                <span className="truncate">{selectedSample?.title || 'Samples'}</span>
-                <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
-              </button>
-
-              {isSampleDropdownOpen && (
-                <div className="absolute top-full mt-1.5 right-0 sm:left-0 w-72 rounded-2xl bg-[#0C121E] border border-white/15 shadow-2xl py-1 z-50 overflow-hidden backdrop-blur-xl">
-                  <div className="px-3 py-1.5 text-[10px] font-mono text-slate-500 uppercase tracking-wider border-b border-white/5">
-                    {selectedLang.name} Samples
-                  </div>
-                  <div className="max-h-64 overflow-y-auto py-1">
-                    {currentSamples.map((sample) => (
-                      <button
-                        key={sample.id}
-                        onClick={() => selectSample(sample)}
-                        className={`w-full flex flex-col px-3 py-2 text-xs font-mono transition-colors text-left border-b border-white/5 last:border-none ${
-                          selectedSample?.id === sample.id
-                            ? 'bg-[#FF8A00]/15 text-[#FF8A00]'
-                            : 'text-slate-300 hover:bg-white/5 hover:text-white'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-1">
-                          <span className="font-semibold text-white truncate">{sample.title}</span>
-                          <span className="text-[9px] px-1.5 py-0.2 rounded bg-white/10 text-[#FF8A00] shrink-0">
-                            {sample.tag}
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">
-                          {sample.description}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="text-[11px] text-slate-500 hidden xl:block">
-              UTF-8 • Tab = 4 Spaces
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] sm:text-[11px] font-mono font-medium">
+                Default
+              </span>
+              <span className="text-[11px] text-slate-500 hidden sm:inline">
+                UTF-8 • Tab = 4
+              </span>
             </div>
           </div>
 
@@ -831,8 +712,8 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
           {/* Editor Status Bottom Strip */}
           <div className="border-t border-white/10 bg-[#090E17] px-3 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
             <div className="flex items-center gap-1.5 truncate">
-              <span className="text-[#FF8A00] text-[11px]">Active:</span>
-              <span className="text-slate-200 text-[11px] truncate">{selectedSample?.title}</span>
+              <span className="text-emerald-400 text-[11px]">Template:</span>
+              <span className="text-slate-200 text-[11px] truncate">Default ({selectedLang.name})</span>
             </div>
 
             <div className="text-[11px] text-slate-500 shrink-0 ml-2 hidden sm:block">
