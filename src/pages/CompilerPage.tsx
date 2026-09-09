@@ -15,11 +15,13 @@ import {
   Sliders,
   CornerDownLeft,
   Send,
-  Code2
+  Code2,
+  Printer
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
 import { DEFAULT_STARTER_CODES } from '../data/compilerSamples';
 import { executeInteractiveSession } from '../utils/codeRunner';
+import { LabReportModal } from '../components/LabReportModal';
 import confetti from 'canvas-confetti';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-c';
@@ -101,6 +103,15 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
   const [activeMobileTab, setActiveMobileTab] = useState<'editor' | 'output'>('editor');
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [showStdinDrawer, setShowStdinDrawer] = useState(false);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+
+  // Formatted terminal execution output for lab report printing
+  const terminalOutputText = useMemo(() => {
+    return terminalLines
+      .filter((l) => l.type === 'stdout' || l.type === 'stderr' || l.type === 'stdin')
+      .map((l) => l.text)
+      .join('\n');
+  }, [terminalLines]);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
@@ -566,6 +577,19 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
             <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
 
+          {/* Print / PDF Lab Report Button */}
+          <button
+            onClick={() => {
+              sounds.playClick();
+              setIsPrintModalOpen(true);
+            }}
+            className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all flex items-center gap-1.5 text-xs font-mono"
+            title="Print Code & Output to PDF (Lab Journal)"
+          >
+            <Printer className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#FF8A00]" />
+            <span className="hidden md:inline">Print / PDF</span>
+          </button>
+
           {/* Prominent Green Run Button (Easily tappable on mobile) */}
           <button
             onClick={() => executeCode()}
@@ -758,6 +782,18 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
               )}
 
               <button
+                onClick={() => {
+                  sounds.playClick();
+                  setIsPrintModalOpen(true);
+                }}
+                className="p-1 rounded hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center gap-1 text-[11px] font-mono"
+                title="Print Report / Export PDF"
+              >
+                <Printer className="w-3.5 h-3.5 text-[#FF8A00]" />
+                <span className="hidden xs:inline">Print/PDF</span>
+              </button>
+
+              <button
                 onClick={handleClearOutput}
                 className="p-1 rounded hover:bg-white/5 text-slate-500 hover:text-slate-300 transition-colors"
                 title="Clear Output"
@@ -867,6 +903,16 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
         </div>
 
       </div>
+
+      {/* Academic Lab Report & PDF Print Modal */}
+      <LabReportModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        code={code}
+        languageName={selectedLang.name}
+        languageExtension={selectedLang.extension}
+        terminalOutput={terminalOutputText}
+      />
 
     </div>
   );
