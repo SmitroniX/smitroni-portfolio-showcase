@@ -115,6 +115,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
+  const gutterRef = useRef<HTMLDivElement>(null);
   const terminalScrollRef = useRef<HTMLDivElement>(null);
   const terminalInputRef = useRef<HTMLInputElement>(null);
   const inputResolverRef = useRef<((val: string) => void) | null>(null);
@@ -127,19 +128,33 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     }
   }, [terminalLines, activePrompt, terminalInputValue]);
 
-  // Sync scroll between transparent textarea and highlighted pre underlay
+  // Sync scroll between transparent textarea, highlighted pre underlay, and gutter
   const handleEditorScroll = () => {
-    if (textareaRef.current && preRef.current) {
-      preRef.current.scrollTop = textareaRef.current.scrollTop;
-      preRef.current.scrollLeft = textareaRef.current.scrollLeft;
+    if (textareaRef.current) {
+      const top = textareaRef.current.scrollTop;
+      const left = textareaRef.current.scrollLeft;
+      if (preRef.current) {
+        preRef.current.scrollTop = top;
+        preRef.current.scrollLeft = left;
+      }
+      if (gutterRef.current) {
+        gutterRef.current.scrollTop = top;
+      }
     }
   };
 
   // Sync scroll on code or language switch
   useEffect(() => {
-    if (textareaRef.current && preRef.current) {
-      preRef.current.scrollTop = textareaRef.current.scrollTop;
-      preRef.current.scrollLeft = textareaRef.current.scrollLeft;
+    if (textareaRef.current) {
+      const top = textareaRef.current.scrollTop;
+      const left = textareaRef.current.scrollLeft;
+      if (preRef.current) {
+        preRef.current.scrollTop = top;
+        preRef.current.scrollLeft = left;
+      }
+      if (gutterRef.current) {
+        gutterRef.current.scrollTop = top;
+      }
     }
   }, [code, selectedLang]);
 
@@ -447,22 +462,129 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     }
   };
 
-  // Keyboard shortcut (⌘+Enter / Ctrl+Enter) & Tab indentation
+  // Keyboard shortcut (⌘+Enter / Ctrl+Enter), Tab indentation, auto-closing quotes/brackets & auto-indent
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // 1. Run shortcut: ⌘+Enter or Ctrl+Enter
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
       e.preventDefault();
       executeCode();
-    } else if (e.key === 'Tab') {
+      return;
+    }
+
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    // 2. Tab / Shift+Tab indentation
+    if (e.key === 'Tab') {
       e.preventDefault();
-      const textarea = textareaRef.current;
-      if (!textarea) return;
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const newCode = code.substring(0, start) + '    ' + code.substring(end);
+      if (!e.shiftKey) {
+        const newCode = code.substring(0, start) + '    ' + code.substring(end);
+        setCode(newCode);
+        setTimeout(() => {
+          textarea.selectionStart = textarea.selectionEnd = start + 4;
+        }, 0);
+      } else {
+        const before = code.substring(0, start);
+        const lineStart = before.lastIndexOf('\n') + 1;
+        const currentLine = code.substring(lineStart, end);
+        if (currentLine.startsWith('    ')) {
+          const newCode = code.substring(0, lineStart) + currentLine.substring(4);
+          setCode(newCode);
+          setTimeout(() => {
+            textarea.selectionStart = textarea.selectionEnd = Math.max(lineStart, start - 4);
+          }, 0);
+        }
+      }
+      return;
+    }
+
+    // 3. Auto-indent on Enter
+    if (e.key === 'Enter') {
+      const before = code.substring(0, start);
+      const after = code.substring(end);
+      const currentLine = before.substring(before.lastIndexOf('\n') + 1);
+      const indentMatch = currentLine.match(/^(\s*)/);
+      const currentIndent = indentMatch ? indentMatch[1] : '';
+
+      // Expand {|} on Enter into formatted block
+      if (before.endsWith('{') && after.startsWith('}')) {
+        e.preventDefault();
+        const extraIndent = '    ';
+        const insert = `\n${currentIndent}${extraIndent}\n${currentIndent}`;
+        const newCode = before + insert + after;
+        setCode(newCode);
+        setTimeout(() => {
+          const newPos = start + currentIndent.length + extraIndent.length + 1;
+          textarea.selectionStart = textarea.selectionEnd = newPos;
+        }, 0);
+        return;
+      }
+
+      // Preserve indentation on Enter, add 4 spaces if line ends with { or :
+      const shouldExtra = (before.trimEnd().endsWith('{') || (selectedLang.id === 'python' && before.trimEnd().endsWith(':')));
+      const extra = shouldExtra ? '    ' : '';
+      e.preventDefault();
+      const insert = `\n${currentIndent}${extra}`;
+      const newCode = before + insert + after;
       setCode(newCode);
       setTimeout(() => {
-        textarea.selectionStart = textarea.selectionEnd = start + 4;
+        textarea.selectionStart = textarea.selectionEnd = start + insert.length;
       }, 0);
+      return;
+    }
+
+    // 4. Auto-closing quotes & brackets
+    const pairs: Record<string, string> = {
+      '(': ')',
+      '[': ']',
+      '{': '}',
+      '"': '"',
+      "'": "'",
+      '`': '`',
+    };
+    const closers = new Set([')', ']', '}', '"', "'", '`']);
+
+    // If typing closer right before that exact closer, skip over it
+    if (closers.has(e.key) && start === end && code[start] === e.key) {
+      e.preventDefault();
+      textarea.selectionStart = textarea.selectionEnd = start + 1;
+      return;
+    }
+
+    // Auto-insert pair
+    if (pairs[e.key]) {
+      e.preventDefault();
+      const open = e.key;
+      const close = pairs[e.key];
+      const selected = code.substring(start, end);
+      const newCode = code.substring(0, start) + open + selected + close + code.substring(end);
+      setCode(newCode);
+      setTimeout(() => {
+        if (selected.length > 0) {
+          textarea.selectionStart = start + 1;
+          textarea.selectionEnd = end + 1;
+        } else {
+          textarea.selectionStart = textarea.selectionEnd = start + 1;
+        }
+      }, 0);
+      return;
+    }
+
+    // 5. Backspace between matching pair
+    if (e.key === 'Backspace' && start === end && start > 0) {
+      const prevChar = code[start - 1];
+      const nextChar = code[start];
+      if (pairs[prevChar] === nextChar) {
+        e.preventDefault();
+        const newCode = code.substring(0, start - 1) + code.substring(start + 1);
+        setCode(newCode);
+        setTimeout(() => {
+          textarea.selectionStart = textarea.selectionEnd = start - 1;
+        }, 0);
+        return;
+      }
     }
   };
 
@@ -695,6 +817,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
             
             {/* Dynamic Line Numbers Gutter (Compact on mobile) */}
             <div
+              ref={gutterRef}
               className="w-8 sm:w-12 py-2.5 sm:py-3 bg-[#05080E] border-r border-white/5 select-none font-mono text-[11px] sm:text-[12px] text-slate-600 text-right pr-1 sm:pr-2.5 overflow-hidden shrink-0 leading-[20px] sm:leading-[22px]"
               aria-hidden="true"
             >

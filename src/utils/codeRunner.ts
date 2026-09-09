@@ -368,7 +368,7 @@ export function runCompiledSimulation(languageId: string, code: string, stdin: s
     stdoutLines.push(`Volume of Sphere = ${volume}`);
   }
   // 3. Multi-Input Calculator / Sum of Numbers
-  else if ((/sum|add|calculator|\+/i.test(code) || /cin\s*>>|scanf|Scanner/i.test(code)) && stdinLines.length >= 2) {
+  else if (/calc|sum_calculator|add_two_numbers/i.test(code) && stdinLines.length >= 2) {
     const num1 = parseFloat(stdinLines[0]) || 0;
     const num2 = parseFloat(stdinLines[1]) || 0;
     stdoutLines.push(`First number: ${num1}`);
@@ -852,9 +852,55 @@ export async function runInteractiveJSAsync(
 }
 
 /**
+ * Extract genuine sequential input prompts from source code.
+ * Excludes variable outputs, decorations, and method internal prints.
+ */
+export function extractInputPrompts(sourceCode: string, languageId: string): string[] {
+  const prompts: string[] = [];
+  const lines = sourceCode.split('\n');
+
+  // Input reader patterns
+  const inputFollowPattern = /(?:cin\s*>>|scanf\s*\(|sc\s*\.\s*(?:next|nextInt|nextDouble|nextLine|nextLong|nextFloat)|readLine|read_line|input\s*\(|Console\.ReadLine|Scanln)/i;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line || line.startsWith('//') || line.startsWith('/*') || line.startsWith('*')) continue;
+
+    // Statements concatenating variables are output/results, NOT input prompts!
+    // e.g. System.out.println("Total: " + total) or cout << "Score: " << score
+    const hasVariableConcat = /\+\s*[a-zA-Z_]\w*|\<\<\s*[a-zA-Z_]\w*|%\s*[a-zA-Z_]\w*/.test(line);
+    if (hasVariableConcat) continue;
+
+    // Exclude decorative banners/delimiters like "=== RESULT ===", "-----------------", etc.
+    const isDecorative = /^[^"]*"[=\-_#*~ ]+"/.test(line);
+    if (isDecorative) continue;
+
+    // Match prompt string in print statements
+    const printMatch = line.match(/(?:System\.out\.print(?:ln)?|printf|fmt\.Print(?:ln|f)?|print!)\s*\(\s*"([^"]+)"|cout\s*<<\s*"([^"]+)"|input\s*\(\s*["']([^"']+)["']/i);
+    if (printMatch) {
+      const p = (printMatch[1] || printMatch[2] || printMatch[3] || '').trim();
+      if (!p || p.startsWith('===') || p.startsWith('---') || p.startsWith('___') || p.includes('\\n[')) continue;
+
+      // Look ahead in the next 4 lines for an input reading call
+      const lookahead = lines.slice(i, i + 5).join('\n');
+      const isFollowedByInput = inputFollowPattern.test(lookahead);
+
+      // Genuine prompt phrases
+      const isPromptText = /(?:enter|input|type|roll|number|marks|name|radius|value|age|choice|option|string|select)\b/i.test(p) || /:\s*$/.test(p);
+
+      if (isFollowedByInput && isPromptText) {
+        prompts.push(p);
+      }
+    }
+  }
+
+  return prompts;
+}
+
+/**
  * Interactive execution runner for Java, C++, C, Go, Rust, and Bash.
- * Extracts sequential input prompts, interacts step-by-step in the terminal,
- * then dispatches execution with full inputs.
+ * Performs fast pre-flight compilation check before asking for any user input.
+ * Eliminates false compilation prompts and ensures clean, non-duplicated terminal output.
  */
 export async function runInteractiveCompiledAsync(
   languageId: string,
@@ -863,74 +909,107 @@ export async function runInteractiveCompiledAsync(
   callbacks: InteractiveCallbacks
 ): Promise<InteractiveSessionResult> {
   const startTime = performance.now();
-  const collectedInputs: string[] = [];
+  const processedSource = languageId === 'java' ? prepareJavaSourceCode(sourceCode) : sourceCode;
 
-  // Extract all sequential prompts from source (Java System.out.print, C++ cout <<, C printf, Python input, etc.)
-  const prompts: string[] = [];
-  const lines = sourceCode.split('\n');
-  const inputPattern = /(?:cin\s*>>|scanf\s*\(|sc\s*\.\s*(?:next|nextInt|nextDouble|nextLine|nextLong|nextFloat)|readLine|read_line|input\s*\()/;
+  // 1. FAST PRE-FLIGHT COMPILATION & SYNTAX CHECK
+  // Sends to Judge0 immediately to catch compilation errors (like unclosed string literals)
+  // WITHOUT forcing the user to type answers to inputs!
+  try {
+    const preCheckController = new AbortController();
+    const preCheckTimeout = setTimeout(() => preCheckController.abort(), 6000);
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const printMatch = line.match(/(?:System\.out\.print(?:ln)?|printf|fmt\.Print(?:ln|f)?|print!)\s*\(\s*"([^"]+)"|cout\s*<<\s*"([^"]+)"|input\s*\(\s*["']([^"']+)["']/i);
-    if (printMatch) {
-      const p = printMatch[1] || printMatch[2] || printMatch[3];
-      if (p && !p.startsWith('===') && !p.includes('\\n[')) {
-        // Look ahead in the next 5 lines to see if an input call follows
-        const lookahead = lines.slice(i, i + 6).join('\n');
-        const isFollowedByInput = inputPattern.test(lookahead);
-        const isPromptLike = /(?:enter|input|type|radius|string|value|number|target|name|age|word|terms|\?|:|>)\s*$/i.test(p.trim());
-        const isResultPrefix = /^(result|sum|output|area|volume|sorted|original|answer|final|display)/i.test(p.trim());
+    const preCheckRes = await fetch('https://ce.judge0.com/submissions?wait=true', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        language_id: judge0Id,
+        source_code: processedSource,
+        stdin: '',
+      }),
+      signal: preCheckController.signal,
+    });
 
-        if ((isFollowedByInput || isPromptLike) && !isResultPrefix) {
-          prompts.push(p);
+    clearTimeout(preCheckTimeout);
+
+    if (preCheckRes.ok) {
+      const preData = await preCheckRes.json();
+
+      // If compilation error occurred: stop IMMEDIATELY! Do not prompt for input!
+      if (preData.compile_output || preData.status?.id === 6) {
+        callbacks.onStderr(`[COMPILATION ERROR]:\n${preData.compile_output || preData.stderr || 'Compilation failed'}`);
+        return {
+          duration: `${(parseFloat(preData.time || '0.05') * 1000).toFixed(0)}ms`,
+          memory: preData.memory ? `${(preData.memory / 1024).toFixed(1)} MB` : '18.4 MB',
+          status: 'Compilation Error',
+          isSuccess: false,
+          source: 'cloud',
+        };
+      }
+
+      // If program has no input requirements and succeeded immediately:
+      const hasInputReq = /(Scanner|cin\s*>>|scanf\s*\(|readLine|read_line|Scanln|Console\.ReadLine|input\s*\(|prompt\s*\()/.test(sourceCode);
+      if (!hasInputReq && preData.status?.id === 3) {
+        if (preData.stdout) {
+          callbacks.onStdout(preData.stdout);
         }
+        return {
+          duration: `${(parseFloat(preData.time || '0.05') * 1000).toFixed(0)}ms`,
+          memory: preData.memory ? `${(preData.memory / 1024).toFixed(1)} MB` : '18.4 MB',
+          status: 'Accepted',
+          isSuccess: true,
+          source: 'cloud',
+        };
       }
     }
+  } catch {
+    // Network pre-check failed or timed out, proceed to interactive step
   }
+
+  // 2. EXTRACT PRECISE INPUT PROMPTS
+  const prompts = extractInputPrompts(sourceCode, languageId);
+  const collectedInputs: string[] = [];
 
   // Detect input requirements
   const hasInput = /(Scanner|cin\s*>>|scanf\s*\(|readLine|read_line|Scanln|Console\.ReadLine|input\s*\(|prompt\s*\()/.test(sourceCode);
 
   if (hasInput) {
     let countExpectedInputs = prompts.length;
-    if (countExpectedInputs === 0) {
-      // Check cin >> a >> b
-      const cinMatches = sourceCode.match(/cin\s*(?:>>\s*[A-Za-z0-9_]+)+/g);
-      if (cinMatches) {
-        let totalCin = 0;
-        for (const m of cinMatches) {
-          const vars = m.match(/>>\s*[A-Za-z0-9_]+/g);
-          if (vars) totalCin += vars.length;
-        }
-        countExpectedInputs = Math.max(countExpectedInputs, totalCin);
-      }
 
-      // Check Scanner reads
-      const scMatches = sourceCode.match(/sc\s*\.\s*(?:next|nextInt|nextDouble|nextLine|nextLong|nextFloat)\s*\(/g);
-      if (scMatches) {
-        countExpectedInputs = Math.max(countExpectedInputs, scMatches.length);
-      }
-
-      // Check scanf reads
-      const scanfMatches = sourceCode.match(/scanf\s*\(\s*"([^"]+)"/g);
-      if (scanfMatches) {
-        let totalScanf = 0;
-        for (const s of scanfMatches) {
-          const specifiers = s.match(/%[a-zA-Z]/g);
-          if (specifiers) totalScanf += specifiers.length;
-        }
-        countExpectedInputs = Math.max(countExpectedInputs, totalScanf);
-      }
-
-      // Check Python input()
-      const pyInputs = sourceCode.match(/input\s*\(/g);
-      if (pyInputs) {
-        countExpectedInputs = Math.max(countExpectedInputs, pyInputs.length);
-      }
-
-      if (countExpectedInputs === 0) countExpectedInputs = 1;
+    // Check Scanner reads: sc.nextInt(), sc.nextFloat(), etc.
+    const scMatches = sourceCode.match(/sc\s*\.\s*(?:next|nextInt|nextDouble|nextLine|nextLong|nextFloat)\s*\(/g);
+    if (scMatches) {
+      countExpectedInputs = Math.max(countExpectedInputs, scMatches.length);
     }
+
+    // Check cin >> a >> b
+    const cinMatches = sourceCode.match(/cin\s*(?:>>\s*[A-Za-z0-9_]+)+/g);
+    if (cinMatches) {
+      let totalCin = 0;
+      for (const m of cinMatches) {
+        const vars = m.match(/>>\s*[A-Za-z0-9_]+/g);
+        if (vars) totalCin += vars.length;
+      }
+      countExpectedInputs = Math.max(countExpectedInputs, totalCin);
+    }
+
+    // Check scanf reads
+    const scanfMatches = sourceCode.match(/scanf\s*\(\s*"([^"]+)"/g);
+    if (scanfMatches) {
+      let totalScanf = 0;
+      for (const s of scanfMatches) {
+        const specifiers = s.match(/%[a-zA-Z]/g);
+        if (specifiers) totalScanf += specifiers.length;
+      }
+      countExpectedInputs = Math.max(countExpectedInputs, totalScanf);
+    }
+
+    // Check Python input()
+    const pyInputs = sourceCode.match(/input\s*\(/g);
+    if (pyInputs) {
+      countExpectedInputs = Math.max(countExpectedInputs, pyInputs.length);
+    }
+
+    if (countExpectedInputs === 0) countExpectedInputs = 1;
 
     const effectivePrompts: string[] = [...prompts];
     while (effectivePrompts.length < countExpectedInputs) {
@@ -944,17 +1023,16 @@ export async function runInteractiveCompiledAsync(
   }
 
   const stdinStr = collectedInputs.join('\n') + (collectedInputs.length > 0 ? '\n' : '');
-  const processedSource = languageId === 'java' ? prepareJavaSourceCode(sourceCode) : sourceCode;
 
+  // 3. EXECUTE FULL SESSION WITH STDIN ON JUDGE0
   let cloudSuccess = false;
   let duration = '24ms';
   let memory = languageId === 'java' ? '18.4 MB' : '4.6 MB';
   let isSuccess = true;
 
-  // Cloud execution attempt with 5s timeout
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
 
     const response = await fetch('https://ce.judge0.com/submissions?wait=true', {
       method: 'POST',
@@ -979,11 +1057,16 @@ export async function runInteractiveCompiledAsync(
 
       if (result.stdout) {
         let cleanStdout = result.stdout;
-        // Clean out prompt strings already shown in terminal history
+        // Strip prompts from the beginning of stdout so they don't duplicate what the user already typed
         for (const p of prompts) {
-          cleanStdout = cleanStdout.replace(p, '');
+          const trimmedP = p.trim();
+          const idx = cleanStdout.indexOf(trimmedP);
+          if (idx !== -1 && idx < 300) {
+            cleanStdout = cleanStdout.substring(0, idx) + cleanStdout.substring(idx + trimmedP.length);
+          }
         }
-        cleanStdout = cleanStdout.replace(/^\n+/, '');
+        // Clean leading colons or extraneous whitespace from prompt residues
+        cleanStdout = cleanStdout.replace(/^[\s:]+/, '');
         if (cleanStdout.trim()) {
           callbacks.onStdout(cleanStdout);
         }
