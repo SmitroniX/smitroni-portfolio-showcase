@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { X, Printer, FileText, Check, Sparkles, User, Hash, GraduationCap, Users, BookOpen, Target, Calendar, Eye, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { X, Printer, FileText, Check, Sparkles, User, Hash, GraduationCap, Users, BookOpen, Target, Calendar, Eye, RefreshCw, Monitor } from 'lucide-react';
 import { sounds } from '../utils/sound';
+import { isJavaGuiCode, parseJavaGuiCode, JavaGuiState } from '../utils/javaGuiRunner';
 
 interface LabReportModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface LabReportModalProps {
   languageName: string;
   languageExtension: string;
   terminalOutput: string;
+  guiState?: JavaGuiState | null;
 }
 
 interface StudentProfile {
@@ -29,6 +31,7 @@ export const LabReportModal: React.FC<LabReportModalProps> = ({
   languageName,
   languageExtension,
   terminalOutput,
+  guiState,
 }) => {
   // Student & Academic Details Form State
   const [name, setName] = useState('');
@@ -46,6 +49,27 @@ export const LabReportModal: React.FC<LabReportModalProps> = ({
   const [includeOutput, setIncludeOutput] = useState(true);
   const [includeLineNumbers, setIncludeLineNumbers] = useState(true);
   const [includeSignatureBox, setIncludeSignatureBox] = useState(true);
+
+  // Compute effective Java GUI state (either passed from live runner or dynamically parsed from code)
+  const activeGuiState: JavaGuiState | null = useMemo(() => {
+    if (guiState) return guiState;
+    if (languageExtension === 'java' && isJavaGuiCode(code)) {
+      try {
+        return parseJavaGuiCode(code);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }, [guiState, code, languageExtension]);
+
+  const [includeGuiWindow, setIncludeGuiWindow] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (activeGuiState) {
+      setIncludeGuiWindow(true);
+    }
+  }, [activeGuiState]);
 
   // Active view tab: 'form' | 'preview'
   const [activeTab, setActiveTab] = useState<'form' | 'preview'>('form');
@@ -126,6 +150,150 @@ export const LabReportModal: React.FC<LabReportModalProps> = ({
     } catch {
       return date;
     }
+  };
+
+  // Generate printable HTML for Java Swing / AWT GUI Output Window
+  const generateGuiPrintHtml = (gui: JavaGuiState) => {
+    const primaryDisplay = gui.components.find(
+      (c) => c.type === 'textfield' || c.type === 'label'
+    );
+    const buttons = gui.components.filter((c) => c.type === 'button');
+    const otherComponents = gui.components.filter(
+      (c) => c.type !== 'button' && c !== primaryDisplay
+    );
+    const hasGraphics = gui.graphicsCommands && gui.graphicsCommands.length > 0;
+
+    let displayHtml = '';
+    if (primaryDisplay || gui.isScientificCalculator || gui.subtitle || buttons.length > 0) {
+      displayHtml = `
+        <div class="gui-calc-display">
+          <div class="gui-calc-subtitle">${escapeHtml(gui.subtitle || (gui.isScientificCalculator ? 'SCIENTIFIC CALCULATOR' : gui.title || 'OUTPUT DISPLAY'))}</div>
+          <div class="gui-calc-val">${escapeHtml(primaryDisplay?.text || '0')}</div>
+        </div>
+      `;
+    }
+
+    let graphicsHtml = '';
+    if (hasGraphics) {
+      const svgElements = gui.graphicsCommands
+        .map((cmd) => {
+          const p = cmd.params;
+          const color = cmd.color || '#FFFFFF';
+          switch (cmd.type) {
+            case 'line':
+              return `<line x1="${p[0]}" y1="${p[1]}" x2="${p[2]}" y2="${p[3]}" stroke="${color}" stroke-width="2"/>`;
+            case 'rect':
+              return `<rect x="${p[0]}" y="${p[1]}" width="${p[2]}" height="${p[3]}" fill="none" stroke="${color}" stroke-width="2"/>`;
+            case 'fillRect':
+              return `<rect x="${p[0]}" y="${p[1]}" width="${p[2]}" height="${p[3]}" fill="${color}"/>`;
+            case 'oval':
+              return `<ellipse cx="${Number(p[0]) + Number(p[2]) / 2}" cy="${Number(p[1]) + Number(p[3]) / 2}" rx="${Number(p[2]) / 2}" ry="${Number(p[3]) / 2}" fill="none" stroke="${color}" stroke-width="2"/>`;
+            case 'fillOval':
+              return `<ellipse cx="${Number(p[0]) + Number(p[2]) / 2}" cy="${Number(p[1]) + Number(p[3]) / 2}" rx="${Number(p[2]) / 2}" ry="${Number(p[3]) / 2}" fill="${color}"/>`;
+            case 'string':
+              return `<text x="${p[1]}" y="${p[2]}" fill="${color}" font-size="12" font-weight="600" font-family="Segoe UI, sans-serif">${escapeHtml(String(p[0]))}</text>`;
+            default:
+              return '';
+          }
+        })
+        .join('');
+
+      graphicsHtml = `
+        <div class="gui-graphics-box">
+          <svg width="100%" height="160" viewBox="0 0 380 160" class="gui-graphics-svg">
+            ${svgElements}
+          </svg>
+        </div>
+      `;
+    }
+
+    let buttonsHtml = '';
+    if (buttons.length > 0) {
+      const cols = gui.gridCols || 5;
+      const btnItems = buttons
+        .map((btn) => {
+          const text = btn.text.trim();
+          let btnClass = 'gui-btn-digit';
+          if (['C', '⌫', 'DEL', 'CLR'].includes(text)) {
+            btnClass = 'gui-btn-red';
+          } else if (['/', '×', '*', '-', '+'].includes(text)) {
+            btnClass = 'gui-btn-blue';
+          } else if (text === '=') {
+            btnClass = 'gui-btn-green';
+          } else if (['sin', 'cos', 'tan', 'log', 'ln', '√', 'x²', '1/x', 'π', 'e', '(', ')'].includes(text)) {
+            btnClass = 'gui-btn-sci';
+          } else if (/^[0-9]$|\./.test(text)) {
+            btnClass = 'gui-btn-digit';
+          }
+
+          let style = '';
+          if (btn.bgColor && !['C', '⌫', 'DEL', 'CLR', '/', '×', '*', '-', '+', '='].includes(text)) {
+            style = `background-color: ${btn.bgColor}; color: ${btn.color || '#FFFFFF'};`;
+          }
+
+          return `<div class="gui-btn ${btnClass}" ${style ? `style="${style}"` : ''}>${escapeHtml(text)}</div>`;
+        })
+        .join('');
+
+      buttonsHtml = `
+        <div class="gui-btn-grid" style="grid-template-columns: repeat(${cols}, 1fr);">
+          ${btnItems}
+        </div>
+      `;
+    }
+
+    let otherHtml = '';
+    if (otherComponents.length > 0 && buttons.length === 0) {
+      otherHtml = `
+        <div class="gui-form-layout">
+          ${otherComponents
+            .map((comp) => {
+              if (comp.type === 'label') {
+                return `<div class="gui-form-label">${escapeHtml(comp.text)}</div>`;
+              }
+              if (comp.type === 'textfield' || comp.type === 'passwordfield') {
+                return `<div class="gui-form-input">${escapeHtml(comp.text || '')}</div>`;
+              }
+              if (comp.type === 'checkbox') {
+                return `<div class="gui-form-checkbox"><span class="gui-chk-box">${comp.checked ? '✔' : ''}</span> <span>${escapeHtml(comp.text)}</span></div>`;
+              }
+              return '';
+            })
+            .join('')}
+        </div>
+      `;
+    }
+
+    return `
+      <div class="gui-win-frame">
+        <!-- Authentic Windows Titlebar -->
+        <div class="gui-win-titlebar">
+          <div class="gui-title-left">
+            <svg class="gui-duke-icon" viewBox="0 0 32 32" fill="none">
+              <path d="M19 3C19 3 21 5.5 18 7.5C15 9.5 18 11.5 18 11.5" stroke="#EA2D2E" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M14 2C14 2 16 4.5 13 6.5C10 8.5 13 10.5 13 10.5" stroke="#EA2D2E" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M6 13C6 11.8954 6.89543 11 8 11H21C22.1046 11 23 11.8954 23 13V20C23 22.7614 20.7614 25 18 25H11C8.23858 25 6 22.7614 6 20V13Z" fill="#007396"/>
+              <path d="M23 14H25C26.6569 14 28 15.3431 28 17C28 18.6569 26.6569 20 25 20H23" stroke="#007396" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M4 27C8 29 22 29 26 27" stroke="#007396" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span class="gui-title-text">${escapeHtml(gui.title || 'Scientific Calculator')}</span>
+          </div>
+          <div class="gui-win-controls">
+            <span class="gui-ctrl-btn">—</span>
+            <span class="gui-ctrl-btn">🗖</span>
+            <span class="gui-ctrl-btn gui-ctrl-close">✕</span>
+          </div>
+        </div>
+
+        <!-- Authentic Dark Windows Body -->
+        <div class="gui-win-body">
+          ${graphicsHtml}
+          ${displayHtml}
+          ${otherHtml}
+          ${buttonsHtml}
+        </div>
+      </div>
+    `;
   };
 
   // Generate clean, printable A4 HTML
@@ -380,6 +548,180 @@ export const LabReportModal: React.FC<LabReportModalProps> = ({
       color: #94a3b8;
       font-family: monospace;
     }
+
+    /* Java GUI Window Print Styling */
+    .gui-section {
+      page-break-inside: avoid;
+      margin: 10px 0 14px 0;
+    }
+    .gui-win-frame {
+      width: 100%;
+      max-width: 370px;
+      margin: 6px auto;
+      background: #121212 !important;
+      border: 1.5px solid #2a2a2a;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+      font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      page-break-inside: avoid;
+    }
+    .gui-win-titlebar {
+      background: #FFFFFF !important;
+      color: #000000 !important;
+      height: 28px;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #D5D5D5;
+      font-size: 11px;
+    }
+    .gui-title-left {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 600;
+      color: #111111;
+    }
+    .gui-duke-icon {
+      width: 14px;
+      height: 14px;
+      display: inline-block;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+    .gui-title-text {
+      font-size: 11px;
+      color: #000000;
+      letter-spacing: -0.2px;
+    }
+    .gui-win-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 10px;
+      color: #333333;
+    }
+    .gui-ctrl-close {
+      color: #e81123 !important;
+      font-weight: bold;
+    }
+    .gui-win-body {
+      background: #121212 !important;
+      padding: 10px 12px 12px 12px;
+    }
+    .gui-calc-display {
+      background: #1C1C1C !important;
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 54px;
+    }
+    .gui-calc-subtitle {
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      color: #888888 !important;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .gui-calc-val {
+      text-align: right;
+      font-size: 22px;
+      font-weight: 700;
+      color: #FFFFFF !important;
+      line-height: 1.15;
+      font-family: "Segoe UI", sans-serif;
+      word-break: break-all;
+    }
+    .gui-btn-grid {
+      display: grid;
+      gap: 4px;
+    }
+    .gui-btn {
+      height: 25px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 10px;
+      color: #FFFFFF !important;
+      border: 1px solid rgba(0,0,0,0.3);
+      font-family: "Segoe UI", sans-serif;
+      user-select: none;
+    }
+    .gui-btn-red {
+      background-color: #C63636 !important;
+      color: #FFFFFF !important;
+    }
+    .gui-btn-blue {
+      background-color: #1976D2 !important;
+      color: #FFFFFF !important;
+    }
+    .gui-btn-green {
+      background-color: #0FA958 !important;
+      color: #FFFFFF !important;
+    }
+    .gui-btn-sci {
+      background-color: #383838 !important;
+      color: #FFFFFF !important;
+    }
+    .gui-btn-digit {
+      background-color: #262626 !important;
+      color: #FFFFFF !important;
+    }
+    .gui-graphics-box {
+      background: #181818 !important;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      border: 1px solid #333;
+      padding: 4px;
+    }
+    .gui-form-layout {
+      padding: 6px 0;
+      color: #f1f5f9;
+    }
+    .gui-form-label {
+      font-size: 11px;
+      color: #e2e8f0;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+    .gui-form-input {
+      background: #202020;
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 4px 8px;
+      color: #fff;
+      font-size: 11px;
+      margin-bottom: 8px;
+      min-height: 22px;
+    }
+    .gui-form-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+    .gui-chk-box {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 13px;
+      height: 13px;
+      background: #0078D4;
+      color: #fff;
+      border-radius: 2px;
+      font-size: 9px;
+    }
   </style>
 </head>
 <body>
@@ -441,13 +783,28 @@ export const LabReportModal: React.FC<LabReportModalProps> = ({
       </table>
     </div>
 
+    <!-- Section: Java GUI Output Window (if applicable) -->
+    ${
+      activeGuiState && includeGuiWindow
+        ? `
+    <div class="section-head">
+      <span class="section-title">II. Graphical User Interface (Java GUI Window Output)</span>
+      <span class="section-meta">Windows Native Swing Frame</span>
+    </div>
+    <div class="gui-section">
+      ${generateGuiPrintHtml(activeGuiState)}
+    </div>
+    `
+        : ''
+    }
+
     <!-- Section: Terminal Output -->
     ${
       includeOutput
         ? `
     <div class="section-head">
-      <span class="section-title">II. Output & Execution Result</span>
-      <span class="section-meta">Terminal Session</span>
+      <span class="section-title">${activeGuiState && includeGuiWindow ? 'III.' : 'II.'} Execution Output & Terminal Session</span>
+      <span class="section-meta">Console Session</span>
     </div>
     <div class="output-container">
       <div class="output-bar">smitronix@cloud:~$ run Main.${escapeHtml(languageExtension)}</div>
@@ -749,6 +1106,19 @@ ${escapeHtml(cleanOutput)}
 
                 {/* Print Checkbox options */}
                 <div className="space-y-1.5 pt-2 sm:pt-4">
+                  {activeGuiState && (
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-emerald-400 font-semibold text-[11px] font-mono bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-2.5 py-1.5 transition-colors hover:bg-emerald-500/15">
+                      <input
+                        type="checkbox"
+                        checked={includeGuiWindow}
+                        onChange={(e) => setIncludeGuiWindow(e.target.checked)}
+                        className="rounded bg-black border-white/20 text-emerald-500 focus:ring-0"
+                      />
+                      <Monitor className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <span>Include Java GUI Window in Report (Recommended)</span>
+                    </label>
+                  )}
+
                   <label className="flex items-center gap-2 cursor-pointer select-none text-slate-300 text-[11px] font-mono">
                     <input
                       type="checkbox"
@@ -831,11 +1201,116 @@ ${escapeHtml(cleanOutput)}
                 </div>
               </div>
 
+              {/* Java GUI Output Window Preview */}
+              {includeGuiWindow && activeGuiState && (
+                <div>
+                  <div className="text-[11px] font-bold uppercase tracking-wide text-slate-900 mb-1.5 border-b border-slate-300 pb-0.5 flex justify-between items-center">
+                    <span>II. Java GUI Window Output</span>
+                    <span className="font-mono text-emerald-600 text-[10px] font-semibold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                      <span>Windows Native Swing</span>
+                    </span>
+                  </div>
+
+                  <div className="border border-slate-400 rounded-lg overflow-hidden shadow bg-[#121212] max-w-sm mx-auto my-2">
+                    {/* Window Title Bar */}
+                    <div className="h-7 px-2.5 flex items-center justify-between bg-white border-b border-slate-300 select-none">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 32 32" fill="none">
+                          <path d="M19 3C19 3 21 5.5 18 7.5C15 9.5 18 11.5 18 11.5" stroke="#EA2D2E" strokeWidth="2.5" strokeLinecap="round" />
+                          <path d="M14 2C14 2 16 4.5 13 6.5C10 8.5 13 10.5 13 10.5" stroke="#EA2D2E" strokeWidth="2.5" strokeLinecap="round" />
+                          <path d="M6 13C6 11.8954 6.89543 11 8 11H21C22.1046 11 23 11.8954 23 13V20C23 22.7614 20.7614 25 18 25H11C8.23858 25 6 22.7614 6 20V13Z" fill="#007396" />
+                          <path d="M23 14H25C26.6569 14 28 15.3431 28 17C28 18.6569 26.6569 20 25 20H23" stroke="#007396" strokeWidth="2.5" strokeLinecap="round" />
+                          <path d="M4 27C8 29 22 29 26 27" stroke="#007396" strokeWidth="3" strokeLinecap="round" />
+                        </svg>
+                        <span className="text-[11px] font-normal truncate text-black font-['Segoe_UI',sans-serif]">
+                          {activeGuiState.title || 'Scientific Calculator'}
+                        </span>
+                      </div>
+                      <div className="flex items-center text-slate-700 text-[10px] gap-2 font-mono">
+                        <span>—</span>
+                        <span>🗖</span>
+                        <span className="text-red-600 font-bold">✕</span>
+                      </div>
+                    </div>
+
+                    {/* Window Body */}
+                    <div className="p-2.5 bg-[#121212]">
+                      {/* Top Display Panel */}
+                      <div className="p-2 bg-[#1C1C1C] rounded mb-2 flex flex-col justify-between border border-white/5 min-h-[48px]">
+                        <span className="text-[8px] font-bold uppercase tracking-wider text-[#888888] font-['Segoe_UI',sans-serif]">
+                          {activeGuiState.subtitle || (activeGuiState.isScientificCalculator ? 'SCIENTIFIC CALCULATOR' : activeGuiState.title || 'OUTPUT DISPLAY')}
+                        </span>
+                        <span className="text-right text-white font-bold text-lg tracking-tight font-['Segoe_UI',sans-serif] leading-tight">
+                          {activeGuiState.components.find((c) => c.type === 'textfield' || c.type === 'label')?.text || '0'}
+                        </span>
+                      </div>
+
+                      {/* 2D Graphics Canvas in Preview if present */}
+                      {activeGuiState.graphicsCommands && activeGuiState.graphicsCommands.length > 0 && (
+                        <div className="bg-[#181818] rounded mb-2 p-1 border border-white/10">
+                          <svg width="100%" height="100" viewBox="0 0 380 160">
+                            {activeGuiState.graphicsCommands.map((cmd, i) => {
+                              const p = cmd.params;
+                              const color = cmd.color || '#FFFFFF';
+                              if (cmd.type === 'line') return <line key={i} x1={Number(p[0])} y1={Number(p[1])} x2={Number(p[2])} y2={Number(p[3])} stroke={color} strokeWidth={2} />;
+                              if (cmd.type === 'rect') return <rect key={i} x={Number(p[0])} y={Number(p[1])} width={Number(p[2])} height={Number(p[3])} fill="none" stroke={color} strokeWidth={2} />;
+                              if (cmd.type === 'fillRect') return <rect key={i} x={Number(p[0])} y={Number(p[1])} width={Number(p[2])} height={Number(p[3])} fill={color} />;
+                              if (cmd.type === 'oval') return <ellipse key={i} cx={Number(p[0]) + Number(p[2]) / 2} cy={Number(p[1]) + Number(p[3]) / 2} rx={Number(p[2]) / 2} ry={Number(p[3]) / 2} fill="none" stroke={color} strokeWidth={2} />;
+                              if (cmd.type === 'fillOval') return <ellipse key={i} cx={Number(p[0]) + Number(p[2]) / 2} cy={Number(p[1]) + Number(p[3]) / 2} rx={Number(p[2]) / 2} ry={Number(p[3]) / 2} fill={color} />;
+                              if (cmd.type === 'string') return <text key={i} x={Number(p[1])} y={Number(p[2])} fill={color} fontSize={12} fontWeight={600}>{String(p[0])}</text>;
+                              return null;
+                            })}
+                          </svg>
+                        </div>
+                      )}
+
+                      {/* Buttons Grid */}
+                      {activeGuiState.components.filter((c) => c.type === 'button').length > 0 && (
+                        <div
+                          className="grid gap-1"
+                          style={{
+                            gridTemplateColumns: `repeat(${activeGuiState.gridCols || 5}, minmax(0, 1fr))`,
+                          }}
+                        >
+                          {activeGuiState.components
+                            .filter((c) => c.type === 'button')
+                            .map((btn) => {
+                              const text = btn.text.trim();
+                              let bgColor = '#282828';
+                              if (['C', '⌫', 'DEL', 'CLR'].includes(text)) bgColor = '#C63636';
+                              else if (['/', '×', '*', '-', '+'].includes(text)) bgColor = '#1976D2';
+                              else if (text === '=') bgColor = '#0FA958';
+                              else if (['sin', 'cos', 'tan', 'log', 'ln', '√', 'x²', '1/x', 'π', 'e', '(', ')'].includes(text)) bgColor = '#383838';
+                              else if (/^[0-9]$|\./.test(text)) bgColor = '#262626';
+
+                              return (
+                                <div
+                                  key={btn.id}
+                                  style={{
+                                    backgroundColor:
+                                      btn.bgColor && !['C', '⌫', 'DEL', 'CLR', '/', '×', '*', '-', '+', '='].includes(text)
+                                        ? btn.bgColor
+                                        : bgColor,
+                                  }}
+                                  className="h-5 rounded text-white font-['Segoe_UI',sans-serif] font-bold text-[9px] flex items-center justify-center border border-black/20 shadow-xs select-none"
+                                >
+                                  {text}
+                                </div>
+                              );
+                            })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Output preview snippet */}
               {includeOutput && (
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-wide text-slate-900 mb-1 border-b border-slate-300 pb-0.5">
-                    Terminal Output
+                    {includeGuiWindow && activeGuiState ? 'III.' : 'II.'} Terminal Output
                   </div>
                   <div className="border border-slate-800 rounded bg-slate-950 text-slate-200 p-2.5 font-mono text-[10.5px] max-h-24 overflow-hidden leading-relaxed">
                     <div className="text-cyan-400 text-[9.5px] mb-1 font-bold">smitronix@cloud:~$ run Main.{languageExtension}</div>

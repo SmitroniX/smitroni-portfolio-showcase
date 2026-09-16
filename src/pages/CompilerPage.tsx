@@ -25,7 +25,7 @@ import { DEFAULT_STARTER_CODES, JAVA_GUI_SAMPLES } from '../data/compilerSamples
 import { executeInteractiveSession } from '../utils/codeRunner';
 import { LabReportModal } from '../components/LabReportModal';
 import { JavaGuiWindow } from '../components/JavaGuiWindow';
-import { JavaGuiState, isJavaGuiCode } from '../utils/javaGuiRunner';
+import { JavaGuiState, isJavaGuiCode, parseJavaGuiCode } from '../utils/javaGuiRunner';
 import confetti from 'canvas-confetti';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-c';
@@ -1217,6 +1217,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
         languageName={selectedLang.name}
         languageExtension={selectedLang.extension}
         terminalOutput={terminalOutputText}
+        guiState={javaGuiState || (selectedLang.id === 'java' && isJavaGuiCode(code) ? parseJavaGuiCode(code) : null)}
       />
 
     </div>
