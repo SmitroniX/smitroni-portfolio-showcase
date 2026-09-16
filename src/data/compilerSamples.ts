@@ -823,10 +823,10 @@ SELECT * FROM users;
 
 export const JAVA_GUI_SAMPLES: CodeSample[] = [
   {
-    id: 'java-gui-calc',
-    title: 'Swing Calculator (GUI)',
-    tag: 'Swing GUI',
-    description: 'Interactive two-number arithmetic calculator with Add, Subtract, Multiply, and Clear buttons in a FlowLayout JFrame.',
+    id: 'java-gui-student-form',
+    title: 'Windows Student Form (Menu & Form)',
+    tag: 'Windows Form',
+    description: 'Realistic Windows desktop student registration application with JMenuBar, ComboBox, Radio Buttons, Checkboxes, and submit action listener.',
     defaultStdin: '',
     isInteractive: true,
     code: `import javax.swing.*;
@@ -835,49 +835,123 @@ import java.awt.event.*;
 
 public class Main {
     public static void main(String[] args) {
-        // Create Swing Window Frame
-        JFrame f = new JFrame("Java Swing Calculator");
+        // Windows Desktop Application Frame
+        JFrame f = new JFrame("Student Registration System");
+        f.setSize(520, 420);
+        f.setLayout(new GridLayout(6, 2, 8, 8));
 
-        // Input Fields & Labels
-        JLabel l1 = new JLabel("First Number:");
-        JTextField t1 = new JTextField("15");
+        // JMenuBar (File, Edit, Help)
+        JMenuBar mb = new JMenuBar();
+        JMenu mFile = new JMenu("File");
+        JMenuItem iNew = new JMenuItem("New Form");
+        JMenuItem iExit = new JMenuItem("Exit");
+        mFile.add(iNew);
+        mFile.add(iExit);
+        mb.add(mFile);
+        f.setJMenuBar(mb);
 
-        JLabel l2 = new JLabel("Second Number:");
-        JTextField t2 = new JTextField("5");
+        // Form Fields
+        JLabel lName = new JLabel("Full Name:");
+        JTextField tfName = new JTextField("Alex Mercer");
 
-        // Action Buttons
-        JButton bAdd = new JButton("Add (+)");
-        JButton bSub = new JButton("Subtract (-)");
-        JButton bMul = new JButton("Multiply (*)");
-        JButton bClr = new JButton("Clear");
+        JLabel lRoll = new JLabel("Roll Number:");
+        JTextField tfRoll = new JTextField("24IT105");
 
-        // Result Label
-        JLabel lResult = new JLabel("Result: 20");
+        JLabel lCourse = new JLabel("Department / Branch:");
+        String courses[] = {"Computer Engineering", "Information Technology", "AI & Data Science", "Robotics"};
+        JComboBox<String> cbCourse = new JComboBox<>(courses);
 
-        // Add components to JFrame
-        f.add(l1);
-        f.add(t1);
-        f.add(l2);
-        f.add(t2);
-        f.add(bAdd);
-        f.add(bSub);
-        f.add(bMul);
-        f.add(bClr);
-        f.add(lResult);
+        JLabel lGender = new JLabel("Gender:");
+        JRadioButton rb1 = new JRadioButton("Male");
+        JRadioButton rb2 = new JRadioButton("Female");
 
-        // Window properties
-        f.setSize(380, 260);
-        f.setLayout(new FlowLayout());
+        JCheckBox chkHostel = new JCheckBox("Requires Campus Hostel");
+        JButton btnSubmit = new JButton("Register Student");
+        JButton btnClear = new JButton("Clear Form");
+
+        JLabel lStatus = new JLabel("Status: Ready to register.");
+
+        // Add Components to Form
+        f.add(lName);
+        f.add(tfName);
+        f.add(lRoll);
+        f.add(tfRoll);
+        f.add(lCourse);
+        f.add(cbCourse);
+        f.add(lGender);
+        f.add(rb1);
+        f.add(chkHostel);
+        f.add(btnSubmit);
+        f.add(btnClear);
+        f.add(lStatus);
+
+        // Event Listeners
+        btnSubmit.addActionListener(e -> {
+            String name = tfName.getText();
+            lStatus.setText("Registered: " + name + " (" + tfRoll.getText() + ")");
+            JOptionPane.showMessageDialog(f, "Student Registered Successfully!\\nName: " + name);
+        });
+
+        btnClear.addActionListener(e -> {
+            tfName.setText("");
+            tfRoll.setText("");
+            lStatus.setText("Status: Form cleared.");
+        });
+
         f.setVisible(true);
     }
 }
 `
   },
   {
-    id: 'java-gui-graphics',
-    title: 'AWT Graphics 2D (Paint)',
+    id: 'java-gui-calc-grid',
+    title: 'Windows Grid Calculator (4x4)',
+    tag: 'Calculator',
+    description: 'Authentic Windows calculator with dynamic display screen, 4x4 Grid layout, and arithmetic calculations.',
+    defaultStdin: '',
+    isInteractive: true,
+    code: `import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class Main {
+    public static void main(String[] args) {
+        JFrame f = new JFrame("Windows Calculator");
+        f.setSize(340, 420);
+        f.setLayout(new BorderLayout(5, 5));
+
+        // Display Screen
+        JTextField display = new JTextField("0");
+        display.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        display.setHorizontalAlignment(JTextField.RIGHT);
+        f.add(display, BorderLayout.NORTH);
+
+        // 4x4 Buttons Grid
+        JPanel p = new JPanel();
+        p.setLayout(new GridLayout(4, 4, 6, 6));
+
+        String buttons[] = {
+            "7", "8", "9", "/",
+            "4", "5", "6", "*",
+            "1", "2", "3", "-",
+            "0", "C", "=", "+"
+        };
+
+        for (String text : buttons) {
+            JButton btn = new JButton(text);
+            f.add(btn);
+        }
+
+        f.setVisible(true);
+    }
+}
+`
+  },
+  {
+    id: 'java-gui-graphics-2d',
+    title: 'AWT Graphics 2D Canvas',
     tag: 'AWT Graphics',
-    description: 'Vector graphics painting with custom colors, rectangles, ovals, circles, lines, and text using paint(Graphics g).',
+    description: 'Dynamic 2D vector painting with custom colors, rectangles, ovals, circles, lines, and text using paint(Graphics g).',
     defaultStdin: '',
     isInteractive: true,
     code: `import java.awt.*;
@@ -887,61 +961,31 @@ public class Main extends Frame {
     public void paint(Graphics g) {
         // Welcome Header
         g.setColor(Color.BLUE);
-        g.drawString("Code With SmitroniX - Java Graphics 2D", 30, 45);
+        g.drawString("Code With SmitroniX - Windows Graphics 2D", 30, 40);
 
         // Solid & Outlined Rectangles
         g.setColor(Color.RED);
-        g.drawRect(30, 70, 110, 60);
+        g.drawRect(30, 60, 110, 60);
 
         g.setColor(Color.ORANGE);
-        g.fillRect(160, 70, 110, 60);
+        g.fillRect(160, 60, 110, 60);
 
-        // Outlined Circle & Filled Oval
+        // Circles & Ovals
         g.setColor(Color.GREEN);
-        g.drawOval(30, 150, 70, 70);
+        g.drawOval(30, 140, 70, 70);
 
         g.setColor(Color.MAGENTA);
-        g.fillOval(130, 150, 110, 60);
+        g.fillOval(130, 140, 120, 65);
 
         // Vector Baseline
         g.setColor(Color.BLACK);
-        g.drawLine(30, 240, 270, 240);
+        g.drawLine(30, 230, 300, 230);
     }
 
     public static void main(String[] args) {
         Main f = new Main();
-        f.setTitle("Java AWT Graphics Demo");
-        f.setSize(420, 300);
-        f.setVisible(true);
-    }
-}
-`
-  },
-  {
-    id: 'java-gui-counter',
-    title: 'Counter & Action Listener',
-    tag: 'Swing Event',
-    description: 'Interactive counter window that tracks button clicks in real-time with event listeners.',
-    defaultStdin: '',
-    isInteractive: true,
-    code: `import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-
-public class Main {
-    public static void main(String[] args) {
-        JFrame f = new JFrame("Click Counter");
-
-        JLabel l = new JLabel("Click Count: 0");
-        JButton bInc = new JButton("Click Me (+)");
-        JButton bReset = new JButton("Reset");
-
-        f.add(l);
-        f.add(bInc);
-        f.add(bReset);
-
-        f.setSize(320, 180);
-        f.setLayout(new FlowLayout());
+        f.setTitle("Windows Graphics 2D Demo");
+        f.setSize(480, 320);
         f.setVisible(true);
     }
 }
@@ -949,9 +993,9 @@ public class Main {
   },
   {
     id: 'java-gui-dialogs',
-    title: 'JOptionPane Dialogs',
+    title: 'Windows JOptionPane Dialogs',
     tag: 'JOptionPane',
-    description: 'Swing JOptionPane message dialog popups with classic Java desktop styling.',
+    description: 'Swing JOptionPane message dialog popups with authentic Windows modal styling.',
     defaultStdin: '',
     isInteractive: true,
     code: `import javax.swing.JOptionPane;
@@ -959,11 +1003,11 @@ import javax.swing.JFrame;
 
 public class Main {
     public static void main(String[] args) {
-        JFrame f = new JFrame("Dialog Demo");
-        f.setSize(320, 200);
+        JFrame f = new JFrame("Windows Dialog Demo");
+        f.setSize(380, 220);
 
         // Interactive Message Dialog
-        JOptionPane.showMessageDialog(f, "Welcome to Code With SmitroniX Java GUI IDE!");
+        JOptionPane.showMessageDialog(f, "Welcome to Code With SmitroniX!\\nRunning authentic Windows Java GUI.");
     }
 }
 `
