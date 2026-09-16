@@ -481,7 +481,7 @@ ${escapeHtml(cleanOutput)}
     }
 
     <div class="watermark">
-      Generated via SmitroniX Online IDE & Lab Report Engine • ${new Date().toLocaleDateString()}
+      Generated via Code With SmitroniX • Online IDE & Lab Journal Engine • ${new Date().toLocaleDateString()}
     </div>
   </div>
 </body>

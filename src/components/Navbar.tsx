@@ -104,7 +104,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette, onOpenComp
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-emerald-500/20 transition-all ml-1"
           >
             <Terminal className="w-3.5 h-3.5" />
-            <span>Online Compiler</span>
+            <span>Code With SmitroniX</span>
           </button>
         </nav>
 
@@ -215,7 +215,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette, onOpenComp
             className="w-full flex items-center justify-between py-2 text-xs font-mono text-emerald-400 border-t border-white/5"
           >
             <span className="flex items-center gap-2">
-              <Terminal className="w-4 h-4" /> Launch Online Compiler
+              <Terminal className="w-4 h-4" /> Code With SmitroniX
             </span>
             <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-[10px]">NEW</span>
           </button>

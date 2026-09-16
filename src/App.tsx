@@ -164,13 +164,13 @@ export function App() {
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                 <div className="space-y-2 max-w-xl">
                   <div className="flex items-center gap-2 text-xs font-mono text-[#FF8A00] uppercase font-bold">
-                    <Terminal className="w-4 h-4" /> Standalone Cloud IDE
+                    <Terminal className="w-4 h-4" /> Code With SmitroniX
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-bold text-white font-display">
-                    Multi-Language Online Compiler
+                    Code With SmitroniX — Online IDE & Java GUI Runner
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed">
-                    A full-screen, Programiz-style online code runner supporting Python, C++, Java, Rust, Go, JavaScript, and TypeScript with real cloud execution and latency telemetry.
+                    Full-screen cloud IDE supporting Java (Swing & AWT virtual GUI desktop), Python, C++, C, JavaScript, TypeScript, Rust, Go, and Bash with real-time interactive terminal and academic lab report PDF export.
                   </p>
                 </div>
 
@@ -179,7 +179,7 @@ export function App() {
                   className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] hover:from-[#16A34A] hover:to-[#15803D] text-white font-bold font-mono text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 active:scale-95 transition-all shrink-0"
                 >
                   <Play className="w-4 h-4 fill-current" />
-                  <span>Launch Online Compiler</span>
+                  <span>Launch Code With SmitroniX</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>

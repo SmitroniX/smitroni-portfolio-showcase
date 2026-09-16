@@ -61,8 +61,8 @@ export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose, 
       },
     },
     {
-      title: 'Launch Online Compiler (IDE)',
-      desc: 'Full-screen Programiz-style runner for Python, C++, Java, Rust, JS',
+      title: 'Code With SmitroniX (Online IDE & Java GUI)',
+      desc: 'Full-screen cloud runner for Java (Swing & AWT GUI), Python, C++, C, Rust, JS, Go',
       icon: <Play className="w-4 h-4 text-emerald-400 fill-current" />,
       action: () => {
         onClose();

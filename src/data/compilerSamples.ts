@@ -820,3 +820,153 @@ SELECT * FROM users;
     }
   ]
 };
+
+export const JAVA_GUI_SAMPLES: CodeSample[] = [
+  {
+    id: 'java-gui-calc',
+    title: 'Swing Calculator (GUI)',
+    tag: 'Swing GUI',
+    description: 'Interactive two-number arithmetic calculator with Add, Subtract, Multiply, and Clear buttons in a FlowLayout JFrame.',
+    defaultStdin: '',
+    isInteractive: true,
+    code: `import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class Main {
+    public static void main(String[] args) {
+        // Create Swing Window Frame
+        JFrame f = new JFrame("Java Swing Calculator");
+
+        // Input Fields & Labels
+        JLabel l1 = new JLabel("First Number:");
+        JTextField t1 = new JTextField("15");
+
+        JLabel l2 = new JLabel("Second Number:");
+        JTextField t2 = new JTextField("5");
+
+        // Action Buttons
+        JButton bAdd = new JButton("Add (+)");
+        JButton bSub = new JButton("Subtract (-)");
+        JButton bMul = new JButton("Multiply (*)");
+        JButton bClr = new JButton("Clear");
+
+        // Result Label
+        JLabel lResult = new JLabel("Result: 20");
+
+        // Add components to JFrame
+        f.add(l1);
+        f.add(t1);
+        f.add(l2);
+        f.add(t2);
+        f.add(bAdd);
+        f.add(bSub);
+        f.add(bMul);
+        f.add(bClr);
+        f.add(lResult);
+
+        // Window properties
+        f.setSize(380, 260);
+        f.setLayout(new FlowLayout());
+        f.setVisible(true);
+    }
+}
+`
+  },
+  {
+    id: 'java-gui-graphics',
+    title: 'AWT Graphics 2D (Paint)',
+    tag: 'AWT Graphics',
+    description: 'Vector graphics painting with custom colors, rectangles, ovals, circles, lines, and text using paint(Graphics g).',
+    defaultStdin: '',
+    isInteractive: true,
+    code: `import java.awt.*;
+
+public class Main extends Frame {
+    // Override paint to draw 2D vector shapes
+    public void paint(Graphics g) {
+        // Welcome Header
+        g.setColor(Color.BLUE);
+        g.drawString("Code With SmitroniX - Java Graphics 2D", 30, 45);
+
+        // Solid & Outlined Rectangles
+        g.setColor(Color.RED);
+        g.drawRect(30, 70, 110, 60);
+
+        g.setColor(Color.ORANGE);
+        g.fillRect(160, 70, 110, 60);
+
+        // Outlined Circle & Filled Oval
+        g.setColor(Color.GREEN);
+        g.drawOval(30, 150, 70, 70);
+
+        g.setColor(Color.MAGENTA);
+        g.fillOval(130, 150, 110, 60);
+
+        // Vector Baseline
+        g.setColor(Color.BLACK);
+        g.drawLine(30, 240, 270, 240);
+    }
+
+    public static void main(String[] args) {
+        Main f = new Main();
+        f.setTitle("Java AWT Graphics Demo");
+        f.setSize(420, 300);
+        f.setVisible(true);
+    }
+}
+`
+  },
+  {
+    id: 'java-gui-counter',
+    title: 'Counter & Action Listener',
+    tag: 'Swing Event',
+    description: 'Interactive counter window that tracks button clicks in real-time with event listeners.',
+    defaultStdin: '',
+    isInteractive: true,
+    code: `import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class Main {
+    public static void main(String[] args) {
+        JFrame f = new JFrame("Click Counter");
+
+        JLabel l = new JLabel("Click Count: 0");
+        JButton bInc = new JButton("Click Me (+)");
+        JButton bReset = new JButton("Reset");
+
+        f.add(l);
+        f.add(bInc);
+        f.add(bReset);
+
+        f.setSize(320, 180);
+        f.setLayout(new FlowLayout());
+        f.setVisible(true);
+    }
+}
+`
+  },
+  {
+    id: 'java-gui-dialogs',
+    title: 'JOptionPane Dialogs',
+    tag: 'JOptionPane',
+    description: 'Swing JOptionPane message dialog popups with classic Java desktop styling.',
+    defaultStdin: '',
+    isInteractive: true,
+    code: `import javax.swing.JOptionPane;
+import javax.swing.JFrame;
+
+public class Main {
+    public static void main(String[] args) {
+        JFrame f = new JFrame("Dialog Demo");
+        f.setSize(320, 200);
+
+        // Interactive Message Dialog
+        JOptionPane.showMessageDialog(f, "Welcome to Code With SmitroniX Java GUI IDE!");
+    }
+}
+`
+  }
+];
+

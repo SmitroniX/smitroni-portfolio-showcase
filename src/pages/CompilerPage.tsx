@@ -16,12 +16,16 @@ import {
   CornerDownLeft,
   Send,
   Code2,
-  Printer
+  Printer,
+  AppWindow,
+  Monitor
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
-import { DEFAULT_STARTER_CODES } from '../data/compilerSamples';
+import { DEFAULT_STARTER_CODES, JAVA_GUI_SAMPLES } from '../data/compilerSamples';
 import { executeInteractiveSession } from '../utils/codeRunner';
 import { LabReportModal } from '../components/LabReportModal';
+import { JavaGuiWindow } from '../components/JavaGuiWindow';
+import { JavaGuiState, isJavaGuiCode } from '../utils/javaGuiRunner';
 import confetti from 'canvas-confetti';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-c';
@@ -84,12 +88,12 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     {
       id: 'welcome-1',
       type: 'system',
-      text: 'SmitroniX Cloud Terminal [v2.4.0-universal]',
+      text: 'Code With SmitroniX Cloud Terminal [v2.5.0-gui-ready]',
     },
     {
       id: 'welcome-2',
       type: 'system',
-      text: 'Type "run" or press ⌘+Enter to execute.\nInteractive inputs are typed directly inside this terminal.',
+      text: 'Type "run" or press ⌘+Enter to execute.\nInteractive inputs work directly in terminal. Swing & AWT Java GUI supported!',
     },
   ]);
   const [terminalInputValue, setTerminalInputValue] = useState<string>('');
@@ -97,6 +101,11 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
   const [isWaitingForInput, setIsWaitingForInput] = useState<boolean>(false);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [executionStats, setExecutionStats] = useState<{ time?: string; memory?: string; status?: string } | null>(null);
+
+  // Java GUI Virtual Desktop Runner State
+  const [javaGuiState, setJavaGuiState] = useState<JavaGuiState | null>(null);
+  const [activeRightTab, setActiveRightTab] = useState<'terminal' | 'gui'>('terminal');
+  const [isGuiTemplatesOpen, setIsGuiTemplatesOpen] = useState<boolean>(false);
   
   // UI states
   const [copied, setCopied] = useState<boolean>(false);
@@ -120,6 +129,16 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
   const terminalInputRef = useRef<HTMLInputElement>(null);
   const inputResolverRef = useRef<((val: string) => void) | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const guiTemplatesRef = useRef<HTMLDivElement>(null);
+
+  // Set browser document title
+  useEffect(() => {
+    const originalTitle = document.title;
+    document.title = 'Code With SmitroniX | Online Compiler & Java GUI IDE';
+    return () => {
+      document.title = originalTitle;
+    };
+  }, []);
 
   // Auto-scroll terminal to bottom on any new line, prompt, or user keystroke
   useEffect(() => {
@@ -216,6 +235,9 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     setActivePrompt('');
     inputResolverRef.current = null;
     setIsLangDropdownOpen(false);
+    setIsGuiTemplatesOpen(false);
+    setJavaGuiState(null);
+    setActiveRightTab('terminal');
     setTerminalLines([
       {
         id: `lang-${Date.now()}`,
@@ -225,11 +247,34 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     ]);
   };
 
+  // Load Java GUI starter template
+  const loadJavaGuiSample = (sample: (typeof JAVA_GUI_SAMPLES)[number]) => {
+    sounds.playClick();
+    setCode(sample.code);
+    setIsGuiTemplatesOpen(false);
+    setJavaGuiState(null);
+    setActiveRightTab('terminal');
+    setExecutionStats(null);
+    setIsWaitingForInput(false);
+    setActivePrompt('');
+    inputResolverRef.current = null;
+    setTerminalLines([
+      {
+        id: `gui-sample-${Date.now()}`,
+        type: 'system',
+        text: `Loaded Java GUI Template: [${sample.title}]\n${sample.description}\nClick "Run" (or ⌘+Enter) to compile & launch the virtual GUI window!`,
+      },
+    ]);
+  };
+
   // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsLangDropdownOpen(false);
+      }
+      if (guiTemplatesRef.current && !guiTemplatesRef.current.contains(e.target as Node)) {
+        setIsGuiTemplatesOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -251,6 +296,8 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     setIsWaitingForInput(false);
     setActivePrompt('');
     inputResolverRef.current = null;
+    setJavaGuiState(null);
+    setActiveRightTab('terminal');
     setTerminalLines([
       {
         id: `reset-${Date.now()}`,
@@ -277,7 +324,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     return ['5', '10', '15', '25'];
   }, [code]);
 
-  // Core execution engine with unified real-time interactive terminal (VS Code Style)
+  // Core execution engine with unified real-time interactive terminal (VS Code Style) + Java GUI support
   const executeCode = async () => {
     if (isRunning && !isWaitingForInput) return;
     sounds.playWarp();
@@ -287,6 +334,11 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
     setIsWaitingForInput(false);
     setActivePrompt('');
 
+    const isGui = selectedLang.id === 'java' && isJavaGuiCode(code);
+    if (isGui) {
+      setJavaGuiState(null);
+    }
+
     // EVERY RUN FIRST CLEAR THE OUTPUT AREA
     const startTimestamp = Date.now();
     const fileName = selectedLang.extension === 'java' ? 'Main.java' : `main.${selectedLang.extension}`;
@@ -294,7 +346,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
       {
         id: `cmd-${startTimestamp}`,
         type: 'system',
-        text: `smitronix@cloud:~$ run ${fileName}`,
+        text: `smitronix@cloud:~$ run ${fileName}${isGui ? ' [Java GUI Mode]' : ''}`,
       },
     ]);
 
@@ -338,6 +390,11 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
                 terminalInputRef.current?.focus();
               }, 40);
             });
+          },
+          onJavaGuiLaunch: (guiState) => {
+            setJavaGuiState(guiState);
+            setActiveRightTab('gui');
+            setActiveMobileTab('output');
           },
         }
       );
@@ -615,8 +672,8 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
 
           <div className="flex items-center gap-1.5">
             <span className="text-xs sm:text-sm font-bold text-white tracking-tight flex items-center gap-1">
-              <span className="text-[#FF8A00]">SmitroniX</span>
-              <span className="hidden xs:inline text-slate-300 font-medium">Compiler</span>
+              <span className="text-[#FF8A00]">Code With</span>
+              <span className="text-white font-medium">SmitroniX</span>
             </span>
             <span className="hidden xl:inline-block px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               ● Online
@@ -624,7 +681,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
           </div>
         </div>
 
-        {/* Center: Responsive Language Selector & Desktop Sample Dropdown */}
+        {/* Center: Responsive Language Selector & Java GUI Templates */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           
           {/* Language Selector Dropdown */}
@@ -666,6 +723,52 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
               </div>
             )}
           </div>
+
+          {/* Java GUI Starter Templates Dropdown Button */}
+          {selectedLang.id === 'java' && (
+            <div className="relative" ref={guiTemplatesRef}>
+              <button
+                onClick={() => setIsGuiTemplatesOpen(!isGuiTemplatesOpen)}
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/15 to-[#FF8A00]/15 border border-amber-500/30 hover:border-amber-500/50 text-xs font-mono font-semibold text-amber-300 shadow-sm transition-all"
+                title="Explore Java GUI Starter Templates (Swing & AWT)"
+              >
+                <AppWindow className="w-3.5 h-3.5 text-[#FF8A00]" />
+                <span className="hidden sm:inline">GUI Templates</span>
+                <span className="sm:hidden">GUI</span>
+                <ChevronDown className="w-3 h-3 text-amber-400" />
+              </button>
+
+              {isGuiTemplatesOpen && (
+                <div className="absolute top-full mt-1.5 left-0 sm:left-1/2 sm:-translate-x-1/2 w-64 sm:w-72 rounded-2xl bg-[#0C121E] border border-white/15 shadow-2xl py-1 z-50 overflow-hidden backdrop-blur-xl">
+                  <div className="px-3 py-1.5 text-[10px] font-mono text-amber-400 font-bold uppercase tracking-wider border-b border-white/5 flex items-center justify-between">
+                    <span>Java Swing & AWT Starters</span>
+                    <span className="text-[9px] bg-amber-500/20 px-1.5 py-0.5 rounded text-amber-300">Virtual GUI</span>
+                  </div>
+                  <div className="py-1">
+                    {JAVA_GUI_SAMPLES.map((sample) => (
+                      <button
+                        key={sample.id}
+                        onClick={() => loadJavaGuiSample(sample)}
+                        className="w-full px-3 py-2 text-left hover:bg-white/5 transition-colors group flex flex-col gap-0.5"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-mono font-semibold text-slate-200 group-hover:text-[#FF8A00]">
+                            {sample.title}
+                          </span>
+                          <span className="text-[10px] font-mono text-slate-500 px-1.5 py-0.2 rounded bg-white/5">
+                            {sample.id}
+                          </span>
+                        </div>
+                        <span className="text-[11px] text-slate-400 font-sans line-clamp-1">
+                          {sample.description}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
         </div>
 
@@ -756,15 +859,25 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
               : 'border-transparent text-slate-400'
           }`}
         >
-          <Terminal className="w-3.5 h-3.5" />
-          <span>Terminal Output</span>
-          {isWaitingForInput ? (
-            <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-amber-500/20 text-amber-300 font-bold animate-pulse">
-              Input ↵
-            </span>
-          ) : executionStats ? (
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          ) : null}
+          {activeRightTab === 'gui' && javaGuiState ? (
+            <>
+              <AppWindow className="w-3.5 h-3.5 text-[#FF8A00]" />
+              <span>Java GUI Window</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            </>
+          ) : (
+            <>
+              <Terminal className="w-3.5 h-3.5" />
+              <span>Terminal Output</span>
+              {isWaitingForInput ? (
+                <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-amber-500/20 text-amber-300 font-bold animate-pulse">
+                  Input ↵
+                </span>
+              ) : executionStats ? (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              ) : null}
+            </>
+          )}
         </button>
       </div>
 
@@ -870,26 +983,57 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
 
         </div>
 
-        {/* RIGHT PANE: Interactive Terminal Output Console (Write Input Directly) */}
+        {/* RIGHT PANE: Interactive Terminal Output & Java GUI Window */}
         <div
           className={`flex-1 flex flex-col bg-[#04060A] overflow-hidden ${
             activeMobileTab === 'editor' ? 'hidden md:flex' : 'flex'
           }`}
         >
-          {/* Terminal Header */}
-          <div className="h-9 border-b border-white/5 bg-[#070A10] px-3 sm:px-4 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
-            <div className="flex items-center gap-2">
-              <Terminal className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="font-semibold text-slate-200">Terminal Output</span>
-              {executionStats?.status && (
-                <span className="px-2 py-0.2 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          {/* Header Bar with Terminal & Java GUI Window Tabs */}
+          <div className="h-9 border-b border-white/5 bg-[#070A10] px-2 sm:px-4 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <button
+                onClick={() => {
+                  sounds.playClick();
+                  setActiveRightTab('terminal');
+                }}
+                className={`px-2 sm:px-2.5 py-1 rounded-lg flex items-center gap-1.5 font-semibold text-xs transition-colors ${
+                  activeRightTab === 'terminal'
+                    ? 'bg-white/10 text-white font-bold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Terminal className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Terminal</span>
+              </button>
+
+              {javaGuiState && (
+                <button
+                  onClick={() => {
+                    sounds.playClick();
+                    setActiveRightTab('gui');
+                  }}
+                  className={`px-2 sm:px-2.5 py-1 rounded-lg flex items-center gap-1.5 font-semibold text-xs transition-colors relative ${
+                    activeRightTab === 'gui'
+                      ? 'bg-[#FF8A00]/20 text-[#FF8A00] font-bold border border-[#FF8A00]/30'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <AppWindow className="w-3.5 h-3.5 text-[#FF8A00]" />
+                  <span>Java GUI Window</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                </button>
+              )}
+
+              {executionStats?.status && activeRightTab === 'terminal' && (
+                <span className="hidden sm:inline-block px-2 py-0.2 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   {executionStats.status}
                 </span>
               )}
             </div>
 
-            <div className="flex items-center gap-3 sm:gap-4">
-              {executionStats && (
+            <div className="flex items-center gap-2 sm:gap-3">
+              {executionStats && activeRightTab === 'terminal' && (
                 <div className="flex items-center gap-2 sm:gap-3 text-[11px] font-mono">
                   {executionStats.time && (
                     <span className="flex items-center gap-1 text-emerald-400">
@@ -902,6 +1046,20 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
                     </span>
                   )}
                 </div>
+              )}
+
+              {activeRightTab === 'gui' && (
+                <button
+                  onClick={() => {
+                    sounds.playClick();
+                    setActiveRightTab('terminal');
+                  }}
+                  className="px-2 py-1 rounded hover:bg-white/5 text-slate-400 hover:text-white transition-colors text-[11px] font-mono flex items-center gap-1 border border-white/5"
+                  title="View Console Output"
+                >
+                  <Terminal className="w-3 h-3 text-emerald-400" />
+                  <span className="hidden xs:inline">Console</span>
+                </button>
               )}
 
               <button
@@ -926,97 +1084,121 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
             </div>
           </div>
 
-          {/* Terminal Screen (VS Code Integrated Console - Click anywhere to focus and type) */}
-          <div
-            ref={terminalScrollRef}
-            onClick={() => terminalInputRef.current?.focus()}
-            className="flex-1 p-3 sm:p-4 font-mono text-[12px] sm:text-[13px] leading-relaxed overflow-y-auto select-text bg-[#04060A] cursor-text flex flex-col justify-between"
-          >
-            <div className="space-y-1">
-              {/* Historical output stream */}
-              {terminalLines.map((line) => (
-                <div key={line.id} className="whitespace-pre-wrap break-words">
-                  {line.type === 'stdin' ? (
-                    <span className="text-emerald-400 font-semibold">{line.text}</span>
-                  ) : line.type === 'stderr' ? (
-                    <span className="text-rose-400">{line.text}</span>
-                  ) : line.type === 'system' ? (
-                    <span className="text-cyan-400/90 font-medium">{line.text}</span>
-                  ) : (
-                    <span className="text-slate-200">{line.text}</span>
-                  )}
-                </div>
-              ))}
-
-              {/* Quick suggestion chips when program is waiting for input */}
-              {isWaitingForInput && (
-                <div className="py-1.5 flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[10px] text-amber-400/80 font-mono">Suggestions:</span>
-                  {quickChips.map((chip) => (
-                    <button
-                      key={chip}
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleQuickInput(chip);
-                      }}
-                      className="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[11px] font-mono font-bold border border-amber-500/30 active:scale-95 transition-all"
-                    >
-                      {chip}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Active Inline Prompt (True VS Code Style: Prompt + Typing Line directly in stream) */}
-              <form
-                onSubmit={handleTerminalSubmit}
-                className="flex items-center flex-wrap gap-x-1 font-mono text-[12px] sm:text-[13px] pt-0.5"
-              >
-                <span
-                  className={
-                    isWaitingForInput
-                      ? 'text-amber-400 font-bold shrink-0'
-                      : 'text-emerald-400 font-semibold shrink-0'
-                  }
-                >
-                  {isWaitingForInput ? activePrompt : 'smitronix@cloud:~$ '}
-                </span>
-
-                <div className="relative flex-1 min-w-[140px] inline-flex items-center">
-                  <input
-                    ref={terminalInputRef}
-                    type="text"
-                    value={terminalInputValue}
-                    onChange={(e) => setTerminalInputValue(e.target.value)}
-                    disabled={isRunning && !isWaitingForInput}
-                    placeholder={
-                      isRunning && !isWaitingForInput
-                        ? 'Executing...'
-                        : isWaitingForInput
-                        ? 'Type input & press Enter ↵'
-                        : 'Type "run" or press ⌘+Enter'
-                    }
-                    className="w-full bg-transparent border-none outline-none font-mono text-[12px] sm:text-[13px] text-white p-0 m-0 focus:ring-0 placeholder:text-slate-600 caret-emerald-400"
-                    autoComplete="off"
-                    autoCorrect="off"
-                    autoCapitalize="off"
-                    spellCheck={false}
-                  />
-                  {/* Blinking cursor block when idle or prompt waiting */}
-                  {!terminalInputValue && !(isRunning && !isWaitingForInput) && (
-                    <span className="inline-block w-1.5 sm:w-2 h-4 bg-emerald-400 animate-pulse ml-0.5 pointer-events-none shrink-0" />
-                  )}
-                </div>
-              </form>
+          {/* Right Pane Body: Switch between Virtual Java GUI Window & Terminal Stream */}
+          {activeRightTab === 'gui' && javaGuiState ? (
+            <div className="flex-1 flex flex-col overflow-hidden bg-[#04060A]">
+              <JavaGuiWindow
+                guiState={javaGuiState}
+                onLogEvent={(log) => {
+                  setTerminalLines((prev) => [
+                    ...prev,
+                    {
+                      id: `gui-event-${Date.now()}-${Math.random()}`,
+                      type: 'stdout',
+                      text: `[GUI Event]: ${log}`,
+                    },
+                  ]);
+                }}
+                onClose={() => {
+                  setActiveRightTab('terminal');
+                }}
+              />
             </div>
-          </div>
+          ) : (
+            <>
+              {/* Terminal Screen (VS Code Integrated Console - Click anywhere to focus and type) */}
+              <div
+                ref={terminalScrollRef}
+                onClick={() => terminalInputRef.current?.focus()}
+                className="flex-1 p-3 sm:p-4 font-mono text-[12px] sm:text-[13px] leading-relaxed overflow-y-auto select-text bg-[#04060A] cursor-text flex flex-col justify-between"
+              >
+                <div className="space-y-1">
+                  {/* Historical output stream */}
+                  {terminalLines.map((line) => (
+                    <div key={line.id} className="whitespace-pre-wrap break-words">
+                      {line.type === 'stdin' ? (
+                        <span className="text-emerald-400 font-semibold">{line.text}</span>
+                      ) : line.type === 'stderr' ? (
+                        <span className="text-rose-400">{line.text}</span>
+                      ) : line.type === 'system' ? (
+                        <span className="text-cyan-400/90 font-medium">{line.text}</span>
+                      ) : (
+                        <span className="text-slate-200">{line.text}</span>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Quick suggestion chips when program is waiting for input */}
+                  {isWaitingForInput && (
+                    <div className="py-1.5 flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[10px] text-amber-400/80 font-mono">Suggestions:</span>
+                      {quickChips.map((chip) => (
+                        <button
+                          key={chip}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleQuickInput(chip);
+                          }}
+                          className="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[11px] font-mono font-bold border border-amber-500/30 active:scale-95 transition-all"
+                        >
+                          {chip}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Active Inline Prompt (True VS Code Style: Prompt + Typing Line directly in stream) */}
+                  <form
+                    onSubmit={handleTerminalSubmit}
+                    className="flex items-center flex-wrap gap-x-1 font-mono text-[12px] sm:text-[13px] pt-0.5"
+                  >
+                    <span
+                      className={
+                        isWaitingForInput
+                          ? 'text-amber-400 font-bold shrink-0'
+                          : 'text-emerald-400 font-semibold shrink-0'
+                      }
+                    >
+                      {isWaitingForInput ? activePrompt : 'smitronix@cloud:~$ '}
+                    </span>
+
+                    <div className="relative flex-1 min-w-[140px] inline-flex items-center">
+                      <input
+                        ref={terminalInputRef}
+                        type="text"
+                        value={terminalInputValue}
+                        onChange={(e) => setTerminalInputValue(e.target.value)}
+                        disabled={isRunning && !isWaitingForInput}
+                        placeholder={
+                          isRunning && !isWaitingForInput
+                            ? 'Executing...'
+                            : isWaitingForInput
+                            ? 'Type input & press Enter ↵'
+                            : 'Type "run" or press ⌘+Enter'
+                        }
+                        className="w-full bg-transparent border-none outline-none font-mono text-[12px] sm:text-[13px] text-white p-0 m-0 focus:ring-0 placeholder:text-slate-600 caret-emerald-400"
+                        autoComplete="off"
+                        autoCorrect="off"
+                        autoCapitalize="off"
+                        spellCheck={false}
+                      />
+                      {/* Blinking cursor block when idle or prompt waiting */}
+                      {!terminalInputValue && !(isRunning && !isWaitingForInput) && (
+                        <span className="inline-block w-1.5 sm:w-2 h-4 bg-emerald-400 animate-pulse ml-0.5 pointer-events-none shrink-0" />
+                      )}
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Terminal Bottom Status Bar */}
           <div className="h-7 sm:h-8 border-t border-white/5 bg-[#06080E] px-3 sm:px-4 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-slate-500 shrink-0">
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span>SmitroniX Cloud Engine</span>
+              <span>Code With SmitroniX Engine</span>
             </div>
             <div className="text-slate-400">
               {selectedLang.shortName} • {executionStats?.status || 'Ready'}
