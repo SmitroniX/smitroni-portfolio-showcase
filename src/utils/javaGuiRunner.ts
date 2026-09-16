@@ -81,6 +81,7 @@ export interface JavaGuiDialog {
 
 export interface JavaGuiState {
   title: string;
+  subtitle?: string;
   width: number;
   height: number;
   layout: 'flow' | 'border' | 'grid' | 'box' | 'null';
@@ -96,6 +97,7 @@ export interface JavaGuiState {
   appletMode: boolean;
   resizable: boolean;
   statusText?: string;
+  isScientificCalculator?: boolean;
   rawCode: string;
 }
 
@@ -114,15 +116,15 @@ export function isJavaGuiCode(code: string): boolean {
 export function mapJavaColorToCss(colorExpr: string): string {
   const clean = colorExpr.trim().replace(/^Color\./i, '').toUpperCase();
   const colorMap: Record<string, string> = {
-    RED: '#DC2626',
-    BLUE: '#2563EB',
-    GREEN: '#16A34A',
+    RED: '#C83737',
+    BLUE: '#1976D2',
+    GREEN: '#10B981',
     YELLOW: '#EAB308',
-    BLACK: '#000000',
+    BLACK: '#121212',
     WHITE: '#FFFFFF',
     GRAY: '#64748B',
     LIGHT_GRAY: '#D1D5DB',
-    DARK_GRAY: '#374151',
+    DARK_GRAY: '#262626',
     PINK: '#EC4899',
     ORANGE: '#EA580C',
     CYAN: '#0891B2',
@@ -145,7 +147,13 @@ export function mapJavaColorToCss(colorExpr: string): string {
     return `#${hexMatch[1]}`;
   }
 
-  return '#1E293B';
+  return '#181818';
+}
+
+function formatResult(num: number): string {
+  if (isNaN(num) || !isFinite(num)) return 'Error';
+  if (Number.isInteger(num)) return String(num);
+  return parseFloat(num.toFixed(8)).toString();
 }
 
 /**
@@ -153,18 +161,20 @@ export function mapJavaColorToCss(colorExpr: string): string {
  * Extracts custom variables, layouts, menus, component properties, 2D graphics, and event code.
  */
 export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
-  let title = 'Java Application';
-  let width = 500;
-  let height = 380;
+  let title = 'Scientific Calculator';
+  let subtitle = '';
+  let width = 420;
+  let height = 540;
   let layout: 'flow' | 'border' | 'grid' | 'box' | 'null' = 'flow';
-  let gridRows = 2;
-  let gridCols = 2;
-  let gridHgap = 8;
-  let gridVgap = 8;
-  let backgroundColor = '#F3F3F3'; // Windows 11 default form surface
+  let gridRows = 6;
+  let gridCols = 5;
+  let gridHgap = 6;
+  let gridVgap = 6;
+  let backgroundColor = '#121212';
   let resizable = true;
   let appletMode = false;
   let statusText = 'Ready';
+  let isScientificCalculator = false;
 
   const components: JavaGuiComponent[] = [];
   const menus: JavaMenuItem[] = [];
@@ -199,7 +209,7 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
     const w = parseInt(sizeMatch[1], 10);
     const h = parseInt(sizeMatch[2], 10);
     if (w >= 200 && w <= 1000) width = w;
-    if (h >= 150 && h <= 800) height = h;
+    if (h >= 150 && h <= 900) height = h;
   }
 
   // Check resizable
@@ -216,8 +226,8 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
     layout = 'grid';
     const gridMatch = sourceCode.match(/setLayout\s*\(\s*new\s+GridLayout\s*\(\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*(\d+)\s*,\s*(\d+))?/i);
     if (gridMatch) {
-      gridRows = parseInt(gridMatch[1], 10) || 2;
-      gridCols = parseInt(gridMatch[2], 10) || 2;
+      gridRows = parseInt(gridMatch[1], 10) || 6;
+      gridCols = parseInt(gridMatch[2], 10) || 5;
       if (gridMatch[3]) gridHgap = parseInt(gridMatch[3], 10);
       if (gridMatch[4]) gridVgap = parseInt(gridMatch[4], 10);
     }
@@ -231,7 +241,16 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
     backgroundColor = mapJavaColorToCss(bgMatch[1]);
   }
 
-  // 6. Extract Menu Bar (JMenuBar, JMenu, JMenuItem)
+  // 6. Detect Subtitle Header (e.g. "SCIENTIFIC CALCULATOR")
+  const subtitleMatch = sourceCode.match(/JLabel\s+\w+\s*=\s*new\s+JLabel\s*\(\s*"([^"]*(?:CALCULATOR|SYSTEM|FORM)[^"]*)"\s*\)/i);
+  if (subtitleMatch) {
+    subtitle = subtitleMatch[1];
+  } else if (/scientific\s*calc/i.test(sourceCode) || /scientific/i.test(title)) {
+    subtitle = 'SCIENTIFIC CALCULATOR';
+    isScientificCalculator = true;
+  }
+
+  // 7. Extract Menu Bar (JMenuBar, JMenu, JMenuItem)
   const menuMap = new Map<string, JavaMenuItem>();
   const menuDeclRegex = /(?:JMenu)\s+(\w+)\s*=\s*new\s+JMenu\s*\(\s*"([^"]*)"\s*\)/g;
   let mMatch: RegExpExecArray | null;
@@ -246,7 +265,6 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
     menus.push(menuObj);
   }
 
-  // Extract menu items: menu.add(new JMenuItem("Open")) or menu.add(itemVar)
   const menuItemDeclRegex = /(?:JMenuItem)\s+(\w+)\s*=\s*new\s+JMenuItem\s*\(\s*"([^"]*)"\s*\)/g;
   const itemMap = new Map<string, string>();
   while ((mMatch = menuItemDeclRegex.exec(sourceCode)) !== null) {
@@ -268,41 +286,7 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
     }
   }
 
-  // If no menus defined in code, provide standard Windows desktop menus
-  if (menus.length === 0) {
-    menus.push(
-      {
-        id: 'menu-file',
-        label: 'File',
-        items: [
-          { id: 'f-new', label: 'New', shortcut: 'Ctrl+N' },
-          { id: 'f-open', label: 'Open...', shortcut: 'Ctrl+O' },
-          { id: 'f-save', label: 'Save', shortcut: 'Ctrl+S' },
-          { id: 'f-sep', label: '-', isSeparator: true },
-          { id: 'f-exit', label: 'Exit', shortcut: 'Alt+F4' },
-        ],
-      },
-      {
-        id: 'menu-edit',
-        label: 'Edit',
-        items: [
-          { id: 'e-cut', label: 'Cut', shortcut: 'Ctrl+X' },
-          { id: 'e-copy', label: 'Copy', shortcut: 'Ctrl+C' },
-          { id: 'e-paste', label: 'Paste', shortcut: 'Ctrl+V' },
-        ],
-      },
-      {
-        id: 'menu-help',
-        label: 'Help',
-        items: [
-          { id: 'h-docs', label: 'Java Swing Documentation' },
-          { id: 'h-about', label: 'About Code With SmitroniX' },
-        ],
-      }
-    );
-  }
-
-  // 7. Component Map & Registry
+  // 8. Component Registry
   const compMap = new Map<string, JavaGuiComponent>();
 
   const registerComp = (comp: JavaGuiComponent) => {
@@ -348,6 +332,31 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
     }
   }
 
+  // Extract Buttons created via array loop:
+  // String btnTexts[] = { "sin", "cos", ... }; for (String text : btnTexts) { ... }
+  const btnArrayMatch = sourceCode.match(/String\s*(?:\[\s*\]\s*\w+|\w+\s*\[\s*\])\s*=\s*\{([\s\S]*?)\};/);
+  if (btnArrayMatch && (sourceCode.includes('JButton') || sourceCode.includes('Button'))) {
+    const items = btnArrayMatch[1]
+      .split(',')
+      .map((s) => s.trim().replace(/^"|"$/g, '').trim())
+      .filter(Boolean);
+
+    if (items.length >= 10) {
+      isScientificCalculator = true;
+      let bIdx = 0;
+      for (const item of items) {
+        registerComp({
+          id: `btn-arr-${bIdx}`,
+          varName: `btn_${bIdx++}`,
+          type: 'button',
+          text: item,
+          enabled: true,
+          visible: true,
+        });
+      }
+    }
+  }
+
   // Extract Labels (JLabel / Label)
   const labelRegex = /(?:JLabel|Label)\s+(\w+)\s*(?:=\s*new\s+(?:JLabel|Label)\s*\(\s*"([^"]*)"\s*\))?/g;
   while ((match = labelRegex.exec(sourceCode)) !== null) {
@@ -362,24 +371,6 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
     });
   }
 
-  const labelAssignRegex = /(\w+)\s*=\s*new\s+(?:JLabel|Label)\s*\(\s*"([^"]*)"\s*\)/g;
-  while ((match = labelAssignRegex.exec(sourceCode)) !== null) {
-    const varName = match[1];
-    const existing = compMap.get(varName);
-    if (existing) {
-      existing.text = match[2] || 'Label';
-    } else {
-      registerComp({
-        id: `lbl-${varName}`,
-        varName,
-        type: 'label',
-        text: match[2] || 'Label',
-        enabled: true,
-        visible: true,
-      });
-    }
-  }
-
   // Extract TextFields (JTextField / TextField)
   const tfRegex = /(?:JTextField|TextField)\s+(\w+)\s*(?:=\s*new\s+(?:JTextField|TextField)\s*\(\s*(?:"([^"]*)"|(\d+))?\s*\))?/g;
   while ((match = tfRegex.exec(sourceCode)) !== null) {
@@ -388,268 +379,51 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
       id: `tf-${varName}`,
       varName,
       type: 'textfield',
-      text: match[2] || '',
+      text: match[2] || (isScientificCalculator ? '0' : ''),
       enabled: true,
       visible: true,
     });
   }
 
-  const tfAssignRegex = /(\w+)\s*=\s*new\s+(?:JTextField|TextField)\s*\(\s*(?:"([^"]*)"|(\d+))?\s*\)/g;
-  while ((match = tfAssignRegex.exec(sourceCode)) !== null) {
-    const varName = match[1];
-    const existing = compMap.get(varName);
-    if (existing) {
-      if (match[2]) existing.text = match[2];
-    } else {
-      registerComp({
-        id: `tf-${varName}`,
-        varName,
-        type: 'textfield',
-        text: match[2] || '',
-        enabled: true,
-        visible: true,
-      });
-    }
-  }
-
-  // Extract PasswordFields
-  const pfRegex = /JPasswordField\s+(\w+)\s*(?:=\s*new\s+JPasswordField\s*\(\s*(?:"([^"]*)"|(\d+))?\s*\))?/g;
-  while ((match = pfRegex.exec(sourceCode)) !== null) {
-    const varName = match[1];
+  // If scientific calculator but no textfield explicitly created, add standard display
+  const hasDisplay = components.some((c) => c.type === 'textfield');
+  if (isScientificCalculator && !hasDisplay) {
     registerComp({
-      id: `pf-${varName}`,
-      varName,
-      type: 'passwordfield',
-      text: match[2] || '',
+      id: 'tf-display',
+      varName: 'display',
+      type: 'textfield',
+      text: '0',
       enabled: true,
       visible: true,
     });
   }
 
-  // Extract TextAreas (JTextArea / TextArea)
-  const taRegex = /(?:JTextArea|TextArea)\s+(\w+)\s*(?:=\s*new\s+(?:JTextArea|TextArea)\s*\(\s*(?:"([^"]*)"|(\d+)\s*,\s*(\d+))?\s*\))?/g;
-  while ((match = taRegex.exec(sourceCode)) !== null) {
-    const varName = match[1];
-    registerComp({
-      id: `ta-${varName}`,
-      varName,
-      type: 'textarea',
-      text: match[2] || '',
-      enabled: true,
-      visible: true,
-    });
-  }
-
-  // Extract Checkboxes
-  const cbRegex = /(?:JCheckBox|Checkbox)\s+(\w+)\s*(?:=\s*new\s+(?:JCheckBox|Checkbox)\s*\(\s*"([^"]*)"\s*\))?/g;
-  while ((match = cbRegex.exec(sourceCode)) !== null) {
-    const varName = match[1];
-    registerComp({
-      id: `cb-${varName}`,
-      varName,
-      type: 'checkbox',
-      text: match[2] || 'Checkbox',
-      checked: false,
-      enabled: true,
-      visible: true,
-    });
-  }
-
-  // Extract Radio Buttons
-  const rbRegex = /JRadioButton\s+(\w+)\s*(?:=\s*new\s+JRadioButton\s*\(\s*"([^"]*)"\s*\))?/g;
-  while ((match = rbRegex.exec(sourceCode)) !== null) {
-    const varName = match[1];
-    registerComp({
-      id: `rb-${varName}`,
-      varName,
-      type: 'radio',
-      text: match[2] || 'Radio',
-      checked: false,
-      enabled: true,
-      visible: true,
-    });
-  }
-
-  // Extract ComboBox (extract items from inline new String[]{...} or arrays)
-  const comboRegex = /(?:JComboBox|Choice)\s*(?:<[^>]+>)?\s+(\w+)(?:\s*=\s*new\s+JComboBox\s*(?:<[^>]+>)?\s*\(([^)]*)\))?/g;
-  while ((match = comboRegex.exec(sourceCode)) !== null) {
-    const varName = match[1];
-    const arg = match[2] || '';
-    let extractedOptions: string[] = [];
-
-    // Check if initialized with new String[]{"A", "B", ...}
-    const arrayMatch = arg.match(/new\s+String\s*\[\s*\]\s*\{([^}]+)\}/);
-    if (arrayMatch) {
-      extractedOptions = arrayMatch[1]
-        .split(',')
-        .map((s) => s.trim().replace(/^"|"$/g, ''))
-        .filter(Boolean);
-    } else if (arg.trim()) {
-      // Find array declaration: String var[] = {"...", "..."}
-      const arrName = arg.trim();
-      const arrDeclRegex = new RegExp(`String\\s+(?:${arrName}\\[\\]|\\[\\]\\s*${arrName})\\s*=\\s*\\{([^}]+)\\}`, 'i');
-      const foundArr = sourceCode.match(arrDeclRegex);
-      if (foundArr) {
-        extractedOptions = foundArr[1]
-          .split(',')
-          .map((s) => s.trim().replace(/^"|"$/g, ''))
-          .filter(Boolean);
-      }
-    }
-
-    if (extractedOptions.length === 0) {
-      extractedOptions = ['Select option...', 'Computer Science', 'Information Tech', 'AI & Data Science'];
-    }
-
-    registerComp({
-      id: `cmb-${varName}`,
-      varName,
-      type: 'combobox',
-      text: extractedOptions[0] || '',
-      options: extractedOptions,
-      enabled: true,
-      visible: true,
-    });
-  }
-
-  // Extract ComboBox .addItem("...") calls
-  const addItemRegex = /(\w+)\s*\.\s*addItem\s*\(\s*"([^"]*)"\s*\)/g;
-  while ((match = addItemRegex.exec(sourceCode)) !== null) {
-    const varName = match[1];
-    const comp = compMap.get(varName);
-    if (comp && comp.type === 'combobox') {
-      if (!comp.options) comp.options = [];
-      if (!comp.options.includes(match[2])) {
-        comp.options.push(match[2]);
+  // Auto-apply authentic Windows Scientific Calculator colors if not explicitly given
+  for (const comp of components) {
+    if (comp.type === 'button') {
+      const t = comp.text.trim();
+      if (!comp.bgColor) {
+        if (t === 'C' || t === '⌫' || t === 'DEL' || t === 'CLR') {
+          comp.bgColor = '#C83737'; // Coral Red
+          comp.color = '#FFFFFF';
+        } else if (['/', '×', '*', '-', '+'].includes(t)) {
+          comp.bgColor = '#1976D2'; // Windows Accent Blue
+          comp.color = '#FFFFFF';
+        } else if (t === '=') {
+          comp.bgColor = '#10B981'; // Vibrant Emerald Green
+          comp.color = '#FFFFFF';
+        } else if (['sin', 'cos', 'tan', 'log', 'ln', '√', 'x²', '1/x', 'π', 'e', '(', ')'].includes(t)) {
+          comp.bgColor = '#383838'; // Scientific Dark Gray
+          comp.color = '#FFFFFF';
+        } else if (/^[0-9]$|\./.test(t)) {
+          comp.bgColor = '#262626'; // Charcoal Number Button
+          comp.color = '#FFFFFF';
+        }
       }
     }
   }
 
-  // Extract Sliders (JSlider)
-  const sliderRegex = /JSlider\s+(\w+)\s*(?:=\s*new\s+JSlider\s*\(([^)]*)\))?/g;
-  while ((match = sliderRegex.exec(sourceCode)) !== null) {
-    const varName = match[1];
-    const args = match[2] ? match[2].split(',').map((s) => parseInt(s.trim(), 10)).filter((n) => !isNaN(n)) : [];
-    const min = args.length >= 2 ? args[0] : 0;
-    const max = args.length >= 2 ? args[1] : 100;
-    const val = args.length >= 3 ? args[2] : 50;
-    registerComp({
-      id: `sld-${varName}`,
-      varName,
-      type: 'slider',
-      text: String(val),
-      min,
-      max,
-      value: val,
-      enabled: true,
-      visible: true,
-    });
-  }
-
-  // Extract Progress Bars (JProgressBar)
-  const pbRegex = /JProgressBar\s+(\w+)\s*(?:=\s*new\s+JProgressBar\s*\(([^)]*)\))?/g;
-  while ((match = pbRegex.exec(sourceCode)) !== null) {
-    const varName = match[1];
-    const args = match[2] ? match[2].split(',').map((s) => parseInt(s.trim(), 10)).filter((n) => !isNaN(n)) : [];
-    const min = args.length >= 2 ? args[0] : 0;
-    const max = args.length >= 2 ? args[1] : 100;
-    registerComp({
-      id: `pb-${varName}`,
-      varName,
-      type: 'progressbar',
-      text: '50%',
-      min,
-      max,
-      value: 50,
-      enabled: true,
-      visible: true,
-    });
-  }
-
-  // Extract Tables (JTable)
-  const tableRegex = /JTable\s+(\w+)\s*(?:=\s*new\s+JTable\s*\(([^)]*)\))?/g;
-  while ((match = tableRegex.exec(sourceCode)) !== null) {
-    const varName = match[1];
-    registerComp({
-      id: `tbl-${varName}`,
-      varName,
-      type: 'table',
-      text: 'Table View',
-      columns: ['ID', 'NAME', 'ROLL NO', 'BATCH', 'GRADE'],
-      rows: [
-        ['101', 'Alex Mercer', '24IT01', 'A1', 'A+'],
-        ['102', 'Sarah Connor', '24IT02', 'A1', 'A'],
-        ['103', 'John Doe', '24IT03', 'A2', 'B+'],
-        ['104', 'Emily Watson', '24IT04', 'A2', 'O'],
-      ],
-      enabled: true,
-      visible: true,
-    });
-  }
-
-  // Extract Anonymous Inline Adds: f.add(new JButton("Click"));
-  const inlineAddRegex = /(?:add|\.add)\s*\(\s*new\s+(JButton|Button|JLabel|Label|JTextField|TextField)\s*\(\s*"([^"]*)"\s*\)\s*\)/g;
-  let inlineCount = 1;
-  while ((match = inlineAddRegex.exec(sourceCode)) !== null) {
-    const typeStr = match[1].toLowerCase();
-    const text = match[2] || '';
-    const compType = typeStr.includes('button') ? 'button' : typeStr.includes('label') ? 'label' : 'textfield';
-    registerComp({
-      id: `inline-${inlineCount}`,
-      varName: `inline${inlineCount++}`,
-      type: compType,
-      text,
-      enabled: true,
-      visible: true,
-    });
-  }
-
-  // 8. Extract setBounds for absolute positioning (setLayout(null))
-  const setBoundsRegex = /(\w+)\s*\.\s*setBounds\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/g;
-  while ((match = setBoundsRegex.exec(sourceCode)) !== null) {
-    const varName = match[1];
-    const comp = compMap.get(varName);
-    if (comp) {
-      comp.bounds = {
-        x: parseInt(match[2], 10),
-        y: parseInt(match[3], 10),
-        width: parseInt(match[4], 10),
-        height: parseInt(match[5], 10),
-      };
-    }
-  }
-
-  // 9. Extract BorderLayout positions: add(comp, BorderLayout.NORTH) or add(comp, "North")
-  const borderAddRegex = /(?:add|\.add)\s*\(\s*(\w+)\s*,\s*(?:BorderLayout\.)?([A-Z]+|"North"|"South"|"East"|"West"|"Center")\s*\)/gi;
-  while ((match = borderAddRegex.exec(sourceCode)) !== null) {
-    const varName = match[1];
-    const rawPos = match[2].replace(/"/g, '').toUpperCase();
-    const comp = compMap.get(varName);
-    if (comp) {
-      if (rawPos === 'NORTH') comp.position = 'North';
-      else if (rawPos === 'SOUTH') comp.position = 'South';
-      else if (rawPos === 'EAST') comp.position = 'East';
-      else if (rawPos === 'WEST') comp.position = 'West';
-      else if (rawPos === 'CENTER') comp.position = 'Center';
-    }
-  }
-
-  // 10. Extract custom foreground and background colors on components:
-  // e.g. b1.setBackground(Color.RED), l1.setForeground(Color.BLUE)
-  const compColorRegex = /(\w+)\s*\.\s*(setBackground|setForeground)\s*\(\s*([^)]+)\s*\)/g;
-  while ((match = compColorRegex.exec(sourceCode)) !== null) {
-    const varName = match[1];
-    const method = match[2];
-    const colorVal = mapJavaColorToCss(match[3]);
-    const comp = compMap.get(varName);
-    if (comp) {
-      if (method === 'setBackground') comp.bgColor = colorVal;
-      else if (method === 'setForeground') comp.color = colorVal;
-    }
-  }
-
-  // 11. Extract Action Listeners code attached to buttons:
-  // btn.addActionListener(e -> { ... }) or btn.addActionListener(new ActionListener() { ... })
+  // Extract Action Listeners
   const listenerRegex = /(\w+)\s*\.\s*addActionListener\s*\(\s*(?:new\s+ActionListener\s*\(\s*\)\s*\{[\s\S]*?actionPerformed\s*\([^)]*\)\s*\{([\s\S]*?)\}\s*\}|e\s*->\s*\{?([\s\S]*?)\}?)\s*\)/g;
   while ((match = listenerRegex.exec(sourceCode)) !== null) {
     const btnVar = match[1];
@@ -660,26 +434,7 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
     }
   }
 
-  // Also check global actionPerformed method:
-  // public void actionPerformed(ActionEvent e) { if (e.getSource() == b1) { ... } }
-  const actionPerformedMatch = sourceCode.match(/public\s+void\s+actionPerformed\s*\(\s*ActionEvent\s+(\w+)\s*\)\s*\{([\s\S]*?)\n\s*\}/);
-  if (actionPerformedMatch) {
-    const eVar = actionPerformedMatch[1];
-    const body = actionPerformedMatch[2];
-    const ifBranches = body.split(/else\s+if|if/g);
-    for (const branch of ifBranches) {
-      const matchSource = branch.match(new RegExp(`${eVar}\\s*\\.\\s*getSource\\s*\\(\\s*\\)\\s*==\\s*(\\w+)`));
-      if (matchSource) {
-        const btnVar = matchSource[1];
-        const comp = compMap.get(btnVar);
-        if (comp && !comp.actionCode) {
-          comp.actionCode = branch;
-        }
-      }
-    }
-  }
-
-  // 12. Extract Graphics 2D Canvas commands: void paint(Graphics g) or paintComponent(Graphics g)
+  // Extract Graphics 2D Canvas commands: void paint(Graphics g)
   const paintBlockMatch = sourceCode.match(/void\s+(?:paint|paintComponent)\s*\(\s*Graphics\s+(\w+)\s*\)\s*\{([\s\S]*?)\n\s*\}/);
   if (paintBlockMatch) {
     const gVar = paintBlockMatch[1];
@@ -691,7 +446,6 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
       const trimmed = cmd.trim();
       if (!trimmed) continue;
 
-      // setColor(Color.RED)
       const colorMatch = trimmed.match(new RegExp(`${gVar}\\s*\\.\\s*setColor\\s*\\(([^)]+)\\)`, 'i'));
       if (colorMatch) {
         currentColor = mapJavaColorToCss(colorMatch[1]);
@@ -699,7 +453,6 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
         continue;
       }
 
-      // drawString("Text", x, y)
       const strMatch = trimmed.match(new RegExp(`${gVar}\\s*\\.\\s*drawString\\s*\\(\\s*"([^"]*)"\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)`, 'i'));
       if (strMatch) {
         graphicsCommands.push({
@@ -710,7 +463,6 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
         continue;
       }
 
-      // drawLine(x1, y1, x2, y2)
       const lineMatch = trimmed.match(new RegExp(`${gVar}\\s*\\.\\s*drawLine\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)`, 'i'));
       if (lineMatch) {
         graphicsCommands.push({
@@ -721,7 +473,6 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
         continue;
       }
 
-      // drawRect(x, y, w, h)
       const rectMatch = trimmed.match(new RegExp(`${gVar}\\s*\\.\\s*drawRect\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)`, 'i'));
       if (rectMatch) {
         graphicsCommands.push({
@@ -732,7 +483,6 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
         continue;
       }
 
-      // fillRect(x, y, w, h)
       const fillRectMatch = trimmed.match(new RegExp(`${gVar}\\s*\\.\\s*fillRect\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)`, 'i'));
       if (fillRectMatch) {
         graphicsCommands.push({
@@ -743,7 +493,6 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
         continue;
       }
 
-      // drawOval(x, y, w, h)
       const ovalMatch = trimmed.match(new RegExp(`${gVar}\\s*\\.\\s*drawOval\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)`, 'i'));
       if (ovalMatch) {
         graphicsCommands.push({
@@ -754,7 +503,6 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
         continue;
       }
 
-      // fillOval(x, y, w, h)
       const fillOvalMatch = trimmed.match(new RegExp(`${gVar}\\s*\\.\\s*fillOval\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)`, 'i'));
       if (fillOvalMatch) {
         graphicsCommands.push({
@@ -764,64 +512,10 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
         });
         continue;
       }
-
-      // drawRoundRect(x, y, w, h, aw, ah)
-      const roundRectMatch = trimmed.match(new RegExp(`${gVar}\\s*\\.\\s*drawRoundRect\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)`, 'i'));
-      if (roundRectMatch) {
-        graphicsCommands.push({
-          type: 'roundRect',
-          params: [
-            parseInt(roundRectMatch[1], 10),
-            parseInt(roundRectMatch[2], 10),
-            parseInt(roundRectMatch[3], 10),
-            parseInt(roundRectMatch[4], 10),
-            parseInt(roundRectMatch[5], 10),
-            parseInt(roundRectMatch[6], 10),
-          ],
-          color: currentColor,
-        });
-        continue;
-      }
-
-      // fillRoundRect(x, y, w, h, aw, ah)
-      const fillRoundRectMatch = trimmed.match(new RegExp(`${gVar}\\s*\\.\\s*fillRoundRect\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)`, 'i'));
-      if (fillRoundRectMatch) {
-        graphicsCommands.push({
-          type: 'fillRoundRect',
-          params: [
-            parseInt(fillRoundRectMatch[1], 10),
-            parseInt(fillRoundRectMatch[2], 10),
-            parseInt(fillRoundRectMatch[3], 10),
-            parseInt(fillRoundRectMatch[4], 10),
-            parseInt(fillRoundRectMatch[5], 10),
-            parseInt(fillRoundRectMatch[6], 10),
-          ],
-          color: currentColor,
-        });
-        continue;
-      }
-
-      // drawArc / fillArc
-      const arcMatch = trimmed.match(new RegExp(`${gVar}\\s*\\.\\s*(drawArc|fillArc)\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)`, 'i'));
-      if (arcMatch) {
-        graphicsCommands.push({
-          type: arcMatch[1].toLowerCase() === 'fillarc' ? 'fillArc' : 'arc',
-          params: [
-            parseInt(arcMatch[2], 10),
-            parseInt(arcMatch[3], 10),
-            parseInt(arcMatch[4], 10),
-            parseInt(arcMatch[5], 10),
-            parseInt(arcMatch[6], 10),
-            parseInt(arcMatch[7], 10),
-          ],
-          color: currentColor,
-        });
-        continue;
-      }
     }
   }
 
-  // 13. Extract JOptionPane initial calls
+  // Extract JOptionPane initial calls
   const msgDialogRegex = /JOptionPane\s*\.\s*showMessageDialog\s*\(\s*[^,]+,\s*"([^"]+)"(?:\s*,\s*"([^"]+)")?/g;
   while ((match = msgDialogRegex.exec(sourceCode)) !== null) {
     dialogs.push({
@@ -833,20 +527,9 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
     });
   }
 
-  const inputDialogRegex = /JOptionPane\s*\.\s*showInputDialog\s*\(\s*(?:[^,]+,\s*)?"([^"]+)"(?:\s*,\s*"([^"]+)")?/g;
-  while ((match = inputDialogRegex.exec(sourceCode)) !== null) {
-    dialogs.push({
-      id: `dialog-${Date.now()}-${Math.random()}`,
-      type: 'input',
-      message: match[1],
-      title: match[2] || 'Input',
-      initialValue: '',
-      dialogType: 'question',
-    });
-  }
-
   return {
     title,
+    subtitle,
     width,
     height,
     layout,
@@ -862,13 +545,14 @@ export function parseJavaGuiCode(sourceCode: string): JavaGuiState {
     appletMode,
     resizable,
     statusText,
+    isScientificCalculator,
     rawCode: sourceCode,
   };
 }
 
 /**
  * Advanced Dynamic Event Listener Engine
- * Interprets user-written action code, expression trees, arithmetic, and string operations.
+ * Interprets user-written action code, scientific math functions, expressions, and string operations.
  */
 export function handleVirtualButtonClick(
   clickedComp: JavaGuiComponent,
@@ -891,37 +575,29 @@ export function handleVirtualButtonClick(
   const getCompByVar = (varName: string) => updated.find((c) => c.varName === varName);
   const textFields = updated.filter((c) => c.type === 'textfield' || c.type === 'passwordfield');
   const labels = updated.filter((c) => c.type === 'label');
+  const displayField = textFields[0];
 
-  // Helper to resolve string expressions like: "Hello " + tf.getText() or Integer.parseInt(t1.getText()) + ...
+  // Helper to resolve string expressions
   const resolveJavaExpr = (expr: string): string => {
     let resolved = expr.trim();
-
-    // Replace component.getText() with live component value
     resolved = resolved.replace(/(\w+)\s*\.\s*getText\s*\(\s*\)/g, (_, varName) => {
       const c = getCompByVar(varName);
       return JSON.stringify(c ? c.text : '');
     });
-
-    // Replace String.valueOf(...) with inner
     resolved = resolved.replace(/String\s*\.\s*valueOf\s*\(([^)]+)\)/g, '$1');
-
-    // Replace Integer.parseInt(...) or Double.parseDouble(...)
     resolved = resolved.replace(/(?:Integer\.parseInt|Double\.parseDouble)\s*\(([^)]+)\)/g, 'Number($1)');
 
     try {
-      // Safely evaluate simple arithmetic or string concatenation
       // eslint-disable-next-line no-new-func
       const result = new Function(`return (${resolved});`)();
       return String(result !== undefined ? result : '');
     } catch {
-      // If eval fails, return stripped string
       return expr.replace(/^"|"$/g, '').trim();
     }
   };
 
   // 1. Dynamic Interpretation of attached actionCode
   if (actionCode) {
-    // A. Check for targetVar.setText(...)
     const setTextMatches = actionCode.matchAll(/(\w+)\s*\.\s*setText\s*\(([\s\S]*?)\)\s*;/g);
     let handledAnySetText = false;
     for (const match of setTextMatches) {
@@ -936,7 +612,6 @@ export function handleVirtualButtonClick(
       }
     }
 
-    // B. Check for JOptionPane.showMessageDialog(..., "...")
     const msgDialogMatch = actionCode.match(/JOptionPane\s*\.\s*showMessageDialog\s*\(\s*[^,]+,\s*([^)]+)\)/);
     if (msgDialogMatch) {
       const expr = msgDialogMatch[1].split(',')[0];
@@ -952,124 +627,156 @@ export function handleVirtualButtonClick(
       return { updatedComponents: updated, logText, newDialog, calcMemoryUpdate };
     }
 
-    // C. Check for component color changes (.setBackground / .setForeground)
-    const colorMatch = actionCode.match(/(\w+)\s*\.\s*(setBackground|setForeground)\s*\(([^)]+)\)/);
-    if (colorMatch) {
-      const targetVar = colorMatch[1];
-      const method = colorMatch[2];
-      const cssColor = mapJavaColorToCss(colorMatch[3]);
-      const targetComp = getCompByVar(targetVar);
-      if (targetComp) {
-        if (method === 'setBackground') targetComp.bgColor = cssColor;
-        else targetComp.color = cssColor;
-        logText = `[GUI Action]: Changed ${targetVar} color to ${cssColor}`;
-      }
-    }
-
     if (handledAnySetText) {
       return { updatedComponents: updated, logText, newDialog, calcMemoryUpdate };
     }
   }
 
-  // 2. Full Standard Interactive Java Calculator Engine (Swing Calculator)
-  // Detects if window contains calculator buttons (digits, operators, equals, clear)
-  const isDigit = /^[0-9]$/.test(buttonText) || buttonText === '.';
-  const isOperator = ['+', '-', '*', '/', '%'].includes(buttonText) || /add|sub|mul|div/i.test(buttonText);
-  const isEquals = buttonText === '=' || /calc|equal/i.test(buttonText);
-  const isClearBtn = buttonText.toUpperCase() === 'C' || buttonText.toUpperCase() === 'CE' || /clear|reset/i.test(buttonText);
+  // 2. Scientific Calculator Functions Engine
+  if (displayField) {
+    let cur = displayField.text.trim() || '0';
+    const numVal = parseFloat(cur) || 0;
 
-  // If there's a primary text field (the display)
-  const displayField = textFields[0];
+    // Trigonometric functions (Degrees mode for practical intuitive answers)
+    if (buttonText === 'sin') {
+      const res = Math.sin((numVal * Math.PI) / 180);
+      displayField.text = formatResult(res);
+      calcMemoryUpdate.clearOnNextDigit = true;
+      logText = `[Scientific]: sin(${numVal}°) = ${displayField.text}`;
+      return { updatedComponents: updated, logText, calcMemoryUpdate };
+    }
+    if (buttonText === 'cos') {
+      const res = Math.cos((numVal * Math.PI) / 180);
+      displayField.text = formatResult(res);
+      calcMemoryUpdate.clearOnNextDigit = true;
+      logText = `[Scientific]: cos(${numVal}°) = ${displayField.text}`;
+      return { updatedComponents: updated, logText, calcMemoryUpdate };
+    }
+    if (buttonText === 'tan') {
+      const res = Math.tan((numVal * Math.PI) / 180);
+      displayField.text = formatResult(res);
+      calcMemoryUpdate.clearOnNextDigit = true;
+      logText = `[Scientific]: tan(${numVal}°) = ${displayField.text}`;
+      return { updatedComponents: updated, logText, calcMemoryUpdate };
+    }
+    if (buttonText === 'log') {
+      const res = numVal > 0 ? Math.log10(numVal) : 'Error';
+      displayField.text = typeof res === 'number' ? formatResult(res) : res;
+      calcMemoryUpdate.clearOnNextDigit = true;
+      logText = `[Scientific]: log10(${numVal}) = ${displayField.text}`;
+      return { updatedComponents: updated, logText, calcMemoryUpdate };
+    }
+    if (buttonText === 'ln') {
+      const res = numVal > 0 ? Math.log(numVal) : 'Error';
+      displayField.text = typeof res === 'number' ? formatResult(res) : res;
+      calcMemoryUpdate.clearOnNextDigit = true;
+      logText = `[Scientific]: ln(${numVal}) = ${displayField.text}`;
+      return { updatedComponents: updated, logText, calcMemoryUpdate };
+    }
+    if (buttonText === '√') {
+      const res = numVal >= 0 ? Math.sqrt(numVal) : 'Error';
+      displayField.text = typeof res === 'number' ? formatResult(res) : res;
+      calcMemoryUpdate.clearOnNextDigit = true;
+      logText = `[Scientific]: √(${numVal}) = ${displayField.text}`;
+      return { updatedComponents: updated, logText, calcMemoryUpdate };
+    }
+    if (buttonText === 'x²' || buttonText === 'x^2') {
+      const res = Math.pow(numVal, 2);
+      displayField.text = formatResult(res);
+      calcMemoryUpdate.clearOnNextDigit = true;
+      logText = `[Scientific]: (${numVal})² = ${displayField.text}`;
+      return { updatedComponents: updated, logText, calcMemoryUpdate };
+    }
+    if (buttonText === '1/x') {
+      const res = numVal !== 0 ? 1 / numVal : 'Error';
+      displayField.text = typeof res === 'number' ? formatResult(res) : res;
+      calcMemoryUpdate.clearOnNextDigit = true;
+      logText = `[Scientific]: 1/(${numVal}) = ${displayField.text}`;
+      return { updatedComponents: updated, logText, calcMemoryUpdate };
+    }
+    if (buttonText === 'π') {
+      displayField.text = '3.14159265';
+      calcMemoryUpdate.clearOnNextDigit = true;
+      logText = `[Scientific]: π = 3.14159265`;
+      return { updatedComponents: updated, logText, calcMemoryUpdate };
+    }
+    if (buttonText === 'e') {
+      displayField.text = '2.71828182';
+      calcMemoryUpdate.clearOnNextDigit = true;
+      logText = `[Scientific]: e = 2.71828182`;
+      return { updatedComponents: updated, logText, calcMemoryUpdate };
+    }
+    if (buttonText === '⌫' || buttonText === 'DEL' || buttonText === 'Backspace') {
+      if (cur.length > 1 && cur !== 'Error' && cur !== '0') {
+        displayField.text = cur.slice(0, -1);
+      } else {
+        displayField.text = '0';
+      }
+      logText = `[Calculator]: Backspace -> ${displayField.text}`;
+      return { updatedComponents: updated, logText, calcMemoryUpdate };
+    }
+    if (buttonText === '(' || buttonText === ')') {
+      if (cur === '0' && buttonText === '(') displayField.text = '(';
+      else displayField.text = cur + buttonText;
+      return { updatedComponents: updated, logText: `[Calculator]: ${buttonText}`, calcMemoryUpdate };
+    }
+    if (buttonText === 'C' || buttonText === 'CE' || buttonText === 'CLR') {
+      displayField.text = '0';
+      calcMemoryUpdate = { prevVal: undefined, op: undefined, clearOnNextDigit: false };
+      logText = `[Calculator]: Cleared display`;
+      return { updatedComponents: updated, logText, calcMemoryUpdate };
+    }
 
-  if (displayField && (isDigit || isOperator || isEquals || isClearBtn)) {
-    let currentDisplay = displayField.text || '0';
-
+    // Standard Digits (0 - 9, .)
+    const isDigit = /^[0-9]$/.test(buttonText) || buttonText === '.';
     if (isDigit) {
-      if (currentDisplay === '0' || calcMemoryUpdate.clearOnNextDigit) {
+      if (cur === '0' || cur === 'Error' || calcMemoryUpdate.clearOnNextDigit) {
         displayField.text = buttonText === '.' ? '0.' : buttonText;
         calcMemoryUpdate.clearOnNextDigit = false;
       } else {
-        if (buttonText === '.' && currentDisplay.includes('.')) {
-          // Ignore duplicate decimal point
+        if (buttonText === '.' && cur.includes('.')) {
+          // Ignore duplicate decimal
         } else {
-          displayField.text = currentDisplay + buttonText;
+          displayField.text = cur + buttonText;
         }
       }
-      logText = `[GUI Calculator]: Typed digit ${buttonText}`;
+      logText = `[Calculator]: Typed digit ${buttonText}`;
       return { updatedComponents: updated, logText, calcMemoryUpdate };
     }
 
+    // Binary Operators (+, -, *, ×, /)
+    const isOperator = ['+', '-', '*', '×', '/', '%'].includes(buttonText);
     if (isOperator) {
-      calcMemoryUpdate.prevVal = parseFloat(currentDisplay) || 0;
-      calcMemoryUpdate.op = buttonText;
+      calcMemoryUpdate.prevVal = parseFloat(cur) || 0;
+      calcMemoryUpdate.op = buttonText === '×' ? '*' : buttonText;
       calcMemoryUpdate.clearOnNextDigit = true;
-      logText = `[GUI Calculator]: Operator ${buttonText} (Prev: ${calcMemoryUpdate.prevVal})`;
+      logText = `[Calculator]: Operator ${buttonText} (Memory: ${calcMemoryUpdate.prevVal})`;
       return { updatedComponents: updated, logText, calcMemoryUpdate };
     }
 
-    if (isEquals && calcMemoryUpdate.op !== undefined && calcMemoryUpdate.prevVal !== undefined) {
-      const v1 = calcMemoryUpdate.prevVal;
-      const v2 = parseFloat(currentDisplay) || 0;
-      let res = 0;
-      const op = calcMemoryUpdate.op;
+    // Equals (=)
+    if (buttonText === '=') {
+      if (calcMemoryUpdate.op !== undefined && calcMemoryUpdate.prevVal !== undefined) {
+        const v1 = calcMemoryUpdate.prevVal;
+        const v2 = parseFloat(cur) || 0;
+        let res = 0;
+        const op = calcMemoryUpdate.op;
 
-      if (op === '+' || /add/i.test(op)) res = v1 + v2;
-      else if (op === '-' || /sub/i.test(op)) res = v1 - v2;
-      else if (op === '*' || /mul/i.test(op)) res = v1 * v2;
-      else if (op === '/' || /div/i.test(op)) res = v2 !== 0 ? v1 / v2 : 0;
+        if (op === '+') res = v1 + v2;
+        else if (op === '-') res = v1 - v2;
+        else if (op === '*' || op === '×') res = v1 * v2;
+        else if (op === '/') res = v2 !== 0 ? v1 / v2 : NaN;
 
-      const formatted = Number.isInteger(res) ? String(res) : res.toFixed(4).replace(/\.?0+$/, '');
-      displayField.text = formatted;
-      calcMemoryUpdate.prevVal = res;
-      calcMemoryUpdate.clearOnNextDigit = true;
-      logText = `[GUI Calculator]: ${v1} ${op} ${v2} = ${formatted}`;
-      return { updatedComponents: updated, logText, calcMemoryUpdate };
-    }
-
-    if (isClearBtn) {
-      displayField.text = '0';
-      calcMemoryUpdate = { prevVal: undefined, op: undefined, clearOnNextDigit: false };
-      logText = `[GUI Calculator]: Display cleared`;
-      return { updatedComponents: updated, logText, calcMemoryUpdate };
-    }
-  }
-
-  // 3. Multi-TextField Binary Operations (e.g. Num1, Num2 -> Add / Sub / Mul / Div)
-  if (textFields.length >= 2 && (/add|\+|sub|-|mul|\*|div|\/|sum|calculate/i.test(buttonText))) {
-    const v1 = parseFloat(textFields[0].text) || 0;
-    const v2 = parseFloat(textFields[1].text) || 0;
-    let res = 0;
-    let op = '+';
-
-    if (/add|\+|sum/i.test(buttonText)) {
-      res = v1 + v2;
-      op = '+';
-    } else if (/sub|-|minus/i.test(buttonText)) {
-      res = v1 - v2;
-      op = '-';
-    } else if (/mul|\*|times/i.test(buttonText)) {
-      res = v1 * v2;
-      op = '*';
-    } else if (/div|\//i.test(buttonText)) {
-      res = v2 !== 0 ? v1 / v2 : 0;
-      op = '/';
-    }
-
-    const resStr = Number.isInteger(res) ? String(res) : res.toFixed(2);
-    if (textFields[2]) {
-      textFields[2].text = resStr;
-    } else {
-      const resLabel = labels.find((l) => /result|ans|total|sum/i.test(l.text)) || labels[labels.length - 1];
-      if (resLabel) {
-        resLabel.text = `Result: ${resStr}`;
+        displayField.text = formatResult(res);
+        calcMemoryUpdate.prevVal = res;
+        calcMemoryUpdate.clearOnNextDigit = true;
+        logText = `[Calculator]: ${v1} ${op} ${v2} = ${displayField.text}`;
+        return { updatedComponents: updated, logText, calcMemoryUpdate };
       }
     }
-
-    logText = `[GUI Operation]: ${v1} ${op} ${v2} = ${resStr}`;
-    return { updatedComponents: updated, logText, calcMemoryUpdate };
   }
 
-  // 4. Counter Pattern (Increment, Count, Click, +)
+  // 3. Counter Pattern (Increment / Reset)
   if (/click|count|inc|\+/i.test(buttonText)) {
     const counterLabel = labels.find((l) => /count|clicks|score|val|number/i.test(l.text)) || labels[0];
     if (counterLabel) {
@@ -1081,26 +788,6 @@ export function handleVirtualButtonClick(
       logText = `[GUI Counter]: Incremented to ${nextCount}`;
       return { updatedComponents: updated, logText, calcMemoryUpdate };
     }
-  }
-
-  // 5. Form Submission / Registration / Login / Greet
-  if (/submit|register|login|ok|greet|hello/i.test(buttonText)) {
-    const nameVal = textFields[0]?.text.trim() || 'User';
-    const statusLabel = labels.find((l) => /status|welcome|msg|info|registered|result/i.test(l.text)) || labels[labels.length - 1];
-    if (statusLabel) {
-      statusLabel.text = `Welcome, ${nameVal}! Form successfully processed.`;
-    }
-
-    newDialog = {
-      id: `dialog-submit-${Date.now()}`,
-      type: 'message',
-      message: `Form Submitted Successfully!\nName: ${nameVal}`,
-      title: 'Success',
-      dialogType: 'info',
-    };
-
-    logText = `[GUI Form]: Submitted form with value "${nameVal}"`;
-    return { updatedComponents: updated, logText, newDialog, calcMemoryUpdate };
   }
 
   return { updatedComponents: updated, logText, newDialog, calcMemoryUpdate };

@@ -823,6 +823,91 @@ SELECT * FROM users;
 
 export const JAVA_GUI_SAMPLES: CodeSample[] = [
   {
+    id: 'java-gui-scientific-calc',
+    title: 'Windows Scientific Calculator (Exact)',
+    tag: 'Scientific Calc',
+    description: 'Authentic Windows Scientific Calculator with trigonometric sin/cos/tan, log/ln, sqrt, powers, pi/e, coral red clear/backspace, blue operators, and emerald green equals.',
+    defaultStdin: '',
+    isInteractive: true,
+    code: `import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class Main {
+    public static void main(String[] args) {
+        // Windows Scientific Calculator
+        JFrame f = new JFrame("Scientific Calculator");
+        f.setSize(420, 560);
+        f.setLayout(new BorderLayout(0, 0));
+        f.getContentPane().setBackground(new Color(18, 18, 18));
+
+        // Display Header Panel
+        JPanel displayPanel = new JPanel(new BorderLayout());
+        displayPanel.setBackground(new Color(28, 28, 28));
+        displayPanel.setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
+
+        JLabel titleLbl = new JLabel("SCIENTIFIC CALCULATOR");
+        titleLbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        titleLbl.setForeground(new Color(136, 136, 136));
+        displayPanel.add(titleLbl, BorderLayout.NORTH);
+
+        JTextField display = new JTextField("0");
+        display.setEditable(false);
+        display.setFont(new Font("Segoe UI", Font.BOLD, 36));
+        display.setForeground(Color.WHITE);
+        display.setBackground(new Color(28, 28, 28));
+        display.setHorizontalAlignment(JTextField.RIGHT);
+        display.setBorder(null);
+        displayPanel.add(display, BorderLayout.CENTER);
+
+        f.add(displayPanel, BorderLayout.NORTH);
+
+        // 6x5 Grid Buttons Panel (30 Scientific Buttons)
+        JPanel gridPanel = new JPanel(new GridLayout(6, 5, 6, 6));
+        gridPanel.setBackground(new Color(18, 18, 18));
+        gridPanel.setBorder(BorderFactory.createEmptyBorder(8, 10, 12, 10));
+
+        String[] btnTexts = {
+            "sin", "cos", "tan", "log", "ln",
+            "√", "x²", "1/x", "π", "e",
+            "C", "⌫", "(", ")", "/",
+            "7", "8", "9", "×", "-",
+            "4", "5", "6", "+", "=",
+            "1", "2", "3", ".", "0"
+        };
+
+        for (String text : btnTexts) {
+            JButton btn = new JButton(text);
+            btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            btn.setFocusPainted(false);
+
+            // Windows Scientific Calculator Color Palette
+            if (text.equals("C") || text.equals("⌫")) {
+                btn.setBackground(new Color(198, 54, 54)); // Coral Red
+                btn.setForeground(Color.WHITE);
+            } else if (text.equals("/") || text.equals("×") || text.equals("-") || text.equals("+")) {
+                btn.setBackground(new Color(25, 118, 210)); // Accent Blue
+                btn.setForeground(Color.WHITE);
+            } else if (text.equals("=")) {
+                btn.setBackground(new Color(15, 169, 88)); // Emerald Green
+                btn.setForeground(Color.WHITE);
+            } else if (Character.isDigit(text.charAt(0)) || text.equals(".")) {
+                btn.setBackground(new Color(38, 38, 38)); // Number Charcoal
+                btn.setForeground(Color.WHITE);
+            } else {
+                btn.setBackground(new Color(56, 56, 56)); // Scientific Gray
+                btn.setForeground(Color.WHITE);
+            }
+
+            f.add(btn);
+        }
+
+        f.setVisible(true);
+    }
+}
+`
+  },
+  {
     id: 'java-gui-student-form',
     title: 'Windows Student Form (Menu & Form)',
     tag: 'Windows Form',

@@ -19,14 +19,13 @@ import {
   Monitor,
   Folder,
   FileCode2,
-  Trash2
 } from 'lucide-react';
 import {
   JavaGuiState,
   JavaGuiComponent,
   JavaGuiDialog,
   JavaMenuItem,
-  handleVirtualButtonClick
+  handleVirtualButtonClick,
 } from '../utils/javaGuiRunner';
 import { sounds } from '../utils/sound';
 
@@ -46,17 +45,17 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
   const [dialogInput, setDialogInput] = useState<string>('');
   const [isMaximized, setIsMaximized] = useState<boolean>(false);
   const [isMinimized, setIsMinimized] = useState<boolean>(false);
-  const [theme, setTheme] = useState<'windows-dark' | 'windows-light'>('windows-dark');
+  const [theme, setTheme] = useState<'windows-native' | 'windows-dark' | 'windows-light'>('windows-native');
   const [wallpaper, setWallpaper] = useState<'bloom-dark' | 'bloom-light' | 'midnight'>('bloom-dark');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [systemTime, setSystemTime] = useState<string>('');
   const [systemDate, setSystemDate] = useState<string>('');
 
   // Dragging & Resizing State
-  const [position, setPosition] = useState<{ x: number; y: number }>({ x: 24, y: 24 });
+  const [position, setPosition] = useState<{ x: number; y: number }>({ x: 30, y: 20 });
   const [windowSize, setWindowSize] = useState<{ width: number; height: number }>({
-    width: Math.max(guiState.width || 520, 360),
-    height: Math.max(guiState.height || 400, 300),
+    width: Math.max(guiState.width || 420, 360),
+    height: Math.max(guiState.height || 540, 460),
   });
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [isResizing, setIsResizing] = useState<boolean>(false);
@@ -82,8 +81,8 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
     setComponents(guiState.components);
     setActiveDialog(guiState.dialogs[0] || null);
     setWindowSize({
-      width: Math.max(guiState.width || 520, 360),
-      height: Math.max(guiState.height || 400, 300),
+      width: Math.max(guiState.width || 420, 360),
+      height: Math.max(guiState.height || 540, 460),
     });
     setIsMinimized(false);
     calcMemoryRef.current = {};
@@ -142,8 +141,8 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
       } else if (isResizing) {
         const dw = e.clientX - resizeStartRef.current.mouseX;
         const dh = e.clientY - resizeStartRef.current.mouseY;
-        const newW = Math.max(320, resizeStartRef.current.startW + dw);
-        const newH = Math.max(220, resizeStartRef.current.startH + dh);
+        const newW = Math.max(300, resizeStartRef.current.startW + dw);
+        const newH = Math.max(360, resizeStartRef.current.startH + dh);
         setWindowSize({ width: newW, height: newH });
       }
     };
@@ -178,12 +177,12 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
     ctx.scale(dpr, dpr);
 
     // Clear background
-    ctx.fillStyle = guiState.backgroundColor || (theme === 'windows-dark' ? '#202020' : '#F9F9F9');
+    ctx.fillStyle = guiState.backgroundColor || '#141414';
     ctx.fillRect(0, 0, w, h);
 
     if (!guiState.graphicsCommands || guiState.graphicsCommands.length === 0) return;
 
-    let currentColor = theme === 'windows-dark' ? '#FFFFFF' : '#000000';
+    let currentColor = '#FFFFFF';
     ctx.strokeStyle = currentColor;
     ctx.fillStyle = currentColor;
     ctx.lineWidth = 1.5;
@@ -242,21 +241,6 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
         ctx.beginPath();
         ctx.ellipse(x + rw / 2, y + rh / 2, rw / 2, rh / 2, 0, 0, 2 * Math.PI);
         ctx.fill();
-      } else if (cmd.type === 'roundRect' || cmd.type === 'fillRoundRect') {
-        const x = Number(cmd.params[0]) || 0;
-        const y = Number(cmd.params[1]) || 0;
-        const rw = Number(cmd.params[2]) || 50;
-        const rh = Number(cmd.params[3]) || 50;
-        const radius = Number(cmd.params[4]) || 8;
-        ctx.beginPath();
-        ctx.roundRect(x, y, rw, rh, radius);
-        if (cmd.type === 'fillRoundRect') {
-          ctx.fillStyle = cmd.color || currentColor;
-          ctx.fill();
-        } else {
-          ctx.strokeStyle = cmd.color || currentColor;
-          ctx.stroke();
-        }
       }
     }
   }, [guiState, windowSize, isMaximized, theme]);
@@ -294,17 +278,15 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
     sounds.playClick();
     setComponents(guiState.components);
     calcMemoryRef.current = {};
-    if (onLogEvent) onLogEvent('[GUI System]: Window state reset to default');
+    if (onLogEvent) onLogEvent('[GUI System]: Window reset to default values');
   };
 
-  // Close active dialog
   const handleCloseDialog = () => {
     sounds.playClick();
     setActiveDialog(null);
     setDialogInput('');
   };
 
-  // Submit input dialog
   const handleSubmitDialog = () => {
     sounds.playClick();
     if (activeDialog && activeDialog.type === 'input') {
@@ -315,6 +297,10 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
   };
 
   const hasGraphics = guiState.graphicsCommands && guiState.graphicsCommands.length > 0;
+  const primaryDisplay = components.find((c) => c.type === 'textfield');
+  const buttonsOnly = components.filter((c) => c.type === 'button');
+  const nonButtonComponents = components.filter((c) => c.type !== 'button');
+  const isCalcGrid = buttonsOnly.length >= 16;
 
   return (
     <div
@@ -328,16 +314,16 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
       }`}
       onClick={() => setOpenMenuId(null)}
     >
-      {/* Windows 11 Desktop Ambient Wallpaper Glow */}
+      {/* Desktop Background Ambient Glow */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-sky-500/10 rounded-full blur-[140px]" />
         <div className="absolute bottom-1/4 right-1/3 w-[500px] h-[300px] bg-indigo-500/10 rounded-full blur-[120px]" />
       </div>
 
-      {/* Desktop Top Workspace (Canvas for Windows) */}
+      {/* Desktop Workspace (Canvas for Windows) */}
       <div className="flex-1 relative overflow-hidden p-2 sm:p-4">
         
-        {/* Subtle Windows Desktop Icons (Decorative & Authentic) */}
+        {/* Subtle Desktop Icons */}
         <div className="absolute top-4 left-4 flex flex-col gap-5 z-0 pointer-events-none opacity-40 hidden sm:flex">
           <div className="flex flex-col items-center gap-1 w-14">
             <div className="w-9 h-9 rounded-lg bg-sky-600/20 border border-sky-400/30 flex items-center justify-center text-sky-400 shadow-sm">
@@ -362,7 +348,7 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
         </div>
 
         {/* ========================================================================= */}
-        {/* REAL WINDOWS APPLICATION WINDOW CONTAINER                                 */}
+        {/* REAL WINDOWS APPLICATION WINDOW (MATCHING USER SCREENSHOT EXACTLY)        */}
         {/* ========================================================================= */}
         {!isMinimized && (
           <div
@@ -386,76 +372,63 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
                     height: windowSize.height,
                   }
             }
-            className={`flex flex-col rounded-lg overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.65)] transition-all z-20 border ${
-              theme === 'windows-dark'
-                ? 'bg-[#202020] border-[#383838] text-[#F3F3F3]'
-                : 'bg-[#F9F9F9] border-[#D1D5DB] text-[#1E293B]'
-            }`}
+            className="flex flex-col rounded-lg overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.7)] transition-all z-20 border border-[#3A3A3A] bg-[#121212] text-white"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* WINDOW TITLE BAR (AUTHENTIC WINDOWS 11 CHROME) */}
+            {/* 1. AUTHENTIC WINDOWS TITLE BAR (WHITE BACKGROUND AS PER SCREENSHOT) */}
             <div
               onMouseDown={handleTitleMouseDown}
               onDoubleClick={() => setIsMaximized(!isMaximized)}
-              className={`h-8 sm:h-9 px-2.5 flex items-center justify-between select-none cursor-move shrink-0 border-b ${
-                theme === 'windows-dark'
-                  ? 'bg-[#181818] border-[#2B2B2B] text-white'
-                  : 'bg-[#EAEAEA] border-[#D6D6D6] text-[#1E293B]'
-              }`}
+              className="h-8 sm:h-9 px-2.5 flex items-center justify-between select-none cursor-move shrink-0 bg-white border-b border-[#E0E0E0] text-black"
             >
-              {/* Left: Windows Java Duke Icon & Title */}
+              {/* Left: Classic Official Java Duke Cup Icon & Window Title */}
               <div className="flex items-center gap-2 min-w-0 truncate">
-                {/* Official Java Duke Cup / Window Icon */}
-                <div className="w-4 h-4 rounded flex items-center justify-center shrink-0">
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
+                {/* Official Colorful Java Cup Icon: Blue cup, red steam */}
+                <div className="w-4 h-4 flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4" viewBox="0 0 32 32" fill="none">
                     <path
-                      d="M3 8C3 6.89543 3.89543 6 5 6H16C17.1046 6 18 6.89543 18 8V14C18 16.7614 15.7614 19 13 19H8C5.23858 19 3 16.7614 3 14V8Z"
-                      fill="#FF8A00"
-                    />
-                    <path
-                      d="M18 9H19.5C20.8807 9 22 10.1193 22 11.5C22 12.8807 20.8807 14 19.5 14H18"
-                      stroke="#FF8A00"
+                      d="M19 3C19 3 21 5.5 18 7.5C15 9.5 18 11.5 18 11.5"
+                      stroke="#EA2D2E"
                       strokeWidth="2"
                       strokeLinecap="round"
                     />
-                    <path d="M7 3L8 4" stroke="#FF8A00" strokeWidth="1.5" strokeLinecap="round" />
-                    <path d="M11 2L12 4" stroke="#FF8A00" strokeWidth="1.5" strokeLinecap="round" />
+                    <path
+                      d="M14 2C14 2 16 4.5 13 6.5C10 8.5 13 10.5 13 10.5"
+                      stroke="#EA2D2E"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M6 13C6 11.8954 6.89543 11 8 11H21C22.1046 11 23 11.8954 23 13V20C23 22.7614 20.7614 25 18 25H11C8.23858 25 6 22.7614 6 20V13Z"
+                      fill="#007396"
+                    />
+                    <path
+                      d="M23 14H25C26.6569 14 28 15.3431 28 17C28 18.6569 26.6569 20 25 20H23"
+                      stroke="#007396"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M4 27C8 29 22 29 26 27"
+                      stroke="#007396"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    />
                   </svg>
                 </div>
 
-                <span className="text-[12px] sm:text-[13px] font-normal truncate tracking-tight font-['Segoe_UI']">
-                  {guiState.title || 'Java GUI Application'}
-                </span>
-
-                <span
-                  className={`text-[9.5px] px-1.5 py-0.2 rounded font-mono hidden md:inline-block ${
-                    theme === 'windows-dark' ? 'bg-white/10 text-slate-300' : 'bg-black/5 text-slate-600'
-                  }`}
-                >
-                  {guiState.appletMode ? 'Applet' : 'Swing / AWT'}
+                <span className="text-[12px] sm:text-[13px] font-normal truncate tracking-tight text-black font-['Segoe_UI']">
+                  {guiState.title || 'Scientific Calculator'}
                 </span>
               </div>
 
-              {/* Right: Windows Control Box (Minimize, Maximize, Close) */}
+              {/* Right: Iconic Windows Controls (—, 🗖, ✕ with Red Hover) */}
               <div className="flex items-center shrink-0 h-full">
-                {/* Theme Switcher Icon */}
-                <button
-                  onClick={() => setTheme(theme === 'windows-dark' ? 'windows-light' : 'windows-dark')}
-                  className={`h-full px-2 flex items-center justify-center transition-colors ${
-                    theme === 'windows-dark' ? 'hover:bg-[#2F2F2F] text-slate-300' : 'hover:bg-[#DCDCDC] text-slate-700'
-                  }`}
-                  title={`Switch to ${theme === 'windows-dark' ? 'Windows Light' : 'Windows Dark'} theme`}
-                >
-                  <Layers className="w-3.5 h-3.5" />
-                </button>
-
                 {/* Reset App Form */}
                 <button
                   onClick={handleReset}
-                  className={`h-full px-2 flex items-center justify-center transition-colors ${
-                    theme === 'windows-dark' ? 'hover:bg-[#2F2F2F] text-slate-300' : 'hover:bg-[#DCDCDC] text-slate-700'
-                  }`}
-                  title="Reset Form to Initial State"
+                  className="h-full px-2 flex items-center justify-center hover:bg-[#EBEBEB] text-slate-700 transition-colors"
+                  title="Reset Calculator"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                 </button>
@@ -463,9 +436,7 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
                 {/* Minimize Button (—) */}
                 <button
                   onClick={() => setIsMinimized(true)}
-                  className={`h-full w-10 sm:w-11 flex items-center justify-center transition-colors ${
-                    theme === 'windows-dark' ? 'hover:bg-[#2F2F2F] text-slate-300' : 'hover:bg-[#DCDCDC] text-slate-700'
-                  }`}
+                  className="h-full w-10 sm:w-11 flex items-center justify-center hover:bg-[#EBEBEB] text-black transition-colors"
                   title="Minimize"
                 >
                   <Minus className="w-3.5 h-3.5" />
@@ -474,9 +445,7 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
                 {/* Maximize / Restore Button (🗖) */}
                 <button
                   onClick={() => setIsMaximized(!isMaximized)}
-                  className={`h-full w-10 sm:w-11 flex items-center justify-center transition-colors ${
-                    theme === 'windows-dark' ? 'hover:bg-[#2F2F2F] text-slate-300' : 'hover:bg-[#DCDCDC] text-slate-700'
-                  }`}
+                  className="h-full w-10 sm:w-11 flex items-center justify-center hover:bg-[#EBEBEB] text-black transition-colors"
                   title={isMaximized ? 'Restore Down' : 'Maximize'}
                 >
                   {isMaximized ? (
@@ -492,7 +461,7 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
                     sounds.playClick();
                     if (onClose) onClose();
                   }}
-                  className="h-full w-10 sm:w-11 flex items-center justify-center hover:bg-[#E81123] hover:text-white transition-colors text-slate-400"
+                  className="h-full w-10 sm:w-11 flex items-center justify-center hover:bg-[#E81123] hover:text-white transition-colors text-black"
                   title="Close"
                 >
                   <X className="w-4 h-4" />
@@ -500,396 +469,110 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
               </div>
             </div>
 
-            {/* WINDOWS MENU BAR (JMenuBar: File, Edit, View, Help) */}
+            {/* Optional Menu Bar (if specified in code) */}
             {guiState.menus && guiState.menus.length > 0 && (
-              <div
-                className={`h-6 sm:h-7 px-2 flex items-center gap-1 text-[11px] font-['Segoe_UI'] border-b shrink-0 relative ${
-                  theme === 'windows-dark'
-                    ? 'bg-[#1F1F1F] border-[#2A2A2A] text-slate-300'
-                    : 'bg-[#F3F3F3] border-[#E0E0E0] text-slate-700'
-                }`}
-              >
+              <div className="h-6 px-2 flex items-center gap-1 text-[11px] font-['Segoe_UI'] bg-[#1E1E1E] border-b border-[#2C2C2C] text-slate-300 shrink-0">
                 {guiState.menus.map((menu) => (
-                  <div key={menu.id} className="relative">
-                    <button
-                      onClick={() => setOpenMenuId(openMenuId === menu.id ? null : menu.id)}
-                      className={`px-2 py-0.5 rounded transition-colors ${
-                        openMenuId === menu.id
-                          ? theme === 'windows-dark'
-                            ? 'bg-[#333333] text-white'
-                            : 'bg-[#E5E5E5] text-slate-900'
-                          : theme === 'windows-dark'
-                          ? 'hover:bg-[#2B2B2B]'
-                          : 'hover:bg-[#EAEAEA]'
-                      }`}
-                    >
-                      {menu.label}
-                    </button>
-
-                    {/* Dropdown Menu Popup */}
-                    {openMenuId === menu.id && menu.items && menu.items.length > 0 && (
-                      <div
-                        className={`absolute top-full left-0 mt-1 min-w-[170px] py-1 rounded-md shadow-2xl z-50 border backdrop-blur-md ${
-                          theme === 'windows-dark'
-                            ? 'bg-[#2A2A2A]/95 border-[#3D3D3D] text-slate-200'
-                            : 'bg-white/95 border-slate-300 text-slate-800'
-                        }`}
-                      >
-                        {menu.items.map((item) => {
-                          if (item.isSeparator) {
-                            return (
-                              <div
-                                key={item.id}
-                                className={`my-1 border-t ${
-                                  theme === 'windows-dark' ? 'border-white/10' : 'border-slate-200'
-                                }`}
-                              />
-                            );
-                          }
-                          return (
-                            <button
-                              key={item.id}
-                              onClick={() => {
-                                sounds.playClick();
-                                setOpenMenuId(null);
-                                if (item.label.toLowerCase().includes('exit') && onClose) {
-                                  onClose();
-                                } else if (item.label.toLowerCase().includes('new')) {
-                                  handleReset();
-                                } else if (item.label.toLowerCase().includes('about')) {
-                                  setActiveDialog({
-                                    id: 'about-dialog',
-                                    type: 'message',
-                                    title: 'About Java GUI Engine',
-                                    message: 'Code With SmitroniX Virtual Windows GUI Engine.\nRunning Java Swing & AWT Runtime.',
-                                    dialogType: 'info',
-                                  });
-                                }
-                              }}
-                              className={`w-full px-3 py-1 text-left text-xs flex items-center justify-between transition-colors ${
-                                theme === 'windows-dark'
-                                  ? 'hover:bg-[#0078D4] hover:text-white'
-                                  : 'hover:bg-[#0078D4] hover:text-white'
-                              }`}
-                            >
-                              <span>{item.label}</span>
-                              {item.shortcut && (
-                                <span className="text-[10px] opacity-60 ml-3">{item.shortcut}</span>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
+                  <span key={menu.id} className="px-2 py-0.5 rounded hover:bg-[#2C2C2C] cursor-pointer">
+                    {menu.label}
+                  </span>
                 ))}
               </div>
             )}
 
-            {/* WINDOW CLIENT AREA (COMPONENTS & 2D CANVAS) */}
-            <div
-              className={`flex-1 relative overflow-auto p-3 sm:p-5 ${
-                theme === 'windows-dark'
-                  ? 'bg-[#202020] text-[#FFFFFF]'
-                  : 'bg-[#FFFFFF] text-[#000000]'
-              }`}
-              style={{
-                backgroundColor: guiState.backgroundColor !== '#F1F5F9' && guiState.backgroundColor !== '#F3F3F3'
-                  ? guiState.backgroundColor
-                  : undefined,
-              }}
-            >
-              {/* Optional Vector Canvas Layer (for paint(Graphics g)) */}
+            {/* 2. WINDOW CONTENT BODY (DARK MATTE BACKGROUND #121212) */}
+            <div className="flex-1 flex flex-col p-3 sm:p-4 overflow-hidden bg-[#121212]">
+              
+              {/* Optional 2D Graphics Canvas Layer */}
               {hasGraphics && (
-                <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                <div className="relative w-full h-44 mb-3 rounded-lg overflow-hidden border border-white/10 bg-[#161616]">
                   <canvas ref={canvasRef} className="w-full h-full block" />
                 </div>
               )}
 
-              {/* Dynamic Components Container */}
-              {components.length > 0 ? (
-                <div
-                  className={`relative z-10 w-full h-full ${
-                    guiState.layout === 'grid'
-                      ? 'grid items-center'
-                      : guiState.layout === 'border'
-                      ? 'flex flex-col justify-between h-full gap-3'
-                      : guiState.layout === 'null'
-                      ? 'relative min-h-[300px]'
-                      : 'flex flex-wrap items-center justify-center gap-3'
-                  }`}
-                  style={
-                    guiState.layout === 'grid'
-                      ? {
-                          gridTemplateColumns: `repeat(${guiState.gridCols || 2}, minmax(0, 1fr))`,
-                          gridTemplateRows: `repeat(${guiState.gridRows || 2}, minmax(0, 1fr))`,
-                          gap: `${guiState.gridVgap || 8}px ${guiState.gridHgap || 8}px`,
-                        }
-                      : undefined
-                  }
-                >
-                  {components.map((comp) => {
-                    const style: React.CSSProperties =
-                      guiState.layout === 'null' && comp.bounds
-                        ? {
-                            position: 'absolute',
-                            left: comp.bounds.x,
-                            top: comp.bounds.y,
-                            width: comp.bounds.width,
-                            height: comp.bounds.height,
-                          }
-                        : {};
+              {/* AUTHENTIC TOP DISPLAY PANEL (Exact match to screenshot) */}
+              <div className="p-3 sm:p-4 bg-[#1C1C1C] rounded-lg mb-3 flex flex-col justify-between min-h-[76px] sm:min-h-[84px] shrink-0 border border-white/5">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#888888] font-['Segoe_UI']">
+                  {guiState.subtitle || 'SCIENTIFIC CALCULATOR'}
+                </span>
+                <span className="text-right text-white font-bold text-3xl sm:text-4xl tracking-tight font-['Segoe_UI'] overflow-x-auto select-text leading-tight">
+                  {primaryDisplay?.text || '0'}
+                </span>
+              </div>
 
-                    if (comp.color) style.color = comp.color;
-                    if (comp.bgColor) style.backgroundColor = comp.bgColor;
-
-                    // 1. JButton / Button (Authentic Windows 11 Push Button)
-                    if (comp.type === 'button') {
-                      return (
-                        <button
-                          key={comp.id}
-                          onClick={() => handleBtnClick(comp)}
-                          style={style}
-                          className={`px-3 py-1.5 text-xs sm:text-sm font-['Segoe_UI'] font-medium rounded transition-all active:scale-[0.98] shadow-sm flex items-center justify-center cursor-pointer border ${
-                            theme === 'windows-dark'
-                              ? 'bg-[#2D2D2D] hover:bg-[#383838] border-[#3F3F3F] text-white active:bg-[#252525]'
-                              : 'bg-[#FBFBFB] hover:bg-[#F3F4F6] border-[#D1D5DB] text-slate-900 active:bg-[#E5E7EB]'
-                          }`}
-                        >
-                          {comp.text}
-                        </button>
-                      );
-                    }
-
-                    // 2. JLabel / Label
+              {/* Non-button components (labels, fields, checkboxes etc.) if any */}
+              {nonButtonComponents.length > 0 && !isCalcGrid && (
+                <div className="mb-3 flex flex-wrap gap-2 items-center">
+                  {nonButtonComponents.map((comp) => {
                     if (comp.type === 'label') {
                       return (
-                        <div
-                          key={comp.id}
-                          style={style}
-                          className={`text-xs sm:text-sm font-['Segoe_UI'] select-text flex items-center ${
-                            comp.isBold ? 'font-bold' : 'font-normal'
-                          } ${theme === 'windows-dark' ? 'text-slate-200' : 'text-slate-800'}`}
-                        >
+                        <div key={comp.id} className="text-xs text-slate-300 font-medium">
                           {comp.text}
                         </div>
                       );
                     }
-
-                    // 3. JTextField & JPasswordField (Authentic Windows 11 Line Focus)
-                    if (comp.type === 'textfield' || comp.type === 'passwordfield') {
-                      return (
-                        <input
-                          key={comp.id}
-                          type={comp.type === 'passwordfield' ? 'password' : 'text'}
-                          value={comp.text}
-                          onChange={(e) => handleInputChange(comp.id, e.target.value)}
-                          style={style}
-                          placeholder="Enter text..."
-                          className={`px-2.5 py-1 text-xs sm:text-sm font-['Segoe_UI'] rounded outline-none border transition-all ${
-                            theme === 'windows-dark'
-                              ? 'bg-[#2C2C2C] text-white border-[#454545] focus:border-[#0078D4] focus:ring-1 focus:ring-[#0078D4]'
-                              : 'bg-white text-slate-900 border-[#868686] focus:border-[#0067C0] focus:ring-1 focus:ring-[#0067C0]'
-                          } ${!style.width ? 'min-w-[120px] max-w-[220px]' : ''}`}
-                        />
-                      );
-                    }
-
-                    // 4. JTextArea
-                    if (comp.type === 'textarea') {
-                      return (
-                        <textarea
-                          key={comp.id}
-                          value={comp.text}
-                          onChange={(e) => handleInputChange(comp.id, e.target.value)}
-                          style={style}
-                          placeholder="Text Area..."
-                          rows={3}
-                          className={`p-2 text-xs sm:text-sm font-['Segoe_UI'] rounded outline-none resize-none border w-full ${
-                            theme === 'windows-dark'
-                              ? 'bg-[#2C2C2C] text-white border-[#454545] focus:border-[#0078D4]'
-                              : 'bg-white text-slate-900 border-[#868686] focus:border-[#0067C0]'
-                          }`}
-                        />
-                      );
-                    }
-
-                    // 5. JCheckBox (Windows Checkbox with checkmark)
                     if (comp.type === 'checkbox') {
                       return (
-                        <label
-                          key={comp.id}
-                          style={style}
-                          className="flex items-center gap-2 text-xs sm:text-sm font-['Segoe_UI'] cursor-pointer select-none"
-                        >
-                          <input
-                            type="checkbox"
-                            defaultChecked={comp.checked}
-                            className="w-4 h-4 rounded text-[#0078D4] focus:ring-0 cursor-pointer"
-                          />
+                        <label key={comp.id} className="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+                          <input type="checkbox" defaultChecked={comp.checked} className="rounded text-[#0078D4]" />
                           <span>{comp.text}</span>
                         </label>
                       );
                     }
-
-                    // 6. JRadioButton (Windows Radio Button)
-                    if (comp.type === 'radio') {
-                      return (
-                        <label
-                          key={comp.id}
-                          style={style}
-                          className="flex items-center gap-2 text-xs sm:text-sm font-['Segoe_UI'] cursor-pointer select-none"
-                        >
-                          <input
-                            type="radio"
-                            name="java_win_radio"
-                            defaultChecked={comp.checked}
-                            className="w-4 h-4 text-[#0078D4] focus:ring-0 cursor-pointer"
-                          />
-                          <span>{comp.text}</span>
-                        </label>
-                      );
-                    }
-
-                    // 7. JComboBox (Windows Dropdown)
-                    if (comp.type === 'combobox') {
-                      return (
-                        <div key={comp.id} style={style} className="relative inline-block">
-                          <select
-                            className={`px-3 py-1 pr-8 text-xs sm:text-sm font-['Segoe_UI'] rounded border outline-none cursor-pointer appearance-none ${
-                              theme === 'windows-dark'
-                                ? 'bg-[#2C2C2C] text-white border-[#454545]'
-                                : 'bg-white text-slate-900 border-[#868686]'
-                            }`}
-                          >
-                            {(comp.options || ['Option 1', 'Option 2', 'Option 3']).map((opt, i) => (
-                              <option key={i} value={opt}>
-                                {opt}
-                              </option>
-                            ))}
-                          </select>
-                          <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-60" />
-                        </div>
-                      );
-                    }
-
-                    // 8. JSlider (Windows Accent Slider)
-                    if (comp.type === 'slider') {
-                      return (
-                        <div key={comp.id} style={style} className="flex items-center gap-2 min-w-[160px]">
-                          <input
-                            type="range"
-                            min={comp.min || 0}
-                            max={comp.max || 100}
-                            defaultValue={Number(comp.value) || 50}
-                            className="w-full accent-[#0078D4] cursor-pointer"
-                          />
-                        </div>
-                      );
-                    }
-
-                    // 9. JProgressBar (Windows Progress Bar)
-                    if (comp.type === 'progressbar') {
-                      return (
-                        <div
-                          key={comp.id}
-                          style={style}
-                          className="w-full max-w-xs h-3 bg-slate-700/30 rounded-full overflow-hidden border border-white/10 relative"
-                        >
-                          <div
-                            className="h-full bg-gradient-to-r from-emerald-500 to-[#0078D4] rounded-full"
-                            style={{ width: `${comp.value || 65}%` }}
-                          />
-                        </div>
-                      );
-                    }
-
-                    // 10. JTable (Windows DataGrid)
-                    if (comp.type === 'table') {
-                      return (
-                        <div
-                          key={comp.id}
-                          style={style}
-                          className={`w-full overflow-x-auto rounded border text-xs font-['Segoe_UI'] ${
-                            theme === 'windows-dark'
-                              ? 'bg-[#1B1B1B] border-[#333]'
-                              : 'bg-white border-slate-300'
-                          }`}
-                        >
-                          <table className="w-full border-collapse">
-                            <thead>
-                              <tr
-                                className={
-                                  theme === 'windows-dark'
-                                    ? 'bg-[#292929] text-slate-200 border-b border-[#3A3A3A]'
-                                    : 'bg-[#F1F1F1] text-slate-800 border-b border-slate-300'
-                                }
-                              >
-                                {(comp.columns || ['COL 1', 'COL 2', 'COL 3']).map((c, i) => (
-                                  <th key={i} className="p-2 text-left font-semibold">
-                                    {c}
-                                  </th>
-                                ))}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {(comp.rows || []).map((row, ri) => (
-                                <tr
-                                  key={ri}
-                                  className={`border-b ${
-                                    theme === 'windows-dark'
-                                      ? 'border-white/5 hover:bg-white/5'
-                                      : 'border-slate-200 hover:bg-slate-50'
-                                  }`}
-                                >
-                                  {row.map((cell, ci) => (
-                                    <td key={ci} className="p-2">
-                                      {cell}
-                                    </td>
-                                  ))}
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      );
-                    }
-
                     return null;
                   })}
                 </div>
-              ) : !hasGraphics ? (
-                <div className="w-full h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
-                  <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-400/20 flex items-center justify-center text-sky-400 mb-3 shadow-inner">
-                    <Monitor className="w-6 h-6" />
-                  </div>
-                  <div className="text-sm font-semibold text-slate-200 font-['Segoe_UI']">Java Windows Frame Active</div>
-                  <div className="text-xs text-slate-400 mt-1 max-w-sm">
-                    Frame was created with <code className="font-mono text-sky-400">new JFrame()</code>. Add components with <code className="font-mono text-sky-400">frame.add()</code> or shapes in <code className="font-mono text-sky-400">paint(Graphics g)</code>.
-                  </div>
+              )}
+
+              {/* 3. AUTHENTIC 5-COLUMN BUTTONS GRID (Exact match to screenshot) */}
+              {buttonsOnly.length > 0 ? (
+                <div
+                  className="flex-1 grid gap-1.5 sm:gap-2 items-stretch"
+                  style={{
+                    gridTemplateColumns: `repeat(${guiState.gridCols || 5}, minmax(0, 1fr))`,
+                    gridTemplateRows: `repeat(${guiState.gridRows || 6}, minmax(0, 1fr))`,
+                  }}
+                >
+                  {buttonsOnly.map((btn) => {
+                    const text = btn.text.trim();
+
+                    // Exact color mapping from user screenshot:
+                    let bgColor = btn.bgColor || '#282828';
+                    let textColor = btn.color || '#FFFFFF';
+
+                    if (text === 'C' || text === '⌫' || text === 'DEL' || text === 'CLR') {
+                      bgColor = '#C63636'; // Coral Red from screenshot
+                    } else if (['/', '×', '*', '-', '+'].includes(text)) {
+                      bgColor = '#1976D2'; // Vivid Accent Blue from screenshot
+                    } else if (text === '=') {
+                      bgColor = '#0FA958'; // Vibrant Emerald Green from screenshot
+                    } else if (['sin', 'cos', 'tan', 'log', 'ln', '√', 'x²', '1/x', 'π', 'e', '(', ')'].includes(text)) {
+                      bgColor = '#383838'; // Scientific Function Gray from screenshot
+                    } else if (/^[0-9]$|\./.test(text)) {
+                      bgColor = '#262626'; // Charcoal Digit Gray from screenshot
+                    }
+
+                    return (
+                      <button
+                        key={btn.id}
+                        onClick={() => handleBtnClick(btn)}
+                        style={{ backgroundColor: bgColor, color: textColor }}
+                        className="w-full h-full rounded-md font-['Segoe_UI'] font-bold text-sm sm:text-base flex items-center justify-center cursor-pointer transition-all active:scale-95 hover:brightness-110 shadow-sm border border-black/10 select-none"
+                      >
+                        {text === '⌫' ? (
+                          <span className="text-base sm:text-lg">⌫</span>
+                        ) : (
+                          text
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               ) : null}
+
             </div>
 
-            {/* WINDOWS STATUS BAR AT BOTTOM OF WINDOW */}
-            <div
-              className={`h-6 px-3 flex items-center justify-between text-[10.5px] font-['Segoe_UI'] border-t shrink-0 ${
-                theme === 'windows-dark'
-                  ? 'bg-[#181818] border-[#2B2B2B] text-slate-400'
-                  : 'bg-[#F0F0F0] border-[#D6D6D6] text-slate-600'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <span>{guiState.statusText || 'Ready'}</span>
-              </div>
-              <div className="flex items-center gap-3 font-mono text-[10px]">
-                <span>{components.length} components</span>
-                <span>JVM JDK 17</span>
-              </div>
-            </div>
-
-            {/* Bottom-Right Corner Resize Drag Handle */}
+            {/* Bottom-Right Resize Handle */}
             {!isMaximized && (
               <div
                 onMouseDown={handleResizeMouseDown}
@@ -906,22 +589,10 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
         {/* AUTHENTIC JOPTIONPANE MODAL DIALOG                                        */}
         {/* ========================================================================= */}
         {activeDialog && (
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
-            <div
-              className={`w-full max-w-sm rounded-lg overflow-hidden shadow-2xl border ${
-                theme === 'windows-dark'
-                  ? 'bg-[#2B2B2B] border-[#444] text-white'
-                  : 'bg-white border-slate-300 text-slate-900'
-              }`}
-            >
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-sm rounded-lg overflow-hidden shadow-2xl border border-[#444] bg-[#222222] text-white">
               {/* Dialog Titlebar */}
-              <div
-                className={`h-7 px-3 flex items-center justify-between border-b ${
-                  theme === 'windows-dark'
-                    ? 'bg-[#202020] border-[#383838]'
-                    : 'bg-[#EAEAEA] border-[#D6D6D6]'
-                }`}
-              >
+              <div className="h-7 px-3 flex items-center justify-between bg-[#1A1A1A] border-b border-[#333]">
                 <span className="text-xs font-['Segoe_UI'] font-medium">
                   {activeDialog.title || 'Message'}
                 </span>
@@ -956,11 +627,7 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
                       value={dialogInput}
                       onChange={(e) => setDialogInput(e.target.value)}
                       placeholder="Type response..."
-                      className={`mt-3 w-full px-2.5 py-1 text-xs sm:text-sm font-['Segoe_UI'] rounded border outline-none ${
-                        theme === 'windows-dark'
-                          ? 'bg-[#1E1E1E] text-white border-[#555] focus:border-[#0078D4]'
-                          : 'bg-white text-slate-900 border-[#888] focus:border-[#0067C0]'
-                      }`}
+                      className="mt-3 w-full px-2.5 py-1 text-xs sm:text-sm font-['Segoe_UI'] rounded border bg-[#181818] text-white border-[#555] focus:border-[#0078D4] outline-none"
                       autoFocus
                     />
                   )}
@@ -968,11 +635,7 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
               </div>
 
               {/* Dialog Buttons */}
-              <div
-                className={`px-4 py-2.5 flex items-center justify-end gap-2 border-t ${
-                  theme === 'windows-dark' ? 'bg-[#222] border-[#333]' : 'bg-[#F2F2F2] border-[#E0E0E0]'
-                }`}
-              >
+              <div className="px-4 py-2.5 flex items-center justify-end gap-2 border-t bg-[#1A1A1A] border-[#333]">
                 {activeDialog.type === 'input' ? (
                   <>
                     <button
@@ -983,11 +646,7 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
                     </button>
                     <button
                       onClick={handleCloseDialog}
-                      className={`px-4 py-1 text-xs font-['Segoe_UI'] font-medium rounded border transition-colors ${
-                        theme === 'windows-dark'
-                          ? 'bg-[#333] hover:bg-[#444] border-[#444]'
-                          : 'bg-white hover:bg-slate-100 border-slate-300'
-                      }`}
+                      className="px-4 py-1 text-xs font-['Segoe_UI'] font-medium rounded border bg-[#333] hover:bg-[#444] border-[#444] text-white transition-colors"
                     >
                       Cancel
                     </button>
@@ -1010,12 +669,12 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
       {/* ========================================================================= */}
       {/* AUTHENTIC WINDOWS 11 TASKBAR AT BOTTOM                                    */}
       {/* ========================================================================= */}
-      <div className="h-11 sm:h-12 border-t border-white/10 bg-[#0F141F]/80 backdrop-blur-xl px-3 flex items-center justify-between shrink-0 z-40 select-none shadow-2xl">
+      <div className="h-11 sm:h-12 border-t border-white/10 bg-[#0F141F]/90 backdrop-blur-xl px-3 flex items-center justify-between shrink-0 z-40 select-none shadow-2xl">
         
         {/* Left / Center: Windows 11 Centered App Icons */}
         <div className="flex items-center gap-1.5 mx-auto sm:mx-0">
           
-          {/* Windows 11 Start Button (Iconic 4 blue squares) */}
+          {/* Windows 11 Start Button (Iconic 4 blue tiles) */}
           <button
             onClick={() => {
               sounds.playClick();
@@ -1051,18 +710,16 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
                 ? 'bg-white/15 text-white shadow-inner'
                 : 'hover:bg-white/10 text-slate-300'
             }`}
-            title={`${guiState.title || 'Java App'} (Click to minimize/restore)`}
+            title={`${guiState.title || 'Scientific Calculator'} (Click to minimize/restore)`}
           >
-            <div className="w-5 h-5 rounded bg-amber-500/20 border border-amber-500/30 flex items-center justify-center shrink-0">
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M3 8C3 6.89543 3.89543 6 5 6H16C17.1046 6 18 6.89543 18 8V14C18 16.7614 15.7614 19 13 19H8C5.23858 19 3 16.7614 3 14V8Z"
-                  fill="#FF8A00"
-                />
+            <div className="w-5 h-5 rounded bg-sky-500/20 border border-sky-500/30 flex items-center justify-center shrink-0">
+              <svg className="w-3.5 h-3.5" viewBox="0 0 32 32" fill="none">
+                <path d="M19 3C19 3 21 5.5 18 7.5C15 9.5 18 11.5 18 11.5" stroke="#EA2D2E" strokeWidth="2" strokeLinecap="round" />
+                <path d="M6 13C6 11.8954 6.89543 11 8 11H21C22.1046 11 23 11.8954 23 13V20C23 22.7614 20.7614 25 18 25H11C8.23858 25 6 22.7614 6 20V13Z" fill="#007396" />
               </svg>
             </div>
-            <span className="text-xs font-['Segoe_UI'] font-medium truncate max-w-[120px] hidden sm:inline">
-              {guiState.title || 'Java App'}
+            <span className="text-xs font-['Segoe_UI'] font-medium truncate max-w-[130px] hidden sm:inline">
+              {guiState.title || 'Scientific Calculator'}
             </span>
 
             {/* Windows 11 Running App Indicator Pill */}
