@@ -18,7 +18,10 @@ import {
   Code2,
   Printer,
   AppWindow,
-  Monitor
+  Monitor,
+  Zap,
+  Tv,
+  Flame,
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
 import { DEFAULT_STARTER_CODES, JAVA_GUI_SAMPLES } from '../data/compilerSamples';
@@ -113,6 +116,18 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [showStdinDrawer, setShowStdinDrawer] = useState(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [cursorPos, setCursorPos] = useState<{ line: number; col: number }>({ line: 1, col: 1 });
+  const [isTerminalCrtMode, setIsTerminalCrtMode] = useState<boolean>(false);
+
+  const updateCursorPos = () => {
+    if (!textareaRef.current) return;
+    const text = textareaRef.current.value.substring(0, textareaRef.current.selectionStart);
+    const lines = text.split('\n');
+    setCursorPos({
+      line: lines.length,
+      col: lines[lines.length - 1].length + 1,
+    });
+  };
 
   // Formatted terminal execution output for lab report printing
   const terminalOutputText = useMemo(() => {
@@ -407,7 +422,28 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
 
       if (result.isSuccess) {
         sounds.playSuccess();
-        confetti({ particleCount: 30, spread: 55, origin: { y: 0.6 } });
+        confetti({
+          particleCount: 45,
+          spread: 70,
+          origin: { y: 0.65 },
+          colors: ['#22C55E', '#00F0FF', '#FF8A00', '#FFFFFF', '#A855F7'],
+        });
+        setTimeout(() => {
+          confetti({
+            particleCount: 25,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0.15, y: 0.6 },
+            colors: ['#22C55E', '#00F0FF', '#FFD700'],
+          });
+          confetti({
+            particleCount: 25,
+            angle: 120,
+            spread: 55,
+            origin: { x: 0.85, y: 0.6 },
+            colors: ['#22C55E', '#00F0FF', '#FF8A00'],
+          });
+        }, 160);
       } else {
         sounds.playClick();
       }
@@ -671,12 +707,13 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
           <div className="h-4 w-px bg-white/10 hidden sm:block" />
 
           <div className="flex items-center gap-1.5">
-            <span className="text-xs sm:text-sm font-bold text-white tracking-tight flex items-center gap-1">
+            <span className="text-xs sm:text-sm font-bold tracking-tight flex items-center gap-1 font-mono">
               <span className="text-[#FF8A00]">Code With</span>
-              <span className="text-white font-medium">SmitroniX</span>
+              <span className="text-white text-shimmer-glow font-bold">SmitroniX</span>
             </span>
-            <span className="hidden xl:inline-block px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              ● Online
+            <span className="hidden xl:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Online</span>
             </span>
           </div>
         </div>
@@ -688,7 +725,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-              className="flex items-center gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-slate-900 border border-white/10 hover:border-white/20 text-xs font-mono font-semibold text-white shadow-sm transition-all"
+              className="flex items-center gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-slate-900/90 border border-white/10 hover:border-white/20 text-xs font-mono font-semibold text-white shadow-sm transition-all btn-tactile"
             >
               <span className="flex items-center shrink-0">{selectedLang.icon}</span>
               <span className="hidden sm:inline">{selectedLang.name}</span>
@@ -697,19 +734,20 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
             </button>
 
             {isLangDropdownOpen && (
-              <div className="absolute top-full mt-1.5 left-0 sm:left-1/2 sm:-translate-x-1/2 w-52 sm:w-56 rounded-2xl bg-[#0C121E] border border-white/15 shadow-2xl py-1 z-50 overflow-hidden backdrop-blur-xl">
-                <div className="px-3 py-1.5 text-[10px] font-mono text-slate-500 uppercase tracking-wider border-b border-white/5">
-                  Select Language
+              <div className="absolute top-full mt-1.5 left-0 sm:left-1/2 sm:-translate-x-1/2 w-56 sm:w-60 rounded-2xl bg-[#0C121E]/95 border border-white/20 shadow-2xl py-1.5 z-50 overflow-hidden backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150 ring-1 ring-white/10">
+                <div className="px-3 py-1.5 text-[10px] font-mono text-slate-500 uppercase tracking-wider border-b border-white/5 flex items-center justify-between">
+                  <span>Select Language</span>
+                  <span className="text-[9px] text-[#FF8A00] font-bold">9 Runtimes</span>
                 </div>
                 <div className="max-h-72 overflow-y-auto py-1">
                   {COMPILER_LANGUAGES.map((lang) => (
                     <button
                       key={lang.id}
                       onClick={() => selectLanguage(lang)}
-                      className={`w-full flex items-center justify-between px-3 py-2 text-xs font-mono transition-colors text-left ${
+                      className={`w-[calc(100%-8px)] mx-1 flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono transition-all text-left ${
                         selectedLang.id === lang.id
-                          ? 'bg-[#FF8A00]/15 text-[#FF8A00] font-bold'
-                          : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                          ? 'bg-[#FF8A00]/20 text-[#FF8A00] font-bold border border-[#FF8A00]/30 shadow-xs'
+                          : 'text-slate-300 hover:bg-white/10 hover:text-white'
                       }`}
                     >
                       <span className="flex items-center gap-2.5">
@@ -729,7 +767,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
             <div className="relative" ref={guiTemplatesRef}>
               <button
                 onClick={() => setIsGuiTemplatesOpen(!isGuiTemplatesOpen)}
-                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/15 to-[#FF8A00]/15 border border-amber-500/30 hover:border-amber-500/50 text-xs font-mono font-semibold text-amber-300 shadow-sm transition-all"
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/15 to-[#FF8A00]/15 border border-amber-500/30 hover:border-amber-500/50 text-xs font-mono font-semibold text-amber-300 shadow-sm transition-all btn-tactile"
                 title="Explore Java GUI Starter Templates (Swing & AWT)"
               >
                 <AppWindow className="w-3.5 h-3.5 text-[#FF8A00]" />
@@ -739,17 +777,17 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
               </button>
 
               {isGuiTemplatesOpen && (
-                <div className="absolute top-full mt-1.5 left-0 sm:left-1/2 sm:-translate-x-1/2 w-64 sm:w-72 rounded-2xl bg-[#0C121E] border border-white/15 shadow-2xl py-1 z-50 overflow-hidden backdrop-blur-xl">
+                <div className="absolute top-full mt-1.5 left-0 sm:left-1/2 sm:-translate-x-1/2 w-64 sm:w-72 rounded-2xl bg-[#0C121E]/95 border border-white/20 shadow-2xl py-1.5 z-50 overflow-hidden backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150 ring-1 ring-white/10">
                   <div className="px-3 py-1.5 text-[10px] font-mono text-amber-400 font-bold uppercase tracking-wider border-b border-white/5 flex items-center justify-between">
                     <span>Java Swing & AWT Starters</span>
                     <span className="text-[9px] bg-amber-500/20 px-1.5 py-0.5 rounded text-amber-300">Virtual GUI</span>
                   </div>
-                  <div className="py-1">
+                  <div className="py-1 max-h-80 overflow-y-auto">
                     {JAVA_GUI_SAMPLES.map((sample) => (
                       <button
                         key={sample.id}
                         onClick={() => loadJavaGuiSample(sample)}
-                        className="w-full px-3 py-2 text-left hover:bg-white/5 transition-colors group flex flex-col gap-0.5"
+                        className="w-[calc(100%-8px)] mx-1 px-3 py-2 rounded-xl text-left hover:bg-white/10 transition-all group flex flex-col gap-0.5"
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-mono font-semibold text-slate-200 group-hover:text-[#FF8A00]">
@@ -772,12 +810,12 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
 
         </div>
 
-        {/* Right: Quick Tools & Green Run Button */}
+        {/* Right: Quick Tools & Supercharged Run Button */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           
           <button
             onClick={() => setShowStdinDrawer(!showStdinDrawer)}
-            className={`p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-mono transition-colors hidden sm:inline-flex items-center gap-1 ${
+            className={`p-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-mono transition-all hidden sm:inline-flex items-center gap-1 btn-tactile ${
               showStdinDrawer ? 'bg-white/20 text-white' : 'bg-white/5 hover:bg-white/10 text-slate-300'
             }`}
             title="Toggle Stdin Batch Drawer"
@@ -788,7 +826,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
 
           <button
             onClick={handleCopyCode}
-            className="p-1.5 sm:p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+            className="p-1.5 sm:p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all btn-tactile"
             title="Copy Code"
           >
             {copied ? <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
@@ -796,7 +834,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
 
           <button
             onClick={handleResetCode}
-            className="p-1.5 sm:p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors hidden xs:block"
+            className="p-1.5 sm:p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all hidden xs:block btn-tactile"
             title="Reset to Default Template"
           >
             <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -808,32 +846,52 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
               sounds.playClick();
               setIsPrintModalOpen(true);
             }}
-            className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all flex items-center gap-1.5 text-xs font-mono"
+            className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all flex items-center gap-1.5 text-xs font-mono btn-tactile shadow-xs"
             title="Print Code & Output to PDF (Lab Journal)"
           >
             <Printer className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#FF8A00]" />
             <span className="hidden md:inline">Print / PDF</span>
           </button>
 
-          {/* Prominent Green Run Button (Easily tappable on mobile) */}
-          <button
-            onClick={() => executeCode()}
-            disabled={isRunning}
-            className="flex items-center gap-1.5 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] hover:from-[#16A34A] hover:to-[#15803D] text-white font-bold font-mono text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-60 shrink-0"
-          >
-            {isRunning ? (
-              <>
-                <Sparkles className="w-3.5 h-3.5 animate-spin" />
-                <span>Running</span>
-              </>
-            ) : (
-              <>
-                <Play className="w-3.5 h-3.5 fill-current" />
-                <span>Run</span>
-                <span className="text-[10px] opacity-75 font-sans hidden sm:inline">(⌘↵)</span>
-              </>
-            )}
-          </button>
+          {/* Supercharged Green Run Button with Rotating Neon Energy Glow Aura */}
+          <div className="relative group">
+            {/* Spinning Neon Energy Aura behind button when running or hovered */}
+            <div
+              className={`absolute -inset-1 rounded-2xl opacity-75 blur-sm transition-all duration-500 ${
+                isRunning && !isWaitingForInput
+                  ? 'bg-gradient-to-r from-emerald-500 via-cyan-400 to-amber-500 opacity-100 animate-pulse'
+                  : 'bg-gradient-to-r from-emerald-600 via-emerald-400 to-teal-500 opacity-30 group-hover:opacity-100 group-hover:blur'
+              }`}
+            />
+
+            <button
+              onClick={() => executeCode()}
+              disabled={isRunning && !isWaitingForInput}
+              className={`relative flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-xl text-white font-bold font-mono text-xs uppercase tracking-wider shadow-lg active:scale-95 transition-all overflow-hidden btn-tactile ${
+                isRunning && !isWaitingForInput
+                  ? 'bg-[#0A1610] border border-emerald-400/60 shadow-emerald-500/30 ring-2 ring-emerald-500/40'
+                  : 'bg-gradient-to-r from-[#22C55E] via-[#16A34A] to-[#15803D] hover:brightness-110 shadow-emerald-500/25 border border-emerald-400/30'
+              }`}
+            >
+              {/* Rotating Energy Conic Glow Ring when running */}
+              {isRunning && !isWaitingForInput && (
+                <div className="absolute inset-0 energy-ring opacity-40 pointer-events-none" />
+              )}
+
+              {isRunning && !isWaitingForInput ? (
+                <>
+                  <Sparkles className="w-3.5 h-3.5 animate-spin text-emerald-400 shrink-0" />
+                  <span className="text-emerald-300 font-extrabold animate-pulse">Running...</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-3.5 h-3.5 fill-current text-white group-hover:scale-110 transition-transform shrink-0" />
+                  <span>Run</span>
+                  <span className="text-[10px] opacity-75 font-sans hidden sm:inline">(⌘↵)</span>
+                </>
+              )}
+            </button>
+          </div>
 
         </div>
       </header>
@@ -940,7 +998,15 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
             </div>
 
             {/* Syntax Highlighted Code Editor */}
-            <div className="relative flex-1 overflow-hidden bg-[#060A11]">
+            <div className={`relative flex-1 overflow-hidden bg-[#060A11] ${isRunning && !isWaitingForInput ? 'running-glow-border' : ''}`}>
+              {/* Laser Scanning Beam Sweeping Across Code During Execution */}
+              {isRunning && !isWaitingForInput && (
+                <>
+                  <div className="laser-scan-beam" />
+                  <div className="laser-scan-glow" />
+                </>
+              )}
+
               {/* Highlighted Prism Code Underlay */}
               <pre
                 ref={preRef}
@@ -954,7 +1020,12 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
               <textarea
                 ref={textareaRef}
                 value={code}
-                onChange={(e) => setCode(e.target.value)}
+                onChange={(e) => {
+                  setCode(e.target.value);
+                  updateCursorPos();
+                }}
+                onClick={updateCursorPos}
+                onKeyUp={updateCursorPos}
                 onScroll={handleEditorScroll}
                 onKeyDown={handleKeyDown}
                 spellCheck={false}
@@ -969,16 +1040,38 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
 
           </div>
 
-          {/* Editor Status Bottom Strip */}
+          {/* Editor Status Bottom Strip with Live Cursor Position & CPU Equalizer */}
           <div className="border-t border-white/10 bg-[#090E17] px-3 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
-            <div className="flex items-center gap-1.5 truncate">
-              <span className="text-emerald-400 text-[11px]">Template:</span>
+            <div className="flex items-center gap-2 truncate">
+              <span className="text-emerald-400 text-[11px] font-semibold">Template:</span>
               <span className="text-slate-200 text-[11px] truncate">Default ({selectedLang.name})</span>
+              <span className="text-slate-600 hidden sm:inline">•</span>
+              <span className="text-[11px] text-slate-400 hidden sm:inline">
+                Ln {cursorPos.line}, Col {cursorPos.col}
+              </span>
             </div>
 
-            <div className="text-[11px] text-slate-500 shrink-0 ml-2 hidden sm:block">
-              Press ⌘+Enter to Run
-            </div>
+            {/* Dynamic Status: Live CPU Audio Equalizer when running, or shortcut hint when idle */}
+            {isRunning && !isWaitingForInput ? (
+              <div className="flex items-center gap-2 text-emerald-400">
+                <div className="flex items-end gap-0.5 h-3.5">
+                  <span className="w-1 bg-emerald-400 rounded-full equalizer-bar-1 h-full" />
+                  <span className="w-1 bg-cyan-400 rounded-full equalizer-bar-2 h-full" />
+                  <span className="w-1 bg-amber-400 rounded-full equalizer-bar-3 h-full" />
+                  <span className="w-1 bg-emerald-400 rounded-full equalizer-bar-4 h-full" />
+                </div>
+                <span className="text-[10px] font-bold tracking-wider uppercase animate-pulse">
+                  Executing...
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-[11px] text-slate-500 shrink-0">
+                <span className="sm:hidden text-slate-400">
+                  Ln {cursorPos.line}, Col {cursorPos.col}
+                </span>
+                <span className="hidden sm:inline">Press ⌘+Enter to Run</span>
+              </div>
+            )}
           </div>
 
         </div>
@@ -1062,12 +1155,29 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
                 </button>
               )}
 
+              {/* CRT Retro Scanlines FX Toggle */}
+              <button
+                onClick={() => {
+                  sounds.playClick();
+                  setIsTerminalCrtMode(!isTerminalCrtMode);
+                }}
+                className={`p-1 sm:px-2 sm:py-1 rounded-lg transition-all flex items-center gap-1 text-[11px] font-mono btn-tactile ${
+                  isTerminalCrtMode
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm shadow-cyan-500/20'
+                    : 'hover:bg-white/10 text-slate-400 hover:text-slate-200'
+                }`}
+                title={isTerminalCrtMode ? 'Disable Retro CRT Scanlines' : 'Enable Retro CRT Scanlines'}
+              >
+                <Tv className={`w-3.5 h-3.5 ${isTerminalCrtMode ? 'text-cyan-400 animate-pulse' : ''}`} />
+                <span className="hidden xs:inline">CRT</span>
+              </button>
+
               <button
                 onClick={() => {
                   sounds.playClick();
                   setIsPrintModalOpen(true);
                 }}
-                className="p-1 rounded hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center gap-1 text-[11px] font-mono"
+                className="p-1 sm:px-2 sm:py-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-all flex items-center gap-1 text-[11px] font-mono btn-tactile"
                 title="Print Report / Export PDF"
               >
                 <Printer className="w-3.5 h-3.5 text-[#FF8A00]" />
@@ -1076,7 +1186,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
 
               <button
                 onClick={handleClearOutput}
-                className="p-1 rounded hover:bg-white/5 text-slate-500 hover:text-slate-300 transition-colors"
+                className="p-1 sm:p-1.5 rounded-lg hover:bg-white/10 text-slate-500 hover:text-slate-300 transition-all btn-tactile"
                 title="Clear Output"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -1110,9 +1220,16 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
               <div
                 ref={terminalScrollRef}
                 onClick={() => terminalInputRef.current?.focus()}
-                className="flex-1 p-3 sm:p-4 font-mono text-[12px] sm:text-[13px] leading-relaxed overflow-y-auto select-text bg-[#04060A] cursor-text flex flex-col justify-between"
+                className={`relative flex-1 p-3 sm:p-4 font-mono text-[12px] sm:text-[13px] leading-relaxed overflow-y-auto select-text bg-[#04060A] cursor-text flex flex-col justify-between ${
+                  isTerminalCrtMode ? 'shadow-[inset_0_0_100px_rgba(0,240,255,0.08)]' : ''
+                }`}
               >
-                <div className="space-y-1">
+                {/* Optional CRT Scanlines Layer */}
+                {isTerminalCrtMode && (
+                  <div className="absolute inset-0 crt-scanlines pointer-events-none z-10" />
+                )}
+
+                <div className="space-y-1 relative z-0">
                   {/* Historical output stream */}
                   {terminalLines.map((line) => (
                     <div key={line.id} className="whitespace-pre-wrap break-words">
@@ -1130,8 +1247,11 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
 
                   {/* Quick suggestion chips when program is waiting for input */}
                   {isWaitingForInput && (
-                    <div className="py-1.5 flex items-center gap-1.5 flex-wrap">
-                      <span className="text-[10px] text-amber-400/80 font-mono">Suggestions:</span>
+                    <div className="py-2 px-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center gap-2 flex-wrap my-1.5 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                      <div className="flex items-center gap-1 text-[11px] text-amber-300 font-mono font-semibold">
+                        <Zap className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                        <span>Quick Input:</span>
+                      </div>
                       {quickChips.map((chip) => (
                         <button
                           key={chip}
@@ -1140,9 +1260,9 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
                             e.stopPropagation();
                             handleQuickInput(chip);
                           }}
-                          className="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[11px] font-mono font-bold border border-amber-500/30 active:scale-95 transition-all"
+                          className="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-xs font-mono font-bold border border-amber-500/40 active:scale-90 transition-all btn-tactile shadow-xs hover:shadow-amber-500/20"
                         >
-                          {chip}
+                          "{chip}"
                         </button>
                       ))}
                     </div>
@@ -1151,16 +1271,23 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
                   {/* Active Inline Prompt (True VS Code Style: Prompt + Typing Line directly in stream) */}
                   <form
                     onSubmit={handleTerminalSubmit}
-                    className="flex items-center flex-wrap gap-x-1 font-mono text-[12px] sm:text-[13px] pt-0.5"
+                    className="flex items-center flex-wrap gap-x-1.5 font-mono text-[12px] sm:text-[13px] pt-1"
                   >
                     <span
-                      className={
+                      className={`shrink-0 flex items-center gap-1 font-semibold ${
                         isWaitingForInput
-                          ? 'text-amber-400 font-bold shrink-0'
-                          : 'text-emerald-400 font-semibold shrink-0'
-                      }
+                          ? 'text-amber-400 font-bold animate-pulse'
+                          : 'text-emerald-400'
+                      }`}
                     >
-                      {isWaitingForInput ? activePrompt : 'smitronix@cloud:~$ '}
+                      {isWaitingForInput ? (
+                        <>
+                          <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping inline-block" />
+                          <span>{activePrompt || 'input: '}</span>
+                        </>
+                      ) : (
+                        'smitronix@cloud:~$ '
+                      )}
                     </span>
 
                     <div className="relative flex-1 min-w-[140px] inline-flex items-center">
@@ -1172,7 +1299,7 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
                         disabled={isRunning && !isWaitingForInput}
                         placeholder={
                           isRunning && !isWaitingForInput
-                            ? 'Executing...'
+                            ? 'Executing program...'
                             : isWaitingForInput
                             ? 'Type input & press Enter ↵'
                             : 'Type "run" or press ⌘+Enter'
@@ -1183,9 +1310,9 @@ export const CompilerPage: React.FC<CompilerPageProps> = ({ onBackToHome }) => {
                         autoCapitalize="off"
                         spellCheck={false}
                       />
-                      {/* Blinking cursor block when idle or prompt waiting */}
+                      {/* Electric blinking cursor block when idle or prompt waiting */}
                       {!terminalInputValue && !(isRunning && !isWaitingForInput) && (
-                        <span className="inline-block w-1.5 sm:w-2 h-4 bg-emerald-400 animate-pulse ml-0.5 pointer-events-none shrink-0" />
+                        <span className="inline-block w-2 h-4 bg-emerald-400 animate-pulse ml-0.5 pointer-events-none shrink-0 shadow-sm shadow-emerald-400" />
                       )}
                     </div>
                   </form>

@@ -491,11 +491,17 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
               )}
 
               {/* AUTHENTIC TOP DISPLAY PANEL (Exact match to screenshot) */}
-              <div className="p-3 sm:p-4 bg-[#1C1C1C] rounded-lg mb-3 flex flex-col justify-between min-h-[76px] sm:min-h-[84px] shrink-0 border border-white/5">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#888888] font-['Segoe_UI']">
-                  {guiState.subtitle || 'SCIENTIFIC CALCULATOR'}
-                </span>
-                <span className="text-right text-white font-bold text-3xl sm:text-4xl tracking-tight font-['Segoe_UI'] overflow-x-auto select-text leading-tight">
+              <div className="p-3 sm:p-4 bg-[#1C1C1C] rounded-lg mb-3 flex flex-col justify-between min-h-[76px] sm:min-h-[84px] shrink-0 border border-white/5 shadow-inner">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#888888] font-['Segoe_UI']">
+                    {guiState.subtitle || 'SCIENTIFIC CALCULATOR'}
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80 animate-pulse" />
+                </div>
+                <span
+                  key={primaryDisplay?.text || '0'}
+                  className="text-right text-white font-bold text-3xl sm:text-4xl tracking-tight font-['Segoe_UI'] overflow-x-auto select-text leading-tight animate-in zoom-in-95 duration-100"
+                >
                   {primaryDisplay?.text || '0'}
                 </span>
               </div>
@@ -557,7 +563,7 @@ export const JavaGuiWindow: React.FC<JavaGuiWindowProps> = ({
                         key={btn.id}
                         onClick={() => handleBtnClick(btn)}
                         style={{ backgroundColor: bgColor, color: textColor }}
-                        className="w-full h-full rounded-md font-['Segoe_UI'] font-bold text-sm sm:text-base flex items-center justify-center cursor-pointer transition-all active:scale-95 hover:brightness-110 shadow-sm border border-black/10 select-none"
+                        className="w-full h-full rounded-md font-['Segoe_UI'] font-bold text-sm sm:text-base flex items-center justify-center cursor-pointer transition-all duration-75 active:scale-[0.92] active:translate-y-0.5 hover:brightness-125 shadow-sm border border-black/20 select-none hover:shadow-md"
                       >
                         {text === '⌫' ? (
                           <span className="text-base sm:text-lg">⌫</span>
