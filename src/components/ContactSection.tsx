@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Copy, Check, Send, MapPin, Sparkles, ArrowUpRight, MessageSquare, Phone, MessageCircle, FileDown, ExternalLink, Code } from 'lucide-react';
+import { Mail, Copy, Check, Send, MapPin, Sparkles, ArrowUpRight, MessageSquare, FileDown, ExternalLink, Code } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './BrandIcons';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { SpotlightCard } from './SpotlightCard';
@@ -8,7 +8,6 @@ import confetti from 'canvas-confetti';
 
 export const ContactSection: React.FC = () => {
   const [copiedEmail, setCopiedEmail] = useState(false);
-  const [copiedPhone, setCopiedPhone] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
@@ -22,13 +21,6 @@ export const ContactSection: React.FC = () => {
     navigator.clipboard.writeText(PERSONAL_INFO.email);
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2500);
-  };
-
-  const handleCopyPhone = () => {
-    sounds.playClick();
-    navigator.clipboard.writeText(PERSONAL_INFO.phone);
-    setCopiedPhone(true);
-    setTimeout(() => setCopiedPhone(false), 2500);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -105,36 +97,6 @@ export const ContactSection: React.FC = () => {
                 </div>
                 <div className="text-slate-500">
                   Timezone: IST (UTC+5:30) • Rapid response
-                </div>
-              </div>
-            </SpotlightCard>
-
-            {/* Direct Phone & WhatsApp Card */}
-            <SpotlightCard className="p-6 space-y-3">
-              <span className="text-xs font-mono text-emerald-400 uppercase font-semibold">Phone &amp; Instant Messaging</span>
-              <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
-                <div className="flex items-center gap-2 text-xs sm:text-sm font-mono text-slate-200">
-                  <Phone className="w-3.5 h-3.5 text-[#FF8A00]" />
-                  <span>{PERSONAL_INFO.phone}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={handleCopyPhone}
-                    className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono text-white transition-colors"
-                    title="Copy Phone Number"
-                  >
-                    {copiedPhone ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  </button>
-                  <a
-                    href={PERSONAL_INFO.whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => sounds.playClick()}
-                    className="px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-mono flex items-center gap-1 transition-colors"
-                  >
-                    <MessageCircle className="w-3.5 h-3.5" />
-                    <span>WhatsApp</span>
-                  </a>
                 </div>
               </div>
             </SpotlightCard>

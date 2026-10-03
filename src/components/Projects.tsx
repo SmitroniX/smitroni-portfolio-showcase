@@ -95,43 +95,6 @@ export const Projects: React.FC = () => {
           </div>
         );
 
-      case 'bookflow':
-        return (
-          <div className="rounded-xl bg-[#090D15] border border-white/10 p-4 space-y-3 font-mono text-xs">
-            <div className="flex items-center justify-between pb-2 border-b border-white/5">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
-                <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
-                <span className="text-[11px] text-slate-400 ml-1">BookFlow Distributed Cluster // RAIT Capstone</span>
-              </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                Consensus Mesh
-              </span>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
-              <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                <div className="text-slate-400 text-[9px]">NODE 01</div>
-                <div className="font-bold">Leader (Active)</div>
-              </div>
-              <div className="p-2 rounded-lg bg-white/5 border border-white/5 text-slate-300">
-                <div className="text-slate-500 text-[9px]">NODE 02</div>
-                <div className="text-cyan-400 font-bold">Replica (Synced)</div>
-              </div>
-              <div className="p-2 rounded-lg bg-white/5 border border-white/5 text-slate-300">
-                <div className="text-slate-500 text-[9px]">NODE 03</div>
-                <div className="text-cyan-400 font-bold">Replica (Synced)</div>
-              </div>
-            </div>
-
-            <div className="p-2.5 rounded-lg bg-black/60 border border-white/5 text-slate-400 text-[10px] flex items-center justify-between">
-              <span>Locking: Distributed Mutex (Zero Split-Brain)</span>
-              <span className="text-emerald-400">P2P Latency: &lt;12ms</span>
-            </div>
-          </div>
-        );
-
       case 'compiler':
         return (
           <div className="rounded-xl bg-[#090D15] border border-white/10 p-4 space-y-3 font-sans text-xs">

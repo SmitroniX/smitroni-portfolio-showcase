@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Copy, Check, Terminal, MapPin, Clock, ExternalLink, FileDown, ShieldCheck, GraduationCap, MessageCircle } from 'lucide-react';
+import { ArrowRight, Copy, Check, Terminal, MapPin, Clock, ExternalLink, FileDown, ShieldCheck, GraduationCap } from 'lucide-react';
 import { GithubIcon } from './BrandIcons';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { SpotlightCard } from './SpotlightCard';
@@ -130,18 +130,6 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
                   </>
                 )}
               </button>
-
-              <a
-                href={PERSONAL_INFO.whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => sounds.playClick()}
-                className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-sm font-medium transition-all"
-                title="Direct Chat on WhatsApp"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span className="hidden sm:inline">WhatsApp</span>
-              </a>
 
               <button
                 onClick={() => {

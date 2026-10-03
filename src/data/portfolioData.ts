@@ -11,7 +11,7 @@ export interface Project {
   liveUrl?: string;
   status: string;
   stats?: { label: string; value: string };
-  previewType: 'dypu' | 'aniplex' | 'shadow' | 'cli' | 'discord' | 'shadowlauncher' | 'smitrix' | 'bookflow' | 'compiler';
+  previewType: 'dypu' | 'aniplex' | 'shadow' | 'cli' | 'discord' | 'shadowlauncher' | 'smitrix' | 'compiler';
 }
 
 export interface Experience {
@@ -45,8 +45,6 @@ export const PERSONAL_INFO = {
   location: "Mumbai, Maharashtra, India",
   timezone: "Asia/Kolkata",
   email: "jogdandasmit@gmail.com",
-  phone: "+91-7020120516",
-  whatsappUrl: "https://wa.me/917020120516?text=Hi%20Asmit,%20I%20saw%20your%20portfolio!",
   resumeUrl: "/resume.pdf",
   education: {
     degree: "B.E. in Computer Engineering (Pursuing)",
@@ -121,25 +119,6 @@ export const PROJECTS: Project[] = [
     status: "Production PWA",
     stats: { label: "Exercise Catalog", value: "1,324 Routines" },
     previewType: "smitrix"
-  },
-  {
-    id: "bookflow",
-    title: "BookFlow — Distributed Systems Hub",
-    category: "Systems & Engine",
-    tagline: "Fault-tolerant distributed library & resource catalog with consensus sync",
-    description: "Engineered a distributed academic resource ecosystem with distributed locking, automated failover, and fault-tolerant node replication for university libraries.",
-    story: "Developed as a distributed computing capstone project to demonstrate partitioned fault tolerance, atomic transactions across independent nodes, and real-time inventory synchronization.",
-    highlights: [
-      "Distributed consensus locking preventing double-allocation across regional nodes",
-      "Automated leader election and seamless failover under node degradation",
-      "RESTful microservice mesh with real-time replication monitoring",
-      "Comprehensive academic case study and formal architecture documentation"
-    ],
-    techStack: ["Java", "Distributed Systems", "Node.js", "Express", "MongoDB", "Docker"],
-    githubUrl: "https://github.com/SmitroniX/BookFlow",
-    status: "Capstone Project",
-    stats: { label: "Fault Tolerance", value: "Zero Split-Brain" },
-    previewType: "bookflow"
   },
   {
     id: "dypu-connect",

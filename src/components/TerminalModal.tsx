@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Terminal, ArrowRight, ExternalLink, Mail, Copy, Check, X, Sparkles, FolderGit2, User, Code2, Play, Skull, FileDown, MessageCircle } from 'lucide-react';
+import { Search, Terminal, ArrowRight, ExternalLink, Mail, Copy, Check, X, Sparkles, FolderGit2, User, Code2, Play, Skull, FileDown } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './BrandIcons';
 import { PERSONAL_INFO, PROJECTS } from '../data/portfolioData';
 import { sounds } from '../utils/sound';
@@ -121,16 +121,6 @@ export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose, 
       action: () => {
         sounds.playSuccess();
         window.open(PERSONAL_INFO.resumeUrl, '_blank');
-        onClose();
-      },
-    },
-    {
-      title: '💬 Direct WhatsApp Chat',
-      desc: '+91 7020120516 • Instant conversation with Asmit',
-      icon: <MessageCircle className="w-4 h-4 text-emerald-400" />,
-      action: () => {
-        sounds.playClick();
-        window.open(PERSONAL_INFO.whatsappUrl, '_blank');
         onClose();
       },
     },

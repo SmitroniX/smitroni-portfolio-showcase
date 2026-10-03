@@ -28,7 +28,7 @@ By updating `portfolioData.ts` and enhancing the presentation layers (`Projects.
    - Render sudo Unknown Hack The Box Team #331386 with 7 disciplines tags.
 
 5. **Task 5: Contact & Navigation (`src/components/ContactSection.tsx`, `src/components/Navbar.tsx`)**
-   - Add WhatsApp & Call action card with `+91 7020120516`.
+   - Add Direct Contact and Resume action cards.
    - Add Resume PDF card with download and preview actions.
    - Add Resume action button in Navbar for desktop and mobile.
 
