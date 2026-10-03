@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Copy, Check, Send, MapPin, Sparkles, ArrowUpRight, MessageSquare } from 'lucide-react';
+import { Mail, Copy, Check, Send, MapPin, Sparkles, ArrowUpRight, MessageSquare, Phone, MessageCircle, FileDown, ExternalLink, Code } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './BrandIcons';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { SpotlightCard } from './SpotlightCard';
@@ -7,7 +7,8 @@ import { sounds } from '../utils/sound';
 import confetti from 'canvas-confetti';
 
 export const ContactSection: React.FC = () => {
-  const [copied, setCopied] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copiedPhone, setCopiedPhone] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
@@ -19,8 +20,15 @@ export const ContactSection: React.FC = () => {
   const handleCopyEmail = () => {
     sounds.playClick();
     navigator.clipboard.writeText(PERSONAL_INFO.email);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+    setCopiedEmail(true);
+    setTimeout(() => setCopiedEmail(false), 2500);
+  };
+
+  const handleCopyPhone = () => {
+    sounds.playClick();
+    navigator.clipboard.writeText(PERSONAL_INFO.phone);
+    setCopiedPhone(true);
+    setTimeout(() => setCopiedPhone(false), 2500);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -56,7 +64,7 @@ export const ContactSection: React.FC = () => {
             Let&apos;s Build Something Remarkable
           </h2>
           <p className="text-slate-400 text-sm font-sans mt-3 leading-relaxed">
-            I&apos;m currently open to software engineering internships, freelance contracts, and exciting open-source collaborations. Have an idea or role in mind? Let&apos;s connect.
+            I&apos;m currently open to software engineering internships, systems architecture contracts, and open-source collaborations. Have an idea, project, or role in mind? Let&apos;s connect.
           </p>
         </div>
 
@@ -66,7 +74,7 @@ export const ContactSection: React.FC = () => {
           <div className="lg:col-span-5 space-y-4">
             
             {/* Email Card */}
-            <SpotlightCard className="p-6 space-y-4">
+            <SpotlightCard className="p-6 space-y-3">
               <span className="text-xs font-mono text-slate-400 uppercase">Direct Email</span>
               <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
                 <span className="text-xs sm:text-sm font-mono text-slate-200 truncate">
@@ -76,7 +84,7 @@ export const ContactSection: React.FC = () => {
                   onClick={handleCopyEmail}
                   className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono text-white flex items-center gap-1.5 transition-colors shrink-0 ml-2"
                 >
-                  {copied ? (
+                  {copiedEmail ? (
                     <>
                       <Check className="w-3.5 h-3.5 text-emerald-400" />
                       <span className="text-emerald-400">Copied</span>
@@ -101,6 +109,73 @@ export const ContactSection: React.FC = () => {
               </div>
             </SpotlightCard>
 
+            {/* Direct Phone & WhatsApp Card */}
+            <SpotlightCard className="p-6 space-y-3">
+              <span className="text-xs font-mono text-emerald-400 uppercase font-semibold">Phone &amp; Instant Messaging</span>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                <div className="flex items-center gap-2 text-xs sm:text-sm font-mono text-slate-200">
+                  <Phone className="w-3.5 h-3.5 text-[#FF8A00]" />
+                  <span>{PERSONAL_INFO.phone}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={handleCopyPhone}
+                    className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono text-white transition-colors"
+                    title="Copy Phone Number"
+                  >
+                    {copiedPhone ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                  <a
+                    href={PERSONAL_INFO.whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => sounds.playClick()}
+                    className="px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-mono flex items-center gap-1 transition-colors"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>WhatsApp</span>
+                  </a>
+                </div>
+              </div>
+            </SpotlightCard>
+
+            {/* Resume Download Spotlight Card */}
+            <SpotlightCard className="p-6 space-y-3 bg-gradient-to-br from-orange-500/10 via-amber-500/5 to-transparent border-orange-500/20">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono text-[#FF8A00] uppercase font-bold">Curriculum Vitae</span>
+                <span className="text-[10px] font-mono text-slate-400">PDF • 2026/27</span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-bold text-white font-display">Asmit Jogdand Resume</div>
+                  <div className="text-xs text-slate-400 font-sans">Updated with CGPA 8.65, internships &amp; projects</div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <a
+                    href={PERSONAL_INFO.resumeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => sounds.playClick()}
+                    className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition-colors"
+                    title="View Resume in Browser"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                  <a
+                    href={PERSONAL_INFO.resumeUrl}
+                    download="Asmit_Jogdand_Resume.pdf"
+                    onClick={() => sounds.playClick()}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#FF8A00] hover:bg-orange-600 text-slate-950 font-bold text-xs transition-colors shadow-md shadow-orange-500/20"
+                  >
+                    <FileDown className="w-4 h-4" />
+                    <span>Download</span>
+                  </a>
+                </div>
+              </div>
+            </SpotlightCard>
+
             {/* Social Cards */}
             <div className="grid grid-cols-2 gap-4">
               <a
@@ -108,14 +183,14 @@ export const ContactSection: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => sounds.playClick()}
-                className="bento-card p-5 rounded-2xl block hover:border-white/20 transition-all group"
+                className="bento-card p-4 rounded-2xl block hover:border-white/20 transition-all group"
               >
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-2">
                   <LinkedinIcon className="w-5 h-5 text-[#0A66C2]" />
                   <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" />
                 </div>
-                <div className="font-semibold text-white text-sm">LinkedIn</div>
-                <div className="text-xs font-mono text-slate-400 mt-0.5">@asmit-jogdand</div>
+                <div className="font-semibold text-white text-xs">LinkedIn</div>
+                <div className="text-[11px] font-mono text-slate-400 mt-0.5">@asmit-jogdand</div>
               </a>
 
               <a
@@ -123,14 +198,44 @@ export const ContactSection: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => sounds.playClick()}
-                className="bento-card p-5 rounded-2xl block hover:border-white/20 transition-all group"
+                className="bento-card p-4 rounded-2xl block hover:border-white/20 transition-all group"
               >
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-2">
                   <GithubIcon className="w-5 h-5 text-slate-200" />
                   <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" />
                 </div>
-                <div className="font-semibold text-white text-sm">GitHub</div>
-                <div className="text-xs font-mono text-slate-400 mt-0.5">@SmitroniX</div>
+                <div className="font-semibold text-white text-xs">GitHub</div>
+                <div className="text-[11px] font-mono text-slate-400 mt-0.5">@SmitroniX</div>
+              </a>
+
+              <a
+                href={PERSONAL_INFO.socials.leetcode}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => sounds.playClick()}
+                className="bento-card p-4 rounded-2xl block hover:border-white/20 transition-all group"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <Code className="w-5 h-5 text-amber-400" />
+                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" />
+                </div>
+                <div className="font-semibold text-white text-xs">LeetCode</div>
+                <div className="text-[11px] font-mono text-slate-400 mt-0.5">DSA Solver</div>
+              </a>
+
+              <a
+                href={PERSONAL_INFO.socials.hackthebox}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => sounds.playClick()}
+                className="bento-card p-4 rounded-2xl block hover:border-white/20 transition-all group"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-emerald-400 font-bold font-mono text-xs">HTB</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" />
+                </div>
+                <div className="font-semibold text-white text-xs">Hack The Box</div>
+                <div className="text-[11px] font-mono text-slate-400 mt-0.5">Team #331386</div>
               </a>
             </div>
 

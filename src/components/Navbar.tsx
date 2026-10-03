@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, VolumeX, Menu, X, ArrowUpRight, Command, Terminal, Skull } from 'lucide-react';
+import { Volume2, VolumeX, Menu, X, ArrowUpRight, Command, Terminal, Skull, FileDown } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './BrandIcons';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { sounds } from '../utils/sound';
@@ -169,6 +169,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette, onOpenComp
             <LinkedinIcon className="w-3.5 h-3.5" />
           </a>
 
+          {/* Resume Download Action */}
+          <a
+            href={PERSONAL_INFO.resumeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            download="Asmit_Jogdand_Resume.pdf"
+            onClick={() => sounds.playClick()}
+            className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/30 text-amber-300 font-medium text-xs transition-colors"
+            title="Download Asmit Jogdand Resume (PDF)"
+          >
+            <FileDown className="w-3.5 h-3.5 text-[#FF8A00]" />
+            <span>Resume</span>
+          </a>
+
           {/* Get in Touch CTA */}
           <a
             href="#contact"
@@ -206,6 +220,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette, onOpenComp
               {link.name}
             </a>
           ))}
+
+          <a
+            href={PERSONAL_INFO.resumeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            download="Asmit_Jogdand_Resume.pdf"
+            onClick={() => {
+              sounds.playClick();
+              setMobileMenuOpen(false);
+            }}
+            className="flex items-center justify-between py-2 text-xs font-mono text-[#FF8A00] border-t border-white/5"
+          >
+            <span className="flex items-center gap-2">
+              <FileDown className="w-4 h-4" /> Download Resume (PDF)
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-orange-500/20 text-[10px]">CGPA 8.65</span>
+          </a>
 
           <button
             onClick={() => {

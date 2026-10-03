@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Copy, Check, Terminal, MapPin, Clock, ExternalLink } from 'lucide-react';
+import { ArrowRight, Copy, Check, Terminal, MapPin, Clock, ExternalLink, FileDown, ShieldCheck, GraduationCap, MessageCircle } from 'lucide-react';
 import { GithubIcon } from './BrandIcons';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { SpotlightCard } from './SpotlightCard';
@@ -52,10 +52,20 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
           {/* Left Column: Headlines & Actions (7 Cols) */}
           <div className="lg:col-span-7 space-y-6">
             
-            {/* Status Badge */}
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-white/10 text-xs font-mono text-slate-300 backdrop-blur-md">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Available for SWE Internships &amp; Collaborations</span>
+            {/* Status Badges */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 border border-white/10 text-xs font-mono text-slate-300 backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Available for SWE Internships</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-mono text-amber-300 backdrop-blur-md">
+                <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
+                <span>CGPA 8.65 • RAIT Mumbai</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-xs font-mono text-cyan-300 backdrop-blur-md">
+                <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Captain • HTB #331386</span>
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -68,15 +78,15 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
               </h1>
 
               <p className="text-xl sm:text-2xl text-slate-300 font-normal leading-snug">
-                Full-stack software engineer &amp; cloud builder based in Mumbai. Known online as{' '}
+                Full-stack software engineer &amp; systems builder in Mumbai. Known online as{' '}
                 <span className="text-[#FF8A00] font-semibold">@SmitroniX</span>.
               </p>
             </div>
 
             <p className="text-base text-slate-400 leading-relaxed font-sans max-w-xl">
-              Computer Engineering student at <span className="text-slate-200 font-medium">Ramrao Adik Institute of Technology (RAIT)</span>. 
-              I build high-concurrency systems, campus platforms like <span className="text-slate-200 font-medium">DYPU Connect</span>, 
-              and scalable cloud microservices with a strong focus on architecture and craft.
+              Computer Engineering undergraduate at <span className="text-slate-200 font-medium">Ramrao Adik Institute of Technology (RAIT)</span>. 
+              I engineer low-latency systems like <span className="text-slate-200 font-medium">ShadowLauncher</span> (native 138 FPS gaming core), campus platforms like <span className="text-slate-200 font-medium">DYPU Connect</span>, 
+              and privacy-first apps like <span className="text-slate-200 font-medium">SmiTriX</span>.
             </p>
 
             {/* Action Row */}
@@ -90,9 +100,23 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
                 <ArrowRight className="w-4 h-4" />
               </a>
 
+              {/* Direct Resume Download Button */}
+              <a
+                href={PERSONAL_INFO.resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                download="Asmit_Jogdand_Resume.pdf"
+                onClick={() => sounds.playClick()}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#FF8A00] to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-bold text-sm transition-all shadow-lg shadow-orange-500/20 hover:-translate-y-0.5 active:translate-y-0"
+                title="Download Official Asmit Jogdand Resume (PDF)"
+              >
+                <FileDown className="w-4 h-4" />
+                <span>Resume (PDF)</span>
+              </a>
+
               <button
                 onClick={handleCopyEmail}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-900/90 hover:bg-slate-800/90 border border-white/10 hover:border-white/20 text-slate-200 text-sm font-medium transition-all"
+                className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-900/90 hover:bg-slate-800/90 border border-white/10 hover:border-white/20 text-slate-200 text-sm font-medium transition-all"
               >
                 {copied ? (
                   <>
@@ -107,19 +131,28 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
                 )}
               </button>
 
+              <a
+                href={PERSONAL_INFO.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => sounds.playClick()}
+                className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-sm font-medium transition-all"
+                title="Direct Chat on WhatsApp"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span className="hidden sm:inline">WhatsApp</span>
+              </a>
+
               <button
                 onClick={() => {
                   sounds.playWarp();
                   onOpenTerminal();
                 }}
-                className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-900/60 hover:bg-slate-800/80 border border-white/10 text-slate-300 text-sm font-mono transition-all"
+                className="inline-flex items-center gap-2 px-3.5 py-3 rounded-xl bg-slate-900/60 hover:bg-slate-800/80 border border-white/10 text-slate-300 text-sm font-mono transition-all"
                 title="Open Command Palette"
               >
                 <Terminal className="w-4 h-4 text-[#FF8A00]" />
-                <span className="hidden sm:inline">Command Palette</span>
-                <kbd className="px-1.5 py-0.5 text-[10px] rounded bg-black/50 border border-slate-700 text-slate-400">
-                  ⌘K
-                </kbd>
+                <span className="hidden sm:inline">⌘K</span>
               </button>
             </div>
 
@@ -133,7 +166,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
         </div>
 
         {/* Hero Bento Grid: Personal Snapshots */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           
           {/* Bento 1: Live Mumbai Clock & Location */}
           <SpotlightCard className="p-5 flex flex-col justify-between">
@@ -151,32 +184,54 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
                 {time || 'Loading...'}
               </div>
               <p className="text-xs text-slate-400">
-                UTC+5:30 • Usually hacking or reviewing PRs
+                UTC+5:30 • Usually hacking, building, or reviewing PRs
               </p>
             </div>
           </SpotlightCard>
 
-          {/* Bento 2: Currently Building */}
-          <SpotlightCard className="md:col-span-2 p-5 flex flex-col justify-between">
+          {/* Bento 2: Academic & CTF Merit */}
+          <SpotlightCard className="p-5 flex flex-col justify-between">
             <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
-              <span className="flex items-center gap-1.5 text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                Current Focus
+              <span className="flex items-center gap-1.5 text-amber-400">
+                <GraduationCap className="w-3.5 h-3.5" /> Academic &amp; CTF
               </span>
-              <span className="text-[11px] text-slate-500 font-mono">v2.0 Beta</span>
+              <span className="text-[10px] text-emerald-400 font-mono font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                TOP TIER
+              </span>
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-base font-semibold text-white">
-                {PERSONAL_INFO.currently.building}
-              </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Empowering university students with real-time community tools, anonymous confession moderation, and decentralized campus exchange.
+              <div className="text-2xl font-bold font-mono text-white flex items-baseline gap-2">
+                <span>8.65</span>
+                <span className="text-xs font-normal text-slate-400 font-sans">CGPA (Sem 1: 8.80)</span>
+              </div>
+              <p className="text-xs text-slate-400">
+                RAIT Mumbai • HTB Team #331386 Founding Captain
               </p>
             </div>
           </SpotlightCard>
 
-          {/* Bento 3: GitHub Pulse */}
+          {/* Bento 3: Currently Building */}
+          <SpotlightCard className="p-5 flex flex-col justify-between">
+            <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
+              <span className="flex items-center gap-1.5 text-emerald-400">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                Active Focus
+              </span>
+              <span className="text-[11px] text-slate-500 font-mono">v2 Engine</span>
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="text-sm font-semibold text-white truncate">
+                {PERSONAL_INFO.currently.building}
+              </h3>
+              <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                Native C/C++ graphics translation, 138 FPS mobile HUD, and distributed campus microservices.
+              </p>
+            </div>
+          </SpotlightCard>
+
+          {/* Bento 4: GitHub Pulse */}
           <SpotlightCard className="p-5 flex flex-col justify-between group">
             <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
               <span className="flex items-center gap-1.5">
@@ -200,7 +255,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
                 <span className="text-xs font-normal text-slate-400 font-sans">Repositories</span>
               </div>
               <p className="text-xs text-slate-400">
-                Active open-source repos, bot infrastructures, and web engines.
+                Systems engines, open-source utilities, and 99.9% uptime bots.
               </p>
             </div>
           </SpotlightCard>

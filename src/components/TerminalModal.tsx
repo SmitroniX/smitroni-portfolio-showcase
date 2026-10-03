@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Terminal, ArrowRight, ExternalLink, Mail, Copy, Check, X, Sparkles, FolderGit2, User, Code2, Play, Skull } from 'lucide-react';
+import { Search, Terminal, ArrowRight, ExternalLink, Mail, Copy, Check, X, Sparkles, FolderGit2, User, Code2, Play, Skull, FileDown, MessageCircle } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './BrandIcons';
 import { PERSONAL_INFO, PROJECTS } from '../data/portfolioData';
 import { sounds } from '../utils/sound';
@@ -115,6 +115,26 @@ export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose, 
       },
     },
     {
+      title: '📄 Download Official Resume (PDF)',
+      desc: 'Updated October 2026 • CGPA 8.65 • Naviotech Internship • Flagship Projects',
+      icon: <FileDown className="w-4 h-4 text-[#FF8A00]" />,
+      action: () => {
+        sounds.playSuccess();
+        window.open(PERSONAL_INFO.resumeUrl, '_blank');
+        onClose();
+      },
+    },
+    {
+      title: '💬 Direct WhatsApp Chat',
+      desc: '+91 7020120516 • Instant conversation with Asmit',
+      icon: <MessageCircle className="w-4 h-4 text-emerald-400" />,
+      action: () => {
+        sounds.playClick();
+        window.open(PERSONAL_INFO.whatsappUrl, '_blank');
+        onClose();
+      },
+    },
+    {
       title: 'Copy Email Address',
       desc: PERSONAL_INFO.email,
       icon: copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-400" />,
@@ -142,10 +162,22 @@ export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose, 
       url: PERSONAL_INFO.socials.linkedin,
     },
     {
+      title: 'Hack The Box CTF Team Profile',
+      desc: 'sudo Unknown (#331386) • Founding Captain',
+      icon: <Skull className="w-4 h-4 text-emerald-400" />,
+      url: PERSONAL_INFO.socials.hackthebox,
+    },
+    {
       title: 'LeetCode Profile',
-      desc: 'leetcode.com/u/SmitroniX',
+      desc: 'leetcode.com/u/SmitroniX (DSA Solutions)',
       icon: <Terminal className="w-4 h-4 text-amber-500" />,
       url: PERSONAL_INFO.socials.leetcode,
+    },
+    {
+      title: 'HackerRank Profile',
+      desc: 'hackerrank.com/jogdandasmit',
+      icon: <Code2 className="w-4 h-4 text-emerald-400" />,
+      url: PERSONAL_INFO.socials.hackerrank,
     },
   ];
 

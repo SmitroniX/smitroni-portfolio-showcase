@@ -1,7 +1,7 @@
 export interface Project {
   id: string;
   title: string;
-  category: 'Full Stack' | 'Cloud & API' | 'Developer Tools' | 'Systems & Bots';
+  category: 'Full Stack' | 'Cloud & API' | 'Developer Tools' | 'Systems & Bots' | 'Systems & Engine';
   tagline: string;
   description: string;
   story: string;
@@ -11,7 +11,7 @@ export interface Project {
   liveUrl?: string;
   status: string;
   stats?: { label: string; value: string };
-  previewType: 'dypu' | 'aniplex' | 'shadow' | 'cli' | 'discord';
+  previewType: 'dypu' | 'aniplex' | 'shadow' | 'cli' | 'discord' | 'shadowlauncher' | 'smitrix' | 'bookflow' | 'compiler';
 }
 
 export interface Experience {
@@ -23,22 +23,42 @@ export interface Experience {
   description: string;
   highlights: string[];
   skills: string[];
+  credentialId?: string;
+  credentialUrl?: string;
+  badge?: string;
+}
+
+export interface Certification {
+  title: string;
+  issuer: string;
+  year: string;
+  credentialId?: string;
+  link: string;
 }
 
 export const PERSONAL_INFO = {
   name: "Asmit Jogdand",
   handle: "SmitroniX",
-  role: "Full-Stack Engineer & Cloud Enthusiast",
-  headline: "Crafting scalable web platforms, high-throughput APIs, and modern developer experiences.",
-  shortBio: "Computer Engineering student at RAIT, DY Patil University in Mumbai. Experienced in building production web applications, high-concurrency systems, and cloud infrastructure.",
+  role: "Full-Stack Software Engineer & Systems Builder",
+  headline: "Crafting scalable web platforms, high-throughput microservices, and native systems engines.",
+  shortBio: "Computer Engineering student at Ramrao Adik Institute of Technology (RAIT), Mumbai University. Maintaining an 8.65 CGPA, founding captain of CTF team sudo Unknown (#331386), and builder of high-performance distributed systems.",
   location: "Mumbai, Maharashtra, India",
   timezone: "Asia/Kolkata",
   email: "jogdandasmit@gmail.com",
+  phone: "+91-7020120516",
+  whatsappUrl: "https://wa.me/917020120516?text=Hi%20Asmit,%20I%20saw%20your%20portfolio!",
+  resumeUrl: "/resume.pdf",
   education: {
-    degree: "B.Tech in Computer Engineering",
-    institution: "Ramrao Adik Institute of Technology (RAIT), DYPU",
+    degree: "B.E. in Computer Engineering (Pursuing)",
+    institution: "Ramrao Adik Institute of Technology (RAIT), Mumbai University",
+    department: "Department of Computer Engineering",
     year: "2025 — 2029",
-    grade: "ICSE General Studies: 85.7%"
+    cgpa: "8.65",
+    sem1: "8.80",
+    sem2: "8.50",
+    grade: "CGPA 8.65 (Sem 1: 8.80 | Sem 2: 8.50)",
+    hsc: "78.40%",
+    icse: "85.70%"
   },
   socials: {
     github: "https://github.com/SmitroniX",
@@ -46,30 +66,88 @@ export const PERSONAL_INFO = {
     leetcode: "https://leetcode.com/u/SmitroniX/",
     hackerrank: "https://www.hackerrank.com/jogdandasmit",
     instagram: "https://www.instagram.com/asmit.jogdand_pvt",
-    portfolio: "https://smitronix.dev"
+    portfolio: "https://smitronix.dev",
+    hackthebox: "https://app.hackthebox.com/teams/overview/331386"
   },
   stats: [
     { label: "Public Repos", value: "52+", note: "Active open-source" },
-    { label: "Production Apps", value: "15+", note: "Deployed & maintained" },
-    { label: "Years Coding", value: "4+", note: "Self-driven engineering" },
-    { label: "Cloud Uptime", value: "99.9%", note: "Bots & services" }
+    { label: "Academic CGPA", value: "8.65", note: "RAIT Mumbai University" },
+    { label: "HTB CTF Team", value: "#331386", note: "Founding Captain" },
+    { label: "Cloud Uptime", value: "99.9%", note: "Distributed systems" }
   ],
   currently: {
-    building: "DYPU Connect v2 & exploring AWS cloud-native patterns",
+    building: "DYPU Connect v2 & ShadowLauncher Native Engine",
     listening: "Lofi Beats for deep programming sessions",
-    learning: "System design at scale & distributed messaging",
+    learning: "GLIBC heap exploitation & distributed consensus",
     available: "Open for Software Engineering internships & freelance"
   }
 };
 
 export const PROJECTS: Project[] = [
   {
+    id: "shadowlauncher",
+    title: "ShadowLauncher — Native Android Engine",
+    category: "Systems & Engine",
+    tagline: "Android native gaming engine core with C/C++ bridges (GL4ES, LWJGL3) & 138 FPS",
+    description: "Engineered native Android launcher core with custom touch HUDs, dynamic RAM allocation, and optimized C/C++ graphics bridges. Achieved 138 FPS (120Hz locked) with sub-8ms touch response latency.",
+    story: "Engineered to deliver desktop-grade game emulation on mobile architectures by bypassing standard JNI overhead with high-performance C++ OpenGL translation layers.",
+    highlights: [
+      "High-performance GL4ES and LWJGL3 C/C++ native bridge integration",
+      "Ultra-responsive touch HUD with sub-8ms latency and multi-touch gestures",
+      "138 FPS locked on 120Hz high-refresh displays",
+      "Dynamic RAM management preventing Out-Of-Memory crashes on low-spec hardware"
+    ],
+    techStack: ["Java 21", "C / C++", "GL4ES", "LWJGL3", "Android NDK", "OpenGL ES"],
+    githubUrl: "https://github.com/SmitroniX/ShadowLauncher",
+    status: "Active Engine",
+    stats: { label: "Performance", value: "138 FPS (120Hz)" },
+    previewType: "shadowlauncher"
+  },
+  {
+    id: "smitrix",
+    title: "SmiTriX — Privacy-First Fitness PWA",
+    category: "Full Stack",
+    tagline: "Self-hosted workout PWA with biometric WebAuthn passkeys & zero telemetry",
+    description: "Architected privacy-first PWA with 1,324 exercise routines, automated 1RM tracking, biometric WebAuthn passkeys, and zero third-party telemetry.",
+    story: "Built as a reaction to commercial fitness apps selling user telemetry. SmiTriX provides gym enthusiasts with local-first, cryptographic privacy and automated strength periodization.",
+    highlights: [
+      "Biometric WebAuthn passkey authentication with zero-trust local storage",
+      "1,324 indexed strength exercises with automated 1RM calculation matrices",
+      "100% offline-capable progressive web application with service workers",
+      "Zero analytics, zero tracking, and lightweight Docker Compose self-hosting"
+    ],
+    techStack: ["React 19", "TypeScript", "Tailwind CSS", "Docker", "WebAuthn", "IndexedDB"],
+    githubUrl: "https://github.com/SmitroniX/SmiTriX",
+    status: "Production PWA",
+    stats: { label: "Exercise Catalog", value: "1,324 Routines" },
+    previewType: "smitrix"
+  },
+  {
+    id: "bookflow",
+    title: "BookFlow — Distributed Systems Hub",
+    category: "Systems & Engine",
+    tagline: "Fault-tolerant distributed library & resource catalog with consensus sync",
+    description: "Engineered a distributed academic resource ecosystem with distributed locking, automated failover, and fault-tolerant node replication for university libraries.",
+    story: "Developed as a distributed computing capstone project to demonstrate partitioned fault tolerance, atomic transactions across independent nodes, and real-time inventory synchronization.",
+    highlights: [
+      "Distributed consensus locking preventing double-allocation across regional nodes",
+      "Automated leader election and seamless failover under node degradation",
+      "RESTful microservice mesh with real-time replication monitoring",
+      "Comprehensive academic case study and formal architecture documentation"
+    ],
+    techStack: ["Java", "Distributed Systems", "Node.js", "Express", "MongoDB", "Docker"],
+    githubUrl: "https://github.com/SmitroniX/BookFlow",
+    status: "Capstone Project",
+    stats: { label: "Fault Tolerance", value: "Zero Split-Brain" },
+    previewType: "bookflow"
+  },
+  {
     id: "dypu-connect",
     title: "DYPU Connect",
     category: "Full Stack",
     tagline: "Exclusive campus social network for DY Patil University students",
     description: "A complete digital campus hub built from the ground up to connect students across departments. Includes authenticated student accounts, anonymous confession boards, student peer marketplace, clubs showcase, and real-time private chat.",
-    story: "I built DYPU Connect to solve the fragmented communication on our university campus. It gave thousands of students an official, secure space to socialize, trade academic resources, and discover college clubs.",
+    story: "I built DYPU Connect to solve fragmented communication across campus. It gave thousands of students an official, secure space to socialize, trade academic resources, and discover college clubs.",
     highlights: [
       "Real-time WebSocket chat and push notifications",
       "Confession feed with community moderation heuristics",
@@ -84,24 +162,24 @@ export const PROJECTS: Project[] = [
     previewType: "dypu"
   },
   {
-    id: "aniplex",
-    title: "AniDex & AniPlex",
-    category: "Full Stack",
-    tagline: "Streaming & discovery platform inspired by modern OTT interfaces",
-    description: "A fast, ad-light anime and manga reader designed for high performance. Features responsive catalog browsing, real-time search, multi-source streaming proxies, and smooth chapter readers.",
-    story: "Frustrated by bloated and slow streaming sites, I developed AniPlex with an emphasis on instant page loads, elegant typography, and seamless video playback.",
+    id: "compiler",
+    title: "Code With SmitroniX — Cloud IDE",
+    category: "Developer Tools",
+    tagline: "Cloud IDE with authentic Windows 11 Java Swing/AWT desktop runner & lab reports",
+    description: "Full-screen cloud IDE supporting Java (Swing & AWT virtual GUI desktop), Python, C++, C, JavaScript, TypeScript, Rust, Go, and Bash with real-time interactive terminal and academic lab report PDF export.",
+    story: "Built to eliminate setup friction for computer engineering students by providing zero-install desktop Java GUI execution and automated lab report documentation directly in the browser.",
     highlights: [
-      "Dynamic manga reader with smooth page preloading",
-      "Adaptive streaming resolution with fallback proxies",
-      "Personalized watchlist and progress synchronizer",
-      "Consumet API aggregation with sub-second response times"
+      "Authentic Windows 11 window manager with draggable Java Swing/AWT GUI rendering",
+      "Instant multi-language execution across 9 programming languages",
+      "Academic lab report generator with code formatting, output capture, and PDF export",
+      "Embedded code samples, syntax highlighting, and interactive terminal"
     ],
-    techStack: ["React.js", "Consumet API", "Node.js", "Firebase", "Tailwind CSS"],
-    githubUrl: "https://github.com/SmitroniX/AniPlex",
-    liveUrl: "https://ani-plex.vercel.app",
-    status: "Active Deployment",
-    stats: { label: "Performance", value: "98 Lighthouse" },
-    previewType: "aniplex"
+    techStack: ["React", "TypeScript", "Tailwind CSS", "PrismJS", "Virtual Windowing"],
+    liveUrl: "#/compiler",
+    githubUrl: "https://github.com/SmitroniX/Code-With-SmitroniX",
+    status: "Live on Site",
+    stats: { label: "Languages", value: "9 Runtimes" },
+    previewType: "compiler"
   },
   {
     id: "shadow-api",
@@ -124,70 +202,50 @@ export const PROJECTS: Project[] = [
     previewType: "shadow"
   },
   {
-    id: "gemini-cli",
-    title: "GhostCLI & Gemini CLI",
-    category: "Developer Tools",
-    tagline: "Terminal AI companion integrating Google Gemini into shell workflows",
-    description: "An open-source terminal developer utility that brings Google Gemini AI into your shell. Automates bash command generation, explains code and git diffs, and assists debugging without switching context.",
-    story: "Built to eliminate the friction of context-switching between the terminal and browser while debugging Linux server errors and writing complex shell scripts.",
+    id: "aniplex",
+    title: "AniDex & AniPlex",
+    category: "Full Stack",
+    tagline: "Streaming & discovery platform inspired by modern OTT interfaces",
+    description: "A fast, ad-light anime and manga reader designed for high performance. Features responsive catalog browsing, real-time search, multi-source streaming proxies, and smooth chapter readers.",
+    story: "Frustrated by bloated and slow streaming sites, I developed AniPlex with an emphasis on instant page loads, elegant typography, and seamless video playback.",
     highlights: [
-      "Context-aware shell command generation with auto-explain",
-      "Streaming markdown syntax rendering right in the terminal",
-      "Zero-latency multi-turn interactive session memory",
-      "Custom system prompt presets for DevOps, Python, and WebDev"
+      "Dynamic manga reader with smooth page preloading",
+      "Adaptive streaming resolution with fallback proxies",
+      "Personalized watchlist and progress synchronizer",
+      "Consumet API aggregation with sub-second response times"
     ],
-    techStack: ["TypeScript", "Node.js", "Google Gemini API", "Commander.js"],
-    githubUrl: "https://github.com/SmitroniX/gemini-cli",
-    liveUrl: "https://geminicli.com",
-    status: "Open Source Tool",
-    stats: { label: "Terminal Tool", value: "CLI Native" },
-    previewType: "cli"
-  },
-  {
-    id: "plexstaff-bots",
-    title: "PlexStaff & High-Concurrency Bots",
-    category: "Systems & Bots",
-    tagline: "Distributed Discord automation bots managing 50k+ server members",
-    description: "Enterprise-grade Discord automation bots managing large community servers. Handles automated verification, ticket triage, voice-channel dynamic allocation, and moderation logs.",
-    story: "Scaled from a simple utility bot into a distributed system handling over 50,000 active server members with zero downtime and sub-second reaction times.",
-    highlights: [
-      "Discord.js v14 gateway sharding architecture",
-      "Automated member safety protocols and anti-raid heuristics",
-      "Persistent ticket storage with SQLite/MongoDB",
-      "High reliability with 99.9% uptime"
-    ],
-    techStack: ["Node.js", "JavaScript", "Discord.js", "MongoDB", "REST APIs"],
-    githubUrl: "https://github.com/SmitroniX/PlexStaff",
-    liveUrl: "https://github.com/SmitroniX",
-    status: "Production Bots",
-    stats: { label: "Community", value: "50k+ Users" },
-    previewType: "discord"
+    techStack: ["React.js", "Consumet API", "Node.js", "Firebase", "Tailwind CSS"],
+    githubUrl: "https://github.com/SmitroniX/AniPlex",
+    liveUrl: "https://ani-plex.vercel.app",
+    status: "Active Deployment",
+    stats: { label: "Performance", value: "98 Lighthouse" },
+    previewType: "aniplex"
   }
 ];
 
 export const TECH_STACK = {
   frontend: [
-    { name: "React.js", tag: "Primary UI", exp: "Advanced" },
+    { name: "React 19 / 18", tag: "Primary UI", exp: "Advanced" },
     { name: "TypeScript", tag: "Type Safety", exp: "Advanced" },
     { name: "Next.js", tag: "Full Stack", exp: "Proficient" },
     { name: "Tailwind CSS", tag: "Styling", exp: "Advanced" },
     { name: "Three.js / WebGL", tag: "3D & Canvas", exp: "Intermediate" },
-    { name: "HTML5 / Modern CSS", tag: "Standards", exp: "Mastery" }
+    { name: "PWA / WebAuthn", tag: "Biometrics", exp: "Advanced" }
   ],
   backend: [
-    { name: "Node.js", tag: "Runtime", exp: "Advanced" },
-    { name: "Express.js", tag: "REST APIs", exp: "Advanced" },
+    { name: "Java (21 LTS)", tag: "Systems & OOP", exp: "Mastery" },
+    { name: "C / C++", tag: "Native & Bridges", exp: "Proficient" },
+    { name: "Node.js / Express", tag: "REST APIs", exp: "Advanced" },
     { name: "Python", tag: "Scripting & AI", exp: "Advanced" },
-    { name: "Java", tag: "Systems & OOP", exp: "Proficient" },
     { name: "WebSockets", tag: "Real-time", exp: "Proficient" },
     { name: "Discord.js", tag: "Bot Engine", exp: "Mastery" }
   ],
   cloud: [
-    { name: "AWS (EC2, S3, Lambda)", tag: "Cloud Infrastructure", exp: "Intermediate" },
-    { name: "Firebase Suite", tag: "Auth & Realtime", exp: "Advanced" },
-    { name: "Docker", tag: "Containers", exp: "Intermediate" },
+    { name: "AWS (EC2, S3)", tag: "Cloud Infrastructure", exp: "Intermediate" },
+    { name: "Docker & Compose", tag: "Containers", exp: "Intermediate" },
     { name: "Linux / Shell", tag: "SysAdmin", exp: "Advanced" },
-    { name: "Vercel / Netlify", tag: "CI/CD & Edge", exp: "Advanced" },
+    { name: "Firebase Suite", tag: "Auth & Realtime", exp: "Advanced" },
+    { name: "Burp Suite Pro", tag: "Security Testing", exp: "Proficient" },
     { name: "Git & GitHub", tag: "Collaboration", exp: "Advanced" }
   ],
   databases: [
@@ -202,16 +260,62 @@ export const EXPERIENCES: Experience[] = [
   {
     role: "Web Development Intern",
     company: "Naviotech Solution Pvt Ltd",
-    period: "2026 — Present",
+    period: "Jun 2026 — Aug 2026",
     type: "Internship",
-    location: "Mumbai, India",
-    description: "Contributing to production client applications, modernizing frontend components, and building robust REST endpoints.",
+    location: "Remote",
+    credentialId: "NTSCS2234",
+    credentialUrl: "https://www.linkedin.com/in/asmit-jogdand",
+    badge: "Credential ID: NTSCS2234",
+    description: "Engineered responsive UI modules and high-performance microservices for client-facing production applications.",
     highlights: [
-      "Engineered performant UI modules using React.js and responsive Tailwind styling.",
-      "Optimized backend REST endpoints, reducing payload overhead and latency.",
-      "Collaborated on database schema design and secure JWT-based authentication flows."
+      "Engineered responsive UI modules in React 18 & TypeScript, slashing unnecessary re-renders by 35%.",
+      "Optimized backend REST microservices, reducing endpoint response latency by 28%.",
+      "Hardened authentication flows using secure JWT tokens, role-based access control, and payload validation."
     ],
-    skills: ["React.js", "Node.js", "REST APIs", "Full-Stack Development"]
+    skills: ["React 18", "TypeScript", "Node.js", "REST APIs", "JWT Security", "Tailwind CSS"]
+  },
+  {
+    role: "Founder & Team Captain",
+    company: "sudo Unknown (HTB Team #331386)",
+    period: "Sep 2024 — Present",
+    type: "Cybersecurity & CTF Team",
+    location: "Global / Remote",
+    badge: "HTB Team #331386",
+    description: "Lead competitive Hack The Box CTF team across 7 disciplines (Web, Pwn, Crypto, Forensics, Reverse, Misc, Cloud).",
+    highlights: [
+      "Formed and captained competitive CTF roster tackling Hack The Box seasonal challenges and university leagues.",
+      "Authored vulnerability research on GLIBC heap exploitation, memory corruption, and web cache deception.",
+      "Trained collegiate peers in binary exploitation, memory forensics, and reverse engineering methodologies."
+    ],
+    skills: ["CTF", "Binary Exploitation", "GLIBC Heap", "Web Security", "Cryptography", "Reverse Engineering"]
+  },
+  {
+    role: "Freelance Systems & Software Engineer",
+    company: "Self-Employed",
+    period: "2024 — 2025",
+    type: "Freelance",
+    location: "Remote",
+    description: "Designed bespoke automation infrastructure, cloud scrapers, and high-concurrency bot systems for international clients.",
+    highlights: [
+      "Architected distributed bot infrastructure with gateway sharding on AWS EC2 and Redis caching, supporting 50,000+ members with 99.9% uptime.",
+      "Built automated data scrapers and custom API integrations for international clients.",
+      "Maintained 99.9% uptime on cloud-hosted bots and EC2 nodes."
+    ],
+    skills: ["Python", "Node.js", "Discord.js", "AWS EC2", "Redis", "MongoDB"]
+  },
+  {
+    role: "Plugin Developer & Server Optimization",
+    company: "Hypixel Ecosystem",
+    period: "Jan 2024 — Sep 2025",
+    type: "Systems & Optimization",
+    location: "Remote",
+    description: "Engineered high-throughput Java server extensions, optimizing networking ticks and concurrent packet dispatchers.",
+    highlights: [
+      "Developed high-efficiency Java server plugins for multiplayer game servers.",
+      "Profiled and optimized server tick-rates (TPS), JVM garbage collection, and packet dispatch under peak loads.",
+      "Implemented custom game mechanics, anti-cheat detection routines, and event listeners."
+    ],
+    skills: ["Java 21", "JVM Tuning", "Packet Optimization", "High Concurrency", "Performance Profiling"]
   },
   {
     role: "Marketing & Operations Lead",
@@ -225,43 +329,23 @@ export const EXPERIENCES: Experience[] = [
       "Managed digital operations, cross-departmental coordination, and social campaigns.",
       "Built collaborative technical spaces for junior engineers to learn web dev and competitive coding."
     ],
-    skills: ["Community Building", "Event Operations", "Team Leadership"]
-  },
-  {
-    role: "Freelance Software & Systems Engineer",
-    company: "Self-Employed",
-    period: "2024 — 2025",
-    type: "Freelance",
-    location: "Remote",
-    description: "Designed bespoke automation infrastructure, cloud scrapers, and high-concurrency bot systems for international clients.",
-    highlights: [
-      "Architected custom high-concurrency Discord bots handling 50k+ server members with sub-second response times.",
-      "Built automated data scrapers and custom API integrations for international clients.",
-      "Maintained 99.9% uptime on cloud-hosted bots and EC2 nodes."
-    ],
-    skills: ["Python", "Node.js", "Discord.js", "AWS EC2", "MongoDB"]
-  },
-  {
-    role: "Plugin Developer (Part-Time)",
-    company: "Hypixel Ecosystem",
-    period: "2023 — 2024",
-    type: "Systems & Optimization",
-    location: "Remote",
-    description: "Engineered high-throughput Java server extensions, optimizing networking ticks and concurrent packet dispatchers.",
-    highlights: [
-      "Developed high-efficiency Java server plugins for multiplayer game servers.",
-      "Profiled and optimized server tick-rates (TPS), memory allocation, and packet handling under peak loads.",
-      "Implemented custom game mechanics, anti-cheat detection routines, and event listeners."
-    ],
-    skills: ["Java", "Packet Optimization", "High Concurrency", "Performance Profiling"]
+    skills: ["Community Building", "Event Operations", "Team Leadership", "Technical Mentorship"]
   }
 ];
 
-export const CERTIFICATIONS = [
+export const CERTIFICATIONS: Certification[] = [
+  {
+    title: "Certified Web Developer",
+    issuer: "Naviotech Solution Pvt. Ltd.",
+    year: "Jul 2026",
+    credentialId: "NTSCS2234",
+    link: "https://www.linkedin.com/in/asmit-jogdand"
+  },
   {
     title: "Data Analytics Job Simulation",
     issuer: "Deloitte Australia",
-    year: "2026",
+    year: "Jun 2026",
+    credentialId: "C9rXmbSJytfjzhKGs",
     link: "https://www.linkedin.com/in/asmit-jogdand"
   },
   {

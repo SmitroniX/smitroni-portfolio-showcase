@@ -90,14 +90,14 @@ export const HeroProfileReveal: React.FC = () => {
           <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
         </span>
         <span className="text-[11px] font-mono text-emerald-300 font-semibold tracking-wide">
-          Available 2025/26
+          CGPA 8.65 • Available 2026/27
         </span>
       </div>
 
       {/* Floating Orbit Badge 2: Bottom-Left RAIT */}
       <div className="absolute -bottom-3 -left-2 sm:-left-6 z-20 hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-white/10 shadow-xl backdrop-blur-md text-xs font-mono text-slate-300">
         <GraduationCap className="w-3.5 h-3.5 text-[#FF8A00]" />
-        <span>B.Tech @ RAIT</span>
+        <span>B.E. Comp Engg @ RAIT</span>
       </div>
 
       {/* 3D Tilt Card Container */}
@@ -158,10 +158,10 @@ export const HeroProfileReveal: React.FC = () => {
 
               <div className="space-y-1 bg-black/75 p-2.5 rounded-xl border border-white/10 backdrop-blur-md">
                 <div className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5 font-bold">
-                  <Check className="w-3.5 h-3.5" /> Full Stack &amp; Cloud Architect
+                  <Check className="w-3.5 h-3.5" /> Full Stack &amp; Systems Engineer
                 </div>
                 <div className="text-[10px] text-slate-300 font-mono">
-                  B.Tech CE • Naviotech Intern • Hypixel Plugin Dev
+                  CGPA 8.65 • Naviotech Intern • Captain HTB #331386
                 </div>
               </div>
             </div>
