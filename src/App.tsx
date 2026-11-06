@@ -11,28 +11,9 @@ import { ThreeCanvas } from './components/ThreeCanvas';
 import { CustomCursor } from './components/CustomCursor';
 import { TerminalModal } from './components/TerminalModal';
 import { DarkSideModal } from './components/DarkSideModal';
-import { ImGuiCheatMenu } from './components/ImGuiCheatMenu';
-import { AppleHelloWelcome } from './components/AppleHelloWelcome';
 import { CompilerPage } from './pages/CompilerPage';
-import { sounds } from './utils/sound';
-import { Terminal, ArrowRight, Play } from 'lucide-react';
-import { SpotlightCard } from './components/SpotlightCard';
-import { KineticMarquee } from './components/KineticMarquee';
-import { CyberHUD } from './components/CyberHUD';
-import { KineticText } from './components/KineticText';
-import { Magnetic } from './components/Magnetic';
 
 export function App() {
-  const [showAppleHello, setShowAppleHello] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      const hash = window.location.hash;
-      if (hash.includes('compiler') || hash.includes('darkside') || hash.includes('classified')) {
-        return false;
-      }
-    }
-    return true;
-  });
-
   const [currentPage, setCurrentPage] = useState<'portfolio' | 'compiler'>(() => {
     if (typeof window !== 'undefined') {
       const hash = window.location.hash;
@@ -51,16 +32,13 @@ export function App() {
     }
     return false;
   });
-  const [imGuiMenuOpen, setImGuiMenuOpen] = useState(false);
+
   const keySequenceRef = React.useRef<string>('');
 
   // Sync route with URL hash & popstate
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
-      if (hash.includes('hello')) {
-        setShowAppleHello(true);
-      }
       if (hash.includes('compiler')) {
         setCurrentPage('compiler');
       } else {
@@ -80,7 +58,6 @@ export function App() {
   }, []);
 
   const navigateTo = (page: 'portfolio' | 'compiler') => {
-    sounds.playClick();
     setCurrentPage(page);
     if (page === 'compiler') {
       window.location.hash = '/compiler';
@@ -90,38 +67,29 @@ export function App() {
     }
   };
 
-  // Global hotkeys (Cmd+K / Ctrl+K, Insert for ImGui, & secret 'darkside' sequence)
+  // Global hotkeys (Cmd+K / Ctrl+K, ESC, & secret 'darkside' sequence)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Insert') {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
-        sounds.playClick();
-        setImGuiMenuOpen((prev) => !prev);
-      } else if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        sounds.playClick();
         setCommandPaletteOpen((prev) => !prev);
       } else if (e.key === 'Escape') {
-        if (imGuiMenuOpen) {
-          setImGuiMenuOpen(false);
-        } else if (darkSideOpen) {
+        if (darkSideOpen) {
           setDarkSideOpen(false);
         } else if (commandPaletteOpen) {
           setCommandPaletteOpen(false);
         }
       }
 
-      // Secret sequence detection (typing "darkside", "blackhat", "cheat", or "imgui")
+      // Secret sequence detection (typing "darkside", "blackhat", or "cheat")
       if (!['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) {
         keySequenceRef.current = (keySequenceRef.current + e.key.toLowerCase()).slice(-10);
         if (
           keySequenceRef.current.includes('darkside') ||
           keySequenceRef.current.includes('blackhat') ||
-          keySequenceRef.current.includes('cheat') ||
-          keySequenceRef.current.includes('imgui')
+          keySequenceRef.current.includes('cheat')
         ) {
           keySequenceRef.current = '';
-          sounds.playAlarm();
           setDarkSideOpen(true);
         }
       }
@@ -129,126 +97,54 @@ export function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [commandPaletteOpen, darkSideOpen, imGuiMenuOpen]);
+  }, [commandPaletteOpen, darkSideOpen]);
 
-  // If viewing the standalone Programiz-style compiler page
+  // Standalone Cloud Compiler / IDE Page
   if (currentPage === 'compiler') {
     return <CompilerPage onBackToHome={() => navigateTo('portfolio')} />;
   }
 
   return (
-    <div className="min-h-screen bg-[#06090E] text-slate-100 relative font-sans selection:bg-[#FF8A00] selection:text-black">
+    <div className="min-h-screen bg-[#050508] text-slate-100 relative font-sans selection:bg-cyan-500 selection:text-black">
       {/* Precision Custom Cursor */}
       <CustomCursor />
 
-      {/* Extreme 3D WebGL Cybernetic Morphing Core & Particle Wavefront Engine */}
+      {/* 60FPS Ambient Particle Wavefront Engine */}
       <ThreeCanvas />
 
-      {/* Real-time Telemetry & Audio Synthesizer Matrix HUD */}
-      <CyberHUD />
-
-      {/* Subtle Dot Grid Background Pattern */}
-      <div className="fixed inset-0 bg-noise pointer-events-none z-0" />
-
-      {/* Linear-Style Navbar */}
+      {/* Floating Glassmorphic Navbar */}
       <Navbar
         onOpenCommandPalette={() => setCommandPaletteOpen(true)}
         onOpenCompiler={() => navigateTo('compiler')}
         onOpenDarkSide={() => setDarkSideOpen(true)}
-        onReplayHello={() => setShowAppleHello(true)}
       />
 
-      {/* Main Flow */}
+      {/* Main Content Flow */}
       <main className="relative z-10">
         <Hero onOpenTerminal={() => setCommandPaletteOpen(true)} />
-
-        {/* Velocity-Reactive Kinetic Marquee Ribbon 1 */}
-        <KineticMarquee direction="left" speed={38} className="my-6" />
-
         <Projects />
-
         <DevOpsArchitecture />
-
-        {/* Velocity-Reactive Kinetic Marquee Ribbon 2 */}
-        <KineticMarquee direction="right" speed={42} outlineStyle className="my-6" />
-
-        {/* Dedicated Standalone Compiler Showcase Card */}
-        <section className="py-16 relative overflow-hidden">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <SpotlightCard enableTilt enableFoil enableLaserBeam className="p-8 border border-white/10 relative overflow-hidden group">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                <div className="space-y-2 max-w-xl">
-                  <div className="flex items-center gap-2 text-xs font-mono text-[#FF8A00] uppercase font-bold">
-                    <Terminal className="w-4 h-4" /> Code With SmitroniX
-                  </div>
-                  <h3 className="text-2xl sm:text-3xl font-bold text-white font-display">
-                    <KineticText text="Code With SmitroniX — Cloud IDE & Virtual Java GUI" playSound speed={30} />
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed">
-                    Full-screen cloud IDE supporting Java (Swing &amp; AWT virtual GUI desktop), Python, C++, C, JavaScript, TypeScript, Rust, Go, and Bash with real-time interactive terminal and academic lab report PDF export.
-                  </p>
-                </div>
-
-                <Magnetic strength={0.3} radius={70}>
-                  <button
-                    onClick={() => navigateTo('compiler')}
-                    data-cursor="project"
-                    className="inline-flex items-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] hover:from-[#16A34A] hover:to-[#15803D] text-white font-bold font-mono text-xs uppercase tracking-wider shadow-xl shadow-emerald-500/25 active:scale-95 transition-all shrink-0"
-                  >
-                    <Play className="w-4 h-4 fill-current" />
-                    <span>Launch Code With SmitroniX</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </Magnetic>
-              </div>
-            </SpotlightCard>
-          </div>
-        </section>
-
         <SkillsRadar />
         <ExperienceTimeline />
         <ContactSection />
       </main>
 
-      {/* Minimal Footer with Secret Dark Side Trigger */}
-      <Footer onOpenDarkSide={() => setDarkSideOpen(true)} />
+      {/* Minimalist Footer */}
+      <Footer />
 
-      {/* Command Palette (⌘K) */}
+      {/* Command Palette Modal (Cmd+K) */}
       <TerminalModal
         isOpen={commandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}
         onOpenCompiler={() => navigateTo('compiler')}
         onOpenDarkSide={() => setDarkSideOpen(true)}
-        onReplayHello={() => setShowAppleHello(true)}
       />
 
-      {/* Secret Easter Egg: The Dark Side Dossier Modal */}
-      <DarkSideModal
-        isOpen={darkSideOpen}
-        onClose={() => setDarkSideOpen(false)}
-        onOpenImGui={() => setImGuiMenuOpen(true)}
-      />
-
-      {/* Feature 2: Floating DirectX ImGui Cheat Menu (Toggle via [INSERT] key or inside Dark Side Dossier) */}
-      <ImGuiCheatMenu
-        isOpen={imGuiMenuOpen}
-        onClose={() => setImGuiMenuOpen(false)}
-        onLaunchDarkSide={() => setDarkSideOpen(true)}
-      />
-
-      {/* Apple "Hello" Cinematic Welcome Experience */}
-      {showAppleHello && (
-        <AppleHelloWelcome
-          onComplete={() => {
-            setShowAppleHello(false);
-            if (typeof window !== 'undefined' && window.location.hash.includes('hello')) {
-              window.location.hash = '';
-            }
-          }}
-        />
+      {/* Secret Cyber Dossier Modal (Easter Egg) */}
+      {darkSideOpen && (
+        <DarkSideModal isOpen={darkSideOpen} onClose={() => setDarkSideOpen(false)} />
       )}
     </div>
   );
 }
-
 export default App;

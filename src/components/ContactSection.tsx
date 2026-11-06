@@ -1,49 +1,38 @@
 import React, { useState } from 'react';
-import { Mail, Copy, Check, Send, MapPin, Sparkles, ArrowUpRight, MessageSquare, FileDown, ExternalLink, Code } from 'lucide-react';
+import { Mail, Copy, Check, Send, ArrowUpRight, MapPin, Clock } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './BrandIcons';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { SpotlightCard } from './SpotlightCard';
-import { sounds } from '../utils/sound';
-import confetti from 'canvas-confetti';
-import { KineticText } from './KineticText';
-import { Magnetic } from './Magnetic';
 
 export const ContactSection: React.FC = () => {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    message: '',
-  });
+  const [form, setForm] = useState({ name: '', email: '', message: '' });
 
   const handleCopyEmail = () => {
-    sounds.playClick();
     navigator.clipboard.writeText(PERSONAL_INFO.email);
     setCopiedEmail(true);
-    setTimeout(() => setCopiedEmail(false), 2500);
+    setTimeout(() => setCopiedEmail(false), 2000);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) return;
-
-    sounds.playClick();
     setIsSending(true);
 
     setTimeout(() => {
       setIsSending(false);
       setSubmitted(true);
-      sounds.playSuccess();
-      confetti({
-        particleCount: 70,
-        spread: 60,
-        origin: { y: 0.6 },
-        colors: ['#FF8A00', '#FFFFFF', '#10B981'],
-      });
-    }, 1000);
+    }, 600);
   };
+
+  const socialLinks = [
+    { name: 'GitHub', url: PERSONAL_INFO.socials.github, handle: '@SmitroniX' },
+    { name: 'LinkedIn', url: PERSONAL_INFO.socials.linkedin, handle: 'in/asmit-jogdand' },
+    { name: 'LeetCode', url: PERSONAL_INFO.socials.leetcode, handle: 'u/SmitroniX' },
+    { name: 'HackTheBox', url: PERSONAL_INFO.socials.hackthebox, handle: 'Team #331386' },
+  ];
 
   return (
     <section id="contact" className="py-24 relative overflow-hidden">
@@ -51,32 +40,34 @@ export const ContactSection: React.FC = () => {
         
         {/* Section Header */}
         <div className="max-w-2xl mb-12">
-          <span className="text-xs font-mono text-[#FF8A00] tracking-widest uppercase font-semibold">
-            Get In Touch
+          <span className="text-xs font-mono text-cyan-400 tracking-widest uppercase font-semibold">
+            // Connectivity
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-display mt-1">
-            <KineticText text="Let's Build Something Remarkable" playSound speed={35} />
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-1">
+            Let&apos;s Build Something Great
           </h2>
-          <p className="text-slate-400 text-sm font-sans mt-3 leading-relaxed">
-            I&apos;m currently open to software engineering internships, systems architecture contracts, and open-source collaborations. Have an idea, project, or role in mind? Let&apos;s connect.
+          <p className="text-slate-400 text-sm mt-3 leading-relaxed">
+            I&apos;m currently available for software engineering internships, backend contracts, and collaborative open-source systems. Reach out directly or send a message below.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Direct Channels (Left 5 Cols) */}
           <div className="lg:col-span-5 space-y-4">
             
             {/* Email Card */}
             <SpotlightCard className="p-6 space-y-3">
-              <span className="text-xs font-mono text-slate-400 uppercase">Direct Email</span>
-              <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+              <span className="text-xs font-mono text-slate-400 uppercase tracking-wider font-semibold">
+                Direct Email
+              </span>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.04] border border-white/[0.06]">
                 <span className="text-xs sm:text-sm font-mono text-slate-200 truncate">
                   {PERSONAL_INFO.email}
                 </span>
                 <button
                   onClick={handleCopyEmail}
-                  className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono text-white flex items-center gap-1.5 transition-colors shrink-0 ml-2"
+                  className="px-3 py-1.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.16] text-xs font-mono text-white flex items-center gap-1.5 transition-colors shrink-0 ml-2 cursor-pointer"
                 >
                   {copiedEmail ? (
                     <>
@@ -85,157 +76,79 @@ export const ContactSection: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3.5 h-3.5" />
+                      <Copy className="w-3.5 h-3.5 text-slate-400" />
                       <span>Copy</span>
                     </>
                   )}
                 </button>
               </div>
-
-              <div className="text-xs text-slate-400 space-y-1.5 pt-2 border-t border-white/5 font-mono">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-3.5 h-3.5 text-[#FF8A00]" />
-                  <span>{PERSONAL_INFO.location}</span>
-                </div>
-                <div className="text-slate-500">
-                  Timezone: IST (UTC+5:30) • Rapid response
-                </div>
-              </div>
             </SpotlightCard>
 
-            {/* Resume Download Spotlight Card */}
-            <SpotlightCard className="p-6 space-y-3 bg-gradient-to-br from-orange-500/10 via-amber-500/5 to-transparent border-orange-500/20">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono text-[#FF8A00] uppercase font-bold">Curriculum Vitae</span>
-                <span className="text-[10px] font-mono text-slate-400">PDF • 2026/27</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-bold text-white font-display">Asmit Jogdand Resume</div>
-                  <div className="text-xs text-slate-400 font-sans">Updated with CGPA 8.65, internships &amp; projects</div>
-                </div>
-
-                <div className="flex items-center gap-2">
+            {/* Social Channels Card */}
+            <SpotlightCard className="p-6 space-y-3">
+              <span className="text-xs font-mono text-slate-400 uppercase tracking-wider font-semibold">
+                Profiles &amp; Repositories
+              </span>
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                {socialLinks.map((s) => (
                   <a
-                    href={PERSONAL_INFO.resumeUrl}
+                    key={s.name}
+                    href={s.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={() => sounds.playClick()}
-                    className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition-colors"
-                    title="View Resume in Browser"
+                    className="p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] flex items-center justify-between transition-colors group"
                   >
-                    <ExternalLink className="w-4 h-4" />
+                    <div>
+                      <div className="text-xs font-semibold text-white">{s.name}</div>
+                      <div className="text-[10px] font-mono text-slate-400">{s.handle}</div>
+                    </div>
+                    <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </a>
-                  <a
-                    href={PERSONAL_INFO.resumeUrl}
-                    download="Asmit_Jogdand_Resume.pdf"
-                    onClick={() => sounds.playClick()}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#FF8A00] hover:bg-orange-600 text-slate-950 font-bold text-xs transition-colors shadow-md shadow-orange-500/20"
-                  >
-                    <FileDown className="w-4 h-4" />
-                    <span>Download</span>
-                  </a>
-                </div>
+                ))}
               </div>
             </SpotlightCard>
 
-            {/* Social Cards */}
-            <div className="grid grid-cols-2 gap-4">
-              <a
-                href={PERSONAL_INFO.socials.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => sounds.playClick()}
-                className="bento-card p-4 rounded-2xl block hover:border-white/20 transition-all group"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <LinkedinIcon className="w-5 h-5 text-[#0A66C2]" />
-                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" />
-                </div>
-                <div className="font-semibold text-white text-xs">LinkedIn</div>
-                <div className="text-[11px] font-mono text-slate-400 mt-0.5">@asmit-jogdand</div>
-              </a>
-
-              <a
-                href={PERSONAL_INFO.socials.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => sounds.playClick()}
-                className="bento-card p-4 rounded-2xl block hover:border-white/20 transition-all group"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <GithubIcon className="w-5 h-5 text-slate-200" />
-                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" />
-                </div>
-                <div className="font-semibold text-white text-xs">GitHub</div>
-                <div className="text-[11px] font-mono text-slate-400 mt-0.5">@SmitroniX</div>
-              </a>
-
-              <a
-                href={PERSONAL_INFO.socials.leetcode}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => sounds.playClick()}
-                className="bento-card p-4 rounded-2xl block hover:border-white/20 transition-all group"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <Code className="w-5 h-5 text-amber-400" />
-                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" />
-                </div>
-                <div className="font-semibold text-white text-xs">LeetCode</div>
-                <div className="text-[11px] font-mono text-slate-400 mt-0.5">DSA Solver</div>
-              </a>
-
-              <a
-                href={PERSONAL_INFO.socials.hackthebox}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => sounds.playClick()}
-                className="bento-card p-4 rounded-2xl block hover:border-white/20 transition-all group"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-emerald-400 font-bold font-mono text-xs">HTB</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" />
-                </div>
-                <div className="font-semibold text-white text-xs">Hack The Box</div>
-                <div className="text-[11px] font-mono text-slate-400 mt-0.5">Team #331386</div>
-              </a>
-            </div>
+            {/* Location & Timezone Card */}
+            <SpotlightCard className="p-5 flex items-center justify-between text-xs font-mono text-slate-400">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-cyan-400" />
+                <span>Mumbai, India (IST)</span>
+              </div>
+              <div className="text-emerald-400 font-semibold">
+                ● Active Timezone
+              </div>
+            </SpotlightCard>
 
           </div>
 
-          {/* Message Form (Right 7 Cols) */}
+          {/* Interactive Contact Form (Right 7 Cols) */}
           <div className="lg:col-span-7">
-            <SpotlightCard enableTilt enableFoil className="p-6 sm:p-8">
+            <SpotlightCard className="p-6 sm:p-8">
               {submitted ? (
-                <div className="py-12 flex flex-col items-center text-center space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <div className="text-center py-12 space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
                     <Check className="w-6 h-6" />
                   </div>
-                  <h3 className="text-xl font-bold text-white">
-                    Message Sent!
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-400 max-w-sm">
-                    Thank you, {form.name}. I&apos;ve received your message and will reply to {form.email} as soon as possible.
+                  <h3 className="text-lg font-bold text-white">Message Dispatched!</h3>
+                  <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                    Thank you for reaching out. I will review your message and reply to{' '}
+                    <strong className="text-slate-200">{form.email}</strong> shortly.
                   </p>
-                  <Magnetic strength={0.25} radius={50}>
-                    <button
-                      onClick={() => {
-                        setSubmitted(false);
-                        setForm({ name: '', email: '', message: '' });
-                      }}
-                      className="mt-4 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-medium text-slate-300 transition-colors"
-                    >
-                      Send Another Note
-                    </button>
-                  </Magnetic>
+                  <button
+                    onClick={() => {
+                      setSubmitted(false);
+                      setForm({ name: '', email: '', message: '' });
+                    }}
+                    className="mt-4 px-4 py-2 rounded-full text-xs font-mono text-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors"
+                  >
+                    Send Another Note
+                  </button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-medium text-slate-300">
+                      <label className="text-[11px] font-mono text-slate-400 uppercase">
                         Your Name
                       </label>
                       <input
@@ -243,14 +156,13 @@ export const ContactSection: React.FC = () => {
                         required
                         value={form.name}
                         onChange={(e) => setForm({ ...form, name: e.target.value })}
-                        placeholder="Alex Mercer"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF8A00] transition-colors"
+                        placeholder="e.g. Alex Chen"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-xs placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/50 transition-colors"
                       />
                     </div>
-
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-medium text-slate-300">
-                        Email Address
+                      <label className="text-[11px] font-mono text-slate-400 uppercase">
+                        Your Email
                       </label>
                       <input
                         type="email"
@@ -258,40 +170,39 @@ export const ContactSection: React.FC = () => {
                         value={form.email}
                         onChange={(e) => setForm({ ...form, email: e.target.value })}
                         placeholder="alex@company.com"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF8A00] transition-colors"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-xs placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/50 transition-colors"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-medium text-slate-300">
-                      Message
+                    <label className="text-[11px] font-mono text-slate-400 uppercase">
+                      Message / Project Details
                     </label>
                     <textarea
-                      rows={4}
                       required
+                      rows={4}
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
                       placeholder="Hi Asmit, I came across your portfolio and wanted to discuss..."
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF8A00] transition-colors resize-none"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-xs placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/50 transition-colors resize-none"
                     />
                   </div>
 
-                  <Magnetic strength={0.2} radius={80} className="w-full">
-                    <button
-                      type="submit"
-                      disabled={isSending}
-                      className="w-full py-3.5 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-60 shadow-lg hover:shadow-xl active:scale-[0.99]"
-                    >
-                      {isSending ? (
-                        <span>Sending note...</span>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4" /> Send Message
-                        </>
-                      )}
-                    </button>
-                  </Magnetic>
+                  <button
+                    type="submit"
+                    disabled={isSending}
+                    className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-white text-slate-950 font-semibold text-xs sm:text-sm hover:bg-slate-200 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    {isSending ? (
+                      <span>Sending...</span>
+                    ) : (
+                      <>
+                        <span>Send Message</span>
+                        <Send className="w-3.5 h-3.5" />
+                      </>
+                    )}
+                  </button>
                 </form>
               )}
             </SpotlightCard>

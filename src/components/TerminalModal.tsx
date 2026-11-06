@@ -1,87 +1,47 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Terminal, ArrowRight, ExternalLink, Mail, Copy, Check, X, Sparkles, FolderGit2, User, Code2, Play, Skull, FileDown } from 'lucide-react';
+import { Search, ArrowRight, ExternalLink, Mail, Copy, Check, X, FolderGit2, FileDown, Terminal, Play, Shield } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './BrandIcons';
 import { PERSONAL_INFO, PROJECTS } from '../data/portfolioData';
-import { sounds } from '../utils/sound';
-import confetti from 'canvas-confetti';
 
 interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenCompiler?: () => void;
   onOpenDarkSide?: () => void;
-  onReplayHello?: () => void;
 }
 
-export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onOpenCompiler, onOpenDarkSide, onReplayHello }) => {
-  const [search, setSearch] = useState('');
+export const TerminalModal: React.FC<CommandPaletteProps> = ({
+  isOpen,
+  onClose,
+  onOpenCompiler,
+  onOpenDarkSide,
+}) => {
+  const [query, setQuery] = useState('');
   const [copied, setCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 80);
+      setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleCopyEmail = () => {
-    sounds.playSuccess();
     navigator.clipboard.writeText(PERSONAL_INFO.email);
     setCopied(true);
     setTimeout(() => {
       setCopied(false);
       onClose();
-    }, 1200);
+    }, 1000);
   };
 
-  const handleHireTrigger = () => {
-    sounds.playSuccess();
-    confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#FF8A00', '#FFFFFF', '#10B981'],
-    });
-    setTimeout(() => {
-      window.location.href = `mailto:${PERSONAL_INFO.email}?subject=Opportunity%20for%20Asmit%20Jogdand`;
-      onClose();
-    }, 800);
-  };
-
-  const navigationActions = [
+  const allActions = [
     {
-      title: '💀 [RESTRICTED] Unlock The Dark Side Dossier',
-      desc: 'Interpol Cyber Threat Dossier: Black Hat Hacker, Game Cheat Maker & Ring-0 Reverser (CS2, Valorant, GTA5, Minecraft, Phasmophobia)',
-      icon: <Skull className="w-4 h-4 text-red-500 animate-pulse" />,
-      action: () => {
-        onClose();
-        if (onOpenDarkSide) onOpenDarkSide();
-      },
-    },
-    {
-      title: 'Code With SmitroniX (Online IDE & Java GUI)',
-      desc: 'Full-screen cloud runner for Java (Swing & AWT GUI), Python, C++, C, Rust, JS, Go',
-      icon: <Play className="w-4 h-4 text-emerald-400 fill-current" />,
-      action: () => {
-        onClose();
-        if (onOpenCompiler) onOpenCompiler();
-      },
-    },
-    {
-      title: '🍎 Replay Apple "Hello" Welcome Screen',
-      desc: 'Authentic Apple cursive handwriting animation with multilingual greetings & startup chime',
-      icon: <Sparkles className="w-4 h-4 text-amber-400" />,
-      action: () => {
-        onClose();
-        if (onReplayHello) onReplayHello();
-      },
-    },
-    {
-      title: 'View Projects',
-      desc: 'Explore DYPU Connect, AniPlex, and cloud APIs',
-      icon: <FolderGit2 className="w-4 h-4 text-[#FF8A00]" />,
+      title: 'View Flagship Projects',
+      desc: 'ShadowLauncher, SmiTriX, DYPU Connect & Cloud IDE',
+      icon: <FolderGit2 className="w-4 h-4 text-cyan-400" />,
       action: () => {
         window.location.hash = '#projects';
         onClose();
@@ -89,37 +49,36 @@ export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose, 
     },
     {
       title: 'DevOps & Architecture Pipeline',
-      desc: 'CI/CD, Docker multi-stage builds, and cloud orchestration',
-      icon: <Terminal className="w-4 h-4 text-cyan-400" />,
+      desc: 'CI/CD, multi-stage Docker builds, and edge delivery',
+      icon: <Terminal className="w-4 h-4 text-purple-400" />,
       action: () => {
-        window.location.hash = '#devops';
+        window.location.hash = '#architecture';
         onClose();
       },
     },
     {
-      title: 'Technical Arsenal & Stack',
-      desc: 'React, TypeScript, Node.js, AWS, and databases',
-      icon: <Code2 className="w-4 h-4 text-amber-400" />,
+      title: 'Tech Stack & Core Disciplines',
+      desc: 'Java 21, C++, React 19, TypeScript, Docker, AWS',
+      icon: <Terminal className="w-4 h-4 text-amber-400" />,
       action: () => {
         window.location.hash = '#skills';
         onClose();
       },
     },
     {
-      title: 'Experience & Background',
-      desc: 'Naviotech, RAIT Social Wing, and Hypixel',
-      icon: <User className="w-4 h-4 text-purple-400" />,
+      title: 'Experience & Academic Timeline',
+      desc: 'Naviotech Solution, HTB Team sudo Unknown, RAIT Mumbai',
+      icon: <Terminal className="w-4 h-4 text-emerald-400" />,
       action: () => {
         window.location.hash = '#experience';
         onClose();
       },
     },
     {
-      title: '📄 Download Official Resume (PDF)',
-      desc: 'Updated October 2026 • CGPA 8.65 • Naviotech Internship • Flagship Projects',
-      icon: <FileDown className="w-4 h-4 text-[#FF8A00]" />,
+      title: 'Download Resume (PDF)',
+      desc: 'Latest official software engineering resume',
+      icon: <FileDown className="w-4 h-4 text-white" />,
       action: () => {
-        sounds.playSuccess();
         window.open(PERSONAL_INFO.resumeUrl, '_blank');
         onClose();
       },
@@ -131,167 +90,112 @@ export const TerminalModal: React.FC<CommandPaletteProps> = ({ isOpen, onClose, 
       action: handleCopyEmail,
     },
     {
-      title: 'Fast-Track Hire / Get in Touch',
-      desc: 'Send an email directly with confetti celebration',
-      icon: <Sparkles className="w-4 h-4 text-amber-400" />,
-      action: handleHireTrigger,
-    },
-  ];
-
-  const externalLinks = [
-    {
-      title: 'GitHub Profile',
+      title: 'Open GitHub Profile',
       desc: 'github.com/SmitroniX (52+ repositories)',
       icon: <GithubIcon className="w-4 h-4 text-slate-300" />,
-      url: PERSONAL_INFO.socials.github,
+      action: () => {
+        window.open(PERSONAL_INFO.socials.github, '_blank');
+        onClose();
+      },
     },
     {
-      title: 'LinkedIn Profile',
+      title: 'Open LinkedIn Profile',
       desc: 'linkedin.com/in/asmit-jogdand',
-      icon: <LinkedinIcon className="w-4 h-4 text-[#0A66C2]" />,
-      url: PERSONAL_INFO.socials.linkedin,
+      icon: <LinkedinIcon className="w-4 h-4 text-blue-400" />,
+      action: () => {
+        window.open(PERSONAL_INFO.socials.linkedin, '_blank');
+        onClose();
+      },
     },
     {
-      title: 'Hack The Box CTF Team Profile',
-      desc: 'sudo Unknown (#331386) • Founding Captain',
-      icon: <Skull className="w-4 h-4 text-emerald-400" />,
-      url: PERSONAL_INFO.socials.hackthebox,
+      title: 'Code With SmitroniX (Cloud IDE)',
+      desc: 'Multi-language cloud runner with Java Swing/AWT desktop',
+      icon: <Play className="w-4 h-4 text-emerald-400" />,
+      action: () => {
+        onClose();
+        if (onOpenCompiler) onOpenCompiler();
+      },
     },
     {
-      title: 'LeetCode Profile',
-      desc: 'leetcode.com/u/SmitroniX (DSA Solutions)',
-      icon: <Terminal className="w-4 h-4 text-amber-500" />,
-      url: PERSONAL_INFO.socials.leetcode,
-    },
-    {
-      title: 'HackerRank Profile',
-      desc: 'hackerrank.com/jogdandasmit',
-      icon: <Code2 className="w-4 h-4 text-emerald-400" />,
-      url: PERSONAL_INFO.socials.hackerrank,
+      title: '🛡️ [Classified] HTB Team sudo Unknown (#331386)',
+      desc: 'Cybersecurity research, binary exploitation & CTF challenges',
+      icon: <Shield className="w-4 h-4 text-red-400" />,
+      action: () => {
+        onClose();
+        if (onOpenDarkSide) onOpenDarkSide();
+      },
     },
   ];
 
-  const filteredNav = navigationActions.filter(
-    (a) =>
-      a.title.toLowerCase().includes(search.toLowerCase()) ||
-      a.desc.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const filteredLinks = externalLinks.filter(
-    (l) =>
-      l.title.toLowerCase().includes(search.toLowerCase()) ||
-      l.desc.toLowerCase().includes(search.toLowerCase())
+  const filtered = allActions.filter(
+    (item) =>
+      item.title.toLowerCase().includes(query.toLowerCase()) ||
+      item.desc.toLowerCase().includes(query.toLowerCase())
   );
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150">
       <div
-        className="w-full max-w-xl bg-[#090E17] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
+        className="fixed inset-0"
+        onClick={onClose}
+      />
+      <div className="relative w-full max-w-xl rounded-2xl bg-[#090D15] border border-white/[0.12] shadow-2xl shadow-black/90 overflow-hidden z-10 animate-in zoom-in-95 duration-150">
+        
         {/* Search Header */}
-        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/10 bg-slate-900/50">
-          <Search className="w-4 h-4 text-slate-400 shrink-0" />
+        <div className="flex items-center px-4 py-3.5 border-b border-white/[0.08] bg-black/40">
+          <Search className="w-4 h-4 text-slate-400 shrink-0 mr-3" />
           <input
             ref={inputRef}
             type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Type a command or search projects, compiler, skills..."
-            className="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder-slate-500 font-sans"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Type a command or search..."
+            className="w-full bg-transparent text-sm text-white placeholder:text-slate-500 focus:outline-none font-sans"
           />
-          <kbd className="px-2 py-0.5 text-[10px] font-mono text-slate-400 bg-white/5 border border-white/10 rounded">
-            ESC
-          </kbd>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Action List */}
-        <div className="max-h-[380px] overflow-y-auto p-2 space-y-4">
-          
-          {/* Navigation & Commands */}
-          {filteredNav.length > 0 && (
-            <div>
-              <div className="px-3 py-1.5 text-[11px] font-mono text-slate-500 uppercase tracking-wider">
-                Quick Actions
-              </div>
-              <div className="space-y-0.5">
-                {filteredNav.map((action, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      sounds.playClick();
-                      action.action();
-                    }}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-white/5 transition-colors text-left group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-white/5 border border-white/5">
-                        {action.icon}
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-slate-200 group-hover:text-white">
-                          {action.title}
-                        </div>
-                        <div className="text-xs text-slate-500">
-                          {action.desc}
-                        </div>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-slate-300 group-hover:translate-x-0.5 transition-all" />
-                  </button>
-                ))}
-              </div>
+        <div className="max-h-80 overflow-y-auto p-2 space-y-1">
+          {filtered.length === 0 ? (
+            <div className="p-6 text-center text-xs font-mono text-slate-500">
+              No matching actions found.
             </div>
-          )}
-
-          {/* Social Profiles */}
-          {filteredLinks.length > 0 && (
-            <div>
-              <div className="px-3 py-1.5 text-[11px] font-mono text-slate-500 uppercase tracking-wider">
-                Profiles &amp; Repositories
-              </div>
-              <div className="space-y-0.5">
-                {filteredLinks.map((link, idx) => (
-                  <a
-                    key={idx}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => {
-                      sounds.playClick();
-                      onClose();
-                    }}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-white/5 transition-colors text-left group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-white/5 border border-white/5">
-                        {link.icon}
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-slate-200 group-hover:text-white">
-                          {link.title}
-                        </div>
-                        <div className="text-xs text-slate-500">
-                          {link.desc}
-                        </div>
-                      </div>
+          ) : (
+            filtered.map((item, i) => (
+              <button
+                key={i}
+                onClick={item.action}
+                className="w-full p-2.5 rounded-xl hover:bg-white/[0.06] flex items-center justify-between text-left transition-colors group cursor-pointer"
+              >
+                <div className="flex items-center gap-3 truncate">
+                  <div className="p-2 rounded-lg bg-white/[0.04] border border-white/[0.06]">
+                    {item.icon}
+                  </div>
+                  <div className="truncate">
+                    <div className="text-xs font-semibold text-white group-hover:text-cyan-400 transition-colors">
+                      {item.title}
                     </div>
-                    <ExternalLink className="w-3.5 h-3.5 text-slate-600 group-hover:text-slate-300 transition-colors" />
-                  </a>
-                ))}
-              </div>
-            </div>
+                    <div className="text-[11px] text-slate-400 font-mono truncate">
+                      {item.desc}
+                    </div>
+                  </div>
+                </div>
+                <ArrowRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
+              </button>
+            ))
           )}
-
         </div>
 
-        {/* Footer */}
-        <div className="px-4 py-2.5 bg-slate-950/60 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-slate-500">
-          <span>Command Palette • Asmit Jogdand</span>
-          <span>Press ESC to close</span>
+        {/* Modal Footer */}
+        <div className="px-4 py-2.5 border-t border-white/[0.06] bg-black/40 flex items-center justify-between text-[11px] font-mono text-slate-400">
+          <span>Navigate with mouse or tap</span>
+          <span>ESC to close</span>
         </div>
 
       </div>

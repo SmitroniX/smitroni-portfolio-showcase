@@ -1,13 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowRight, Copy, Check, Terminal, MapPin, Clock, ExternalLink, FileDown, ShieldCheck, GraduationCap, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowRight, FileDown, Terminal, GraduationCap, ShieldCheck, Copy, Check, Sparkles, Activity } from 'lucide-react';
 import { GithubIcon } from './BrandIcons';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { SpotlightCard } from './SpotlightCard';
-import { HeroProfileReveal } from './HeroProfileReveal';
-import { sounds } from '../utils/sound';
-import { KineticText } from './KineticText';
-import { Magnetic } from './Magnetic';
-import { motion } from 'framer-motion';
 
 interface HeroProps {
   onOpenTerminal: () => void;
@@ -15,267 +10,253 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
   const [copied, setCopied] = useState(false);
-  const [time, setTime] = useState('');
-
-  // Live Mumbai Time
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const options: Intl.DateTimeFormatOptions = {
-        timeZone: 'Asia/Kolkata',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true,
-      };
-      setTime(new Intl.DateTimeFormat('en-US', options).format(now));
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const [activeTab, setActiveTab] = useState<'engine' | 'pwa' | 'cloud'>('engine');
 
   const handleCopyEmail = () => {
-    sounds.playClick();
     navigator.clipboard.writeText(PERSONAL_INFO.email);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const codeSnippets = {
+    engine: `// ShadowLauncher: Android Native C++ Core (GL4ES Bridge)
+class NativeGraphicsPipeline {
+    static constexpr double TARGET_FRAME_TIME_MS = 7.24; // 138 FPS Locked
+    
+    void dispatchRenderLoop(EGLDisplay dpy, EGLSurface surf) {
+        setNativeThreadPriority(THREAD_PRIORITY_URGENT_DISPLAY);
+        while (mIsRunning.load(std::memory_order_relaxed)) {
+            gl4es_flushFrameBuffers();
+            eglSwapBuffers(dpy, surf); // Sub-8ms touch-to-photon
+        }
+    }
+};`,
+    pwa: `// SmiTriX: Privacy PWA with Biometric WebAuthn Passkeys
+export async function authenticatePasskey(): Promise<AuthResult> {
+  const credential = await navigator.credentials.get({
+    publicKey: {
+      challenge: generateLocalCryptographicChallenge(),
+      userVerification: 'required',
+      timeout: 30000,
+    }
+  });
+  // 100% Client-side cryptographic verification with zero telemetry
+  return verifyPasskeyLocally(credential);
+}`,
+    cloud: `// Shadow_API: High-Throughput Media Indexing Microservice
+export async function handleStreamIndex(req: FastifyRequest, reply: FastifyReply) {
+  const cacheKey = \`stream:\${req.params.id}\`;
+  const cached = await redis.get(cacheKey);
+  if (cached) return reply.header('X-Cache', 'HIT').send(cached);
+
+  const payload = await scrapeMediaCluster(req.params.id);
+  await redis.setex(cacheKey, 3600, JSON.stringify(payload));
+  return reply.header('X-Latency-Bench', '<150ms').send(payload);
+}`
   };
 
   return (
-    <section className="relative pt-32 pb-16 overflow-hidden">
-      {/* Soft subtle radial ambient backdrop */}
-      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[850px] h-[450px] bg-gradient-to-b from-orange-500/15 via-amber-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+    <section className="relative pt-36 pb-20 overflow-hidden">
+      {/* Subtle Ambient Radial Glow */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-cyan-500/10 via-purple-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Main Hero Grid: Left Content + Right Heroic Profile Reveal */}
+        {/* Main Grid: Left Value Proposition + Right Interactive Code Console */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-16">
           
-          {/* Left Column: Headlines & Actions (7 Cols) */}
+          {/* Left Column (7 Cols) */}
           <div className="lg:col-span-7 space-y-6">
             
-            {/* Status Badges with Magnetic Proximity */}
-            <div className="flex flex-wrap items-center gap-2.5">
-              <Magnetic strength={0.2} radius={50}>
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-white/10 text-xs font-mono text-slate-300 backdrop-blur-md shadow-md">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Available for SWE Internships</span>
-                </div>
-              </Magnetic>
-
-              <Magnetic strength={0.2} radius={50}>
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-mono text-amber-300 backdrop-blur-md shadow-md">
-                  <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
-                  <span>CGPA 8.65 • RAIT Mumbai</span>
-                </div>
-              </Magnetic>
-
-              <Magnetic strength={0.2} radius={50}>
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-xs font-mono text-cyan-300 backdrop-blur-md shadow-md">
-                  <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Captain • HTB #331386</span>
-                </div>
-              </Magnetic>
+            {/* Status Pill */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] backdrop-blur-md">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              <span className="text-xs font-mono text-slate-300">
+                Available for SWE Internships &amp; Roles
+              </span>
             </div>
 
-            <div className="space-y-4">
-              <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white font-display leading-[1.08]">
-                Hey, I&apos;m{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400">
-                  <KineticText text="Asmit Jogdand" playSound speed={30} />
-                </span>
-                .
+            {/* Headline */}
+            <div className="space-y-3">
+              <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.08]">
+                Asmit Jogdand
               </h1>
-
-              <div className="text-xl sm:text-2xl text-slate-300 font-normal leading-snug">
-                Full-stack software engineer &amp; systems builder in Mumbai. Known online as{' '}
-                <span className="text-[#FF8A00] font-semibold font-mono">
-                  <KineticText text="@SmitroniX" playSound speed={40} />
+              <div className="text-xl sm:text-2xl text-slate-300 font-medium leading-snug">
+                Full-Stack Software Engineer &amp; Systems Builder.{' '}
+                <span className="text-cyan-400 font-mono text-lg sm:text-xl font-normal block sm:inline mt-1 sm:mt-0">
+                  @SmitroniX
                 </span>
-                .
               </div>
             </div>
 
-            <p className="text-base text-slate-400 leading-relaxed font-sans max-w-xl">
-              Computer Engineering undergraduate at{' '}
-              <span className="text-slate-200 font-medium">Ramrao Adik Institute of Technology (RAIT)</span>. 
-              I engineer low-latency systems like{' '}
-              <span className="text-slate-200 font-medium font-mono text-[#FF8A00]">ShadowLauncher</span> (native 138 FPS gaming core), campus platforms like{' '}
-              <span className="text-slate-200 font-medium">DYPU Connect</span>, 
-              and privacy-first apps like <span className="text-slate-200 font-medium">SmiTriX</span>.
+            {/* Description */}
+            <p className="text-sm sm:text-base text-slate-400 leading-relaxed max-w-xl">
+              Computer Engineering student at RAIT, Mumbai University. Maintaining an{' '}
+              <strong className="text-slate-200">8.65 CGPA</strong>, founding captain of CTF team{' '}
+              <strong className="text-slate-200">sudo Unknown (#331386)</strong>, and builder of native C++/Java game engines, privacy-first PWAs, and high-throughput cloud microservices.
             </p>
 
-            {/* Action Row with Magnetic Elements */}
+            {/* Credential Tags */}
+            <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-amber-300">
+                <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
+                <span>CGPA 8.65 • RAIT Mumbai</span>
+              </span>
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-purple-300">
+                <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
+                <span>Capt. sudo Unknown</span>
+              </span>
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-cyan-300">
+                <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                <span>52+ Repositories</span>
+              </span>
+            </div>
+
+            {/* Primary Action Buttons */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
-              <Magnetic strength={0.3} radius={70}>
-                <a
-                  href="#projects"
-                  onClick={() => sounds.playClick()}
-                  data-cursor="project"
-                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-bold text-sm transition-all shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 group"
-                >
-                  <span>View Projects</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </a>
-              </Magnetic>
-
-              {/* Direct Resume Download Button */}
-              <Magnetic strength={0.3} radius={70}>
-                <a
-                  href={PERSONAL_INFO.resumeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  download="Asmit_Jogdand_Resume.pdf"
-                  onClick={() => sounds.playClick()}
-                  className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-gradient-to-r from-[#FF8A00] to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-bold text-sm transition-all shadow-lg shadow-orange-500/25 active:scale-95 group"
-                  title="Download Official Asmit Jogdand Resume (PDF)"
-                >
-                  <FileDown className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
-                  <span>Resume (PDF)</span>
-                </a>
-              </Magnetic>
-
-              <Magnetic strength={0.25} radius={60}>
-                <button
-                  onClick={handleCopyEmail}
-                  className="inline-flex items-center gap-2 px-4 py-3.5 rounded-xl bg-slate-900/90 hover:bg-slate-800/90 border border-white/10 hover:border-white/20 text-slate-200 text-sm font-medium transition-all active:scale-95"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="w-4 h-4 text-emerald-400" />
-                      <span className="text-emerald-400 font-mono text-xs">Email Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-4 h-4 text-slate-400" />
-                      <span>Copy Email</span>
-                    </>
-                  )}
-                </button>
-              </Magnetic>
-
-              <Magnetic strength={0.25} radius={60}>
-                <button
-                  onClick={() => {
-                    sounds.playWarp();
-                    onOpenTerminal();
-                  }}
-                  data-cursor="terminal"
-                  className="inline-flex items-center gap-2 px-4 py-3.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/80 border border-white/10 text-slate-300 text-sm font-mono transition-all active:scale-95"
-                  title="Open Command Palette"
-                >
-                  <Terminal className="w-4 h-4 text-[#FF8A00]" />
-                  <span className="hidden sm:inline font-bold">⌘K</span>
-                </button>
-              </Magnetic>
-            </div>
-
-          </div>
-
-          {/* Right Column: Heroic Profile Reveal Card (5 Cols) */}
-          <div className="lg:col-span-5 flex justify-center lg:justify-end">
-            <HeroProfileReveal />
-          </div>
-
-        </div>
-
-        {/* Hero Bento Grid: Personal Snapshots */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          
-          {/* Bento 1: Live Mumbai Clock & Location */}
-          <SpotlightCard className="p-5 flex flex-col justify-between" enableTilt enableFoil>
-            <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
-              <span className="flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-[#FF8A00]" /> Mumbai, IN
-              </span>
-              <span className="flex items-center gap-1 text-slate-500">
-                <Clock className="w-3.5 h-3.5" /> IST
-              </span>
-            </div>
-
-            <div className="space-y-1">
-              <div className="text-2xl font-bold font-mono tracking-tight text-white flex items-center gap-2">
-                <span>{time || 'Loading...'}</span>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              </div>
-              <p className="text-xs text-slate-400">
-                UTC+5:30 • Usually hacking, building, or reviewing PRs
-              </p>
-            </div>
-          </SpotlightCard>
-
-          {/* Bento 2: Academic & CTF Merit */}
-          <SpotlightCard className="p-5 flex flex-col justify-between" enableTilt enableFoil>
-            <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
-              <span className="flex items-center gap-1.5 text-amber-400">
-                <GraduationCap className="w-3.5 h-3.5" /> Academic &amp; CTF
-              </span>
-              <span className="text-[10px] text-emerald-400 font-mono font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                TOP TIER
-              </span>
-            </div>
-
-            <div className="space-y-1">
-              <div className="text-2xl font-bold font-mono text-white flex items-baseline gap-2">
-                <span>8.65</span>
-                <span className="text-xs font-normal text-slate-400 font-sans">CGPA (Sem 1: 8.80)</span>
-              </div>
-              <p className="text-xs text-slate-400">
-                RAIT Mumbai • HTB Team #331386 Founding Captain
-              </p>
-            </div>
-          </SpotlightCard>
-
-          {/* Bento 3: Currently Building */}
-          <SpotlightCard className="p-5 flex flex-col justify-between" enableTilt enableFoil>
-            <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
-              <span className="flex items-center gap-1.5 text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                Active Focus
-              </span>
-              <span className="text-[11px] text-slate-500 font-mono">v2 Engine</span>
-            </div>
-
-            <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-white truncate font-mono">
-                {PERSONAL_INFO.currently.building}
-              </h3>
-              <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                Native C/C++ graphics translation, 138 FPS mobile HUD, and distributed campus microservices.
-              </p>
-            </div>
-          </SpotlightCard>
-
-          {/* Bento 4: GitHub Pulse */}
-          <SpotlightCard className="p-5 flex flex-col justify-between group" enableTilt enableFoil>
-            <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
-              <span className="flex items-center gap-1.5">
-                <GithubIcon className="w-3.5 h-3.5 text-slate-300" /> GitHub
-              </span>
               <a
-                href={PERSONAL_INFO.socials.github}
+                href="#projects"
+                className="px-5 py-2.5 rounded-full bg-white text-slate-950 font-semibold text-xs sm:text-sm hover:bg-slate-200 transition-all flex items-center gap-2 shadow-lg shadow-white/10 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <span>View Projects</span>
+                <ArrowRight className="w-4 h-4" />
+              </a>
+
+              <a
+                href={PERSONAL_INFO.resumeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Asmit Jogdand GitHub Profile (@SmitroniX)"
-                title="View Asmit Jogdand GitHub Repositories (@SmitroniX)"
-                className="text-slate-400 hover:text-white transition-colors"
+                className="px-5 py-2.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.12] text-white font-medium text-xs sm:text-sm transition-all flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
               >
-                <ExternalLink className="w-3.5 h-3.5" />
+                <FileDown className="w-4 h-4 text-cyan-400" />
+                <span>Download Resume</span>
               </a>
-            </div>
 
-            <div className="space-y-1">
-              <div className="text-2xl font-bold font-mono text-white flex items-baseline gap-2">
-                <span>52+</span>
-                <span className="text-xs font-normal text-slate-400 font-sans">Repositories</span>
+              <button
+                onClick={handleCopyEmail}
+                className="px-3.5 py-2.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Copy email to clipboard"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-emerald-400">Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 text-slate-400" />
+                    <span className="hidden sm:inline">Copy Email</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Right Column: Sleek Interactive Code Console (5 Cols) */}
+          <div className="lg:col-span-5">
+            <SpotlightCard className="p-0 border border-white/[0.12] shadow-2xl">
+              {/* Window Header */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] bg-black/40">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+                  <span className="text-[11px] font-mono text-slate-400 ml-2">architecture-benchmarks</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>ONLINE</span>
+                </div>
               </div>
-              <p className="text-xs text-slate-400">
-                Systems engines, open-source utilities, and 99.9% uptime bots.
-              </p>
-            </div>
-          </SpotlightCard>
 
+              {/* Code Tabs */}
+              <div className="flex items-center border-b border-white/[0.06] bg-black/20 text-xs font-mono">
+                <button
+                  onClick={() => setActiveTab('engine')}
+                  className={`px-3.5 py-2 border-r border-white/[0.06] transition-colors ${
+                    activeTab === 'engine'
+                      ? 'bg-white/[0.06] text-cyan-400 font-semibold'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  ShadowLauncher.cpp
+                </button>
+                <button
+                  onClick={() => setActiveTab('pwa')}
+                  className={`px-3.5 py-2 border-r border-white/[0.06] transition-colors ${
+                    activeTab === 'pwa'
+                      ? 'bg-white/[0.06] text-cyan-400 font-semibold'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  SmiTriX.tsx
+                </button>
+                <button
+                  onClick={() => setActiveTab('cloud')}
+                  className={`px-3.5 py-2 transition-colors ${
+                    activeTab === 'cloud'
+                      ? 'bg-white/[0.06] text-cyan-400 font-semibold'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Shadow_API.ts
+                </button>
+              </div>
+
+              {/* Code Viewer */}
+              <div className="p-4 bg-black/60 font-mono text-xs text-slate-300 overflow-x-auto min-h-[220px]">
+                <pre className="text-[11px] leading-relaxed text-slate-300">
+                  <code>{codeSnippets[activeTab]}</code>
+                </pre>
+              </div>
+
+              {/* Bottom Benchmark Metrics Bar */}
+              <div className="grid grid-cols-3 divide-x divide-white/[0.08] border-t border-white/[0.08] bg-black/40 text-center py-2.5 font-mono text-[11px]">
+                <div>
+                  <div className="text-[10px] text-slate-400 uppercase">Engine FPS</div>
+                  <div className="text-cyan-400 font-bold">138 FPS (120Hz)</div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-slate-400 uppercase">Input Latency</div>
+                  <div className="text-emerald-400 font-bold">&lt;7.2ms Frame</div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-slate-400 uppercase">Security</div>
+                  <div className="text-purple-400 font-bold">WebAuthn Zero-Trust</div>
+                </div>
+              </div>
+            </SpotlightCard>
+          </div>
+        </div>
+
+        {/* Quick Tech Ticker Bar (Linear Style) */}
+        <div className="pt-6 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-slate-400">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-cyan-400" />
+            <span className="text-slate-200 font-medium">Core Stack:</span>
+            <span>React 19 • TypeScript • Java 21 • C/C++ • Node.js • Docker • AWS</span>
+          </div>
+          <div className="flex items-center gap-4 text-slate-400">
+            <a
+              href="https://github.com/SmitroniX"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+            >
+              github.com/SmitroniX ↗
+            </a>
+            <a
+              href="https://linkedin.com/in/asmit-jogdand"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+            >
+              linkedin/asmit-jogdand ↗
+            </a>
+          </div>
         </div>
 
       </div>
