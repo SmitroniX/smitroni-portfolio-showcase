@@ -1,8 +1,10 @@
 import React from 'react';
-import { Layout, Server, Cloud, Database, Terminal, Code2, Flame, ExternalLink, Cpu } from 'lucide-react';
+import { Layout, Server, Cloud, Database, Terminal, Code2, Flame, ExternalLink, Cpu, ShieldCheck } from 'lucide-react';
 import { TECH_STACK, PERSONAL_INFO } from '../data/portfolioData';
 import { SpotlightCard } from './SpotlightCard';
 import { sounds } from '../utils/sound';
+import { KineticText } from './KineticText';
+import { Magnetic } from './Magnetic';
 
 export const SkillsRadar: React.FC = () => {
   return (
@@ -16,7 +18,7 @@ export const SkillsRadar: React.FC = () => {
               Capabilities
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-display mt-1">
-              Tech Stack &amp; Tools
+              <KineticText text="Tech Stack & Tools" playSound speed={35} />
             </h2>
           </div>
           <p className="text-slate-400 text-sm font-sans mt-3 md:mt-0 max-w-md">
@@ -24,11 +26,11 @@ export const SkillsRadar: React.FC = () => {
           </p>
         </div>
 
-        {/* Tech Bento Grid */}
+        {/* Tech Bento Grid with 3D Tilt & Holographic Foil */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           
           {/* Frontend Card */}
-          <SpotlightCard className="p-6 flex flex-col justify-between">
+          <SpotlightCard className="p-6 flex flex-col justify-between" enableTilt enableFoil>
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-[#FF8A00]">
@@ -36,7 +38,7 @@ export const SkillsRadar: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-base">Frontend</h3>
-                  <span className="text-[11px] text-slate-400">User interfaces &amp; web</span>
+                  <span className="text-[11px] text-slate-400 font-mono">User interfaces &amp; web</span>
                 </div>
               </div>
 
@@ -44,7 +46,7 @@ export const SkillsRadar: React.FC = () => {
                 {TECH_STACK.frontend.map((item) => (
                   <div
                     key={item.name}
-                    className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5 text-xs"
+                    className="flex items-center justify-between p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-xs transition-colors"
                   >
                     <span className="font-medium text-slate-200">{item.name}</span>
                     <span className="text-[10px] font-mono text-slate-400">{item.tag}</span>
@@ -55,7 +57,7 @@ export const SkillsRadar: React.FC = () => {
           </SpotlightCard>
 
           {/* Backend Card */}
-          <SpotlightCard className="p-6 flex flex-col justify-between">
+          <SpotlightCard className="p-6 flex flex-col justify-between" enableTilt enableFoil>
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
@@ -63,7 +65,7 @@ export const SkillsRadar: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-base">Backend &amp; APIs</h3>
-                  <span className="text-[11px] text-slate-400">Services &amp; concurrency</span>
+                  <span className="text-[11px] text-slate-400 font-mono">Services &amp; concurrency</span>
                 </div>
               </div>
 
@@ -71,7 +73,7 @@ export const SkillsRadar: React.FC = () => {
                 {TECH_STACK.backend.map((item) => (
                   <div
                     key={item.name}
-                    className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5 text-xs"
+                    className="flex items-center justify-between p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-xs transition-colors"
                   >
                     <span className="font-medium text-slate-200">{item.name}</span>
                     <span className="text-[10px] font-mono text-slate-400">{item.tag}</span>
@@ -82,7 +84,7 @@ export const SkillsRadar: React.FC = () => {
           </SpotlightCard>
 
           {/* Cloud & DevOps Card */}
-          <SpotlightCard className="p-6 flex flex-col justify-between">
+          <SpotlightCard className="p-6 flex flex-col justify-between" enableTilt enableFoil>
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
@@ -90,7 +92,7 @@ export const SkillsRadar: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-base">Cloud &amp; DevOps</h3>
-                  <span className="text-[11px] text-slate-400">Deployments &amp; systems</span>
+                  <span className="text-[11px] text-slate-400 font-mono">Deployments &amp; systems</span>
                 </div>
               </div>
 
@@ -98,7 +100,7 @@ export const SkillsRadar: React.FC = () => {
                 {TECH_STACK.cloud.map((item) => (
                   <div
                     key={item.name}
-                    className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5 text-xs"
+                    className="flex items-center justify-between p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-xs transition-colors"
                   >
                     <span className="font-medium text-slate-200">{item.name}</span>
                     <span className="text-[10px] font-mono text-slate-400">{item.tag}</span>
@@ -109,7 +111,7 @@ export const SkillsRadar: React.FC = () => {
           </SpotlightCard>
 
           {/* Databases & Algorithms */}
-          <SpotlightCard className="p-6 flex flex-col justify-between">
+          <SpotlightCard className="p-6 flex flex-col justify-between" enableTilt enableFoil>
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
@@ -117,7 +119,7 @@ export const SkillsRadar: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-base">Databases &amp; DSA</h3>
-                  <span className="text-[11px] text-slate-400">Storage &amp; algorithmic logic</span>
+                  <span className="text-[11px] text-slate-400 font-mono">Storage &amp; logic</span>
                 </div>
               </div>
 
@@ -125,7 +127,7 @@ export const SkillsRadar: React.FC = () => {
                 {TECH_STACK.databases.map((item) => (
                   <div
                     key={item.name}
-                    className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5 text-xs"
+                    className="flex items-center justify-between p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-xs transition-colors"
                   >
                     <span className="font-medium text-slate-200">{item.name}</span>
                     <span className="text-[10px] font-mono text-slate-400">{item.tag}</span>
@@ -140,7 +142,7 @@ export const SkillsRadar: React.FC = () => {
         {/* Algorithm Profiles, CTF & Philosophy Bar */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           
-          <SpotlightCard className="p-6 flex flex-col justify-between">
+          <SpotlightCard className="p-6 flex flex-col justify-between" enableTilt enableFoil>
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-xs font-mono text-amber-400">
                 <Flame className="w-4 h-4" /> Algorithmic Problem Solving
@@ -154,73 +156,67 @@ export const SkillsRadar: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2 pt-4 border-t border-white/5 mt-4">
-              <a
-                href={PERSONAL_INFO.socials.leetcode}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => sounds.playClick()}
-                className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-slate-200 transition-colors flex items-center gap-1.5"
-              >
-                <span>LeetCode</span>
-                <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
-              </a>
-              <a
-                href={PERSONAL_INFO.socials.hackerrank}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => sounds.playClick()}
-                className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-slate-200 transition-colors flex items-center gap-1.5"
-              >
-                <span>HackerRank</span>
-                <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
-              </a>
+              <Magnetic strength={0.3} radius={50}>
+                <a
+                  href={PERSONAL_INFO.socials.leetcode}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => sounds.playClick()}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-slate-300 hover:text-white transition-all font-mono"
+                >
+                  <span>LeetCode Profile</span>
+                  <ExternalLink className="w-3 h-3 text-amber-400" />
+                </a>
+              </Magnetic>
             </div>
           </SpotlightCard>
 
-          <SpotlightCard className="p-6 flex flex-col justify-between">
+          <SpotlightCard className="p-6 flex flex-col justify-between" enableTilt enableFoil>
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-xs font-mono text-cyan-400">
-                <Terminal className="w-4 h-4" /> Cybersecurity &amp; CTFs
+                <ShieldCheck className="w-4 h-4" /> Cyber Security &amp; CTF
               </div>
               <h4 className="text-base font-bold text-white">
-                sudo Unknown (HTB Team #331386)
+                Hack The Box &amp; Reverse Engineering
               </h4>
               <p className="text-xs text-slate-400">
-                Founding Captain • GLIBC heap exploitation, pwn, web security &amp; forensics.
+                Captain of team #331386. Binary exploitation, memory safety, and web security.
               </p>
             </div>
 
             <div className="flex items-center gap-2 pt-4 border-t border-white/5 mt-4">
-              <a
-                href={PERSONAL_INFO.socials.hackthebox}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => sounds.playClick()}
-                className="px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 text-xs font-mono text-cyan-300 transition-colors flex items-center gap-1.5"
-              >
-                <span>HTB Team Profile</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-              <span className="text-[11px] font-mono text-slate-400">7 Disciplines</span>
+              <Magnetic strength={0.3} radius={50}>
+                <a
+                  href="https://app.hackthebox.com/users/331386"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => sounds.playClick()}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-slate-300 hover:text-white transition-all font-mono"
+                >
+                  <span>HTB Dossier</span>
+                  <ExternalLink className="w-3 h-3 text-cyan-400" />
+                </a>
+              </Magnetic>
             </div>
           </SpotlightCard>
 
-          <SpotlightCard className="p-6 flex flex-col justify-between">
+          <SpotlightCard className="p-6 flex flex-col justify-between" enableTilt enableFoil>
             <div className="space-y-1">
-              <div className="flex items-center gap-2 text-xs font-mono text-[#FF8A00]">
-                <Cpu className="w-4 h-4" /> Systems Philosophy
+              <div className="flex items-center gap-2 text-xs font-mono text-emerald-400">
+                <Cpu className="w-4 h-4" /> Systems Engineering Focus
               </div>
               <h4 className="text-base font-bold text-white">
-                Code with Purpose. Build What Matters.
+                Low-Latency Native Runtime
               </h4>
               <p className="text-xs text-slate-400">
-                Bypassing abstraction bloat with native performance, zero telemetry, and robust security.
+                Compilers, JVM internals, JNI native bridge optimization, and Linux kernel fundamentals.
               </p>
             </div>
 
-            <div className="pt-4 border-t border-white/5 mt-4 flex items-center justify-between text-[11px] font-mono text-slate-400">
-              <span className="text-emerald-400 font-semibold">Native C++ &amp; Java 21</span>
-              <span>100% Privacy</span>
+            <div className="flex items-center gap-2 pt-4 border-t border-white/5 mt-4">
+              <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">
+                GL4ES • LWJGL3 • POSIX • C++
+              </span>
             </div>
           </SpotlightCard>
 

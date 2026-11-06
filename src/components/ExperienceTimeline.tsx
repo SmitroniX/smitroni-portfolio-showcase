@@ -3,6 +3,8 @@ import { Briefcase, GraduationCap, Award, Calendar, MapPin, CheckCircle2, ArrowU
 import { EXPERIENCES, CERTIFICATIONS, PERSONAL_INFO } from '../data/portfolioData';
 import { SpotlightCard } from './SpotlightCard';
 import { sounds } from '../utils/sound';
+import { KineticText } from './KineticText';
+import { Magnetic } from './Magnetic';
 
 export const ExperienceTimeline: React.FC = () => {
   return (
@@ -16,7 +18,7 @@ export const ExperienceTimeline: React.FC = () => {
               Background &amp; Credentials
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-display mt-1">
-              Experience &amp; Education
+              <KineticText text="Experience & Education" playSound speed={35} />
             </h2>
           </div>
           <p className="text-slate-400 text-sm font-sans mt-3 md:mt-0 max-w-md">
@@ -31,6 +33,8 @@ export const ExperienceTimeline: React.FC = () => {
             {EXPERIENCES.map((exp, idx) => (
               <SpotlightCard
                 key={idx}
+                enableTilt
+                enableFoil
                 className="p-6 sm:p-7 space-y-4"
               >
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">

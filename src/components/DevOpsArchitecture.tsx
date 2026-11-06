@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { GitBranch, Box, Cloud, Activity, CheckCircle2, Terminal, Shield, ArrowRight, Server, RefreshCw, Cpu, Layers } from 'lucide-react';
 import { SpotlightCard } from './SpotlightCard';
 import { sounds } from '../utils/sound';
+import { KineticText } from './KineticText';
+import { Magnetic } from './Magnetic';
 
 interface PipelineStage {
   id: string;
@@ -161,7 +163,7 @@ echo "==> Health check: $(curl -s -o /dev/null -w "%{http_code}" localhost/healt
               DevOps &amp; Infrastructure
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-display mt-1">
-              Software Engineering &amp; CI/CD
+              <KineticText text="Software Engineering & CI/CD" playSound speed={35} />
             </h2>
           </div>
           <p className="text-slate-400 text-sm font-sans mt-3 md:mt-0 max-w-md">
@@ -206,7 +208,7 @@ echo "==> Health check: $(curl -s -o /dev/null -w "%{http_code}" localhost/healt
         </div>
 
         {/* Interactive Pipeline Stage Inspector */}
-        <SpotlightCard className="p-6 sm:p-8">
+        <SpotlightCard enableTilt enableFoil enableLaserBeam className="p-6 sm:p-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
             {/* Left Specs & Metrics (6 Cols) */}

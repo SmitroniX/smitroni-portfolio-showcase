@@ -310,5 +310,97 @@
   box-shadow: 0 0 25px -4px rgba(0, 240, 255, 0.5), 0 0 10px -2px rgba(0, 240, 255, 0.3);
 }
 
+/* =========================================================================
+   Extreme Level Creative-Developer Kinetic Animations
+   ========================================================================= */
+
+@keyframes marqueeLeft {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marqueeRight {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0%); }
+}
+
+.animate-marquee-left {
+  animation: marqueeLeft 35s linear infinite;
+}
+
+.animate-marquee-right {
+  animation: marqueeRight 35s linear infinite;
+}
+
+.animate-marquee-left:hover,
+.animate-marquee-right:hover {
+  animation-play-state: paused;
+}
+
+/* Laser Border Beam Tracer */
+@keyframes laserTracer {
+  0% {
+    clip-path: inset(0 0 98% 0);
+  }
+  25% {
+    clip-path: inset(0 0 0 98%);
+  }
+  50% {
+    clip-path: inset(98% 0 0 0);
+  }
+  75% {
+    clip-path: inset(0 98% 0 0);
+  }
+  100% {
+    clip-path: inset(0 0 98% 0);
+  }
+}
+
+.laser-border-tracer {
+  border: 1.5px solid #FF8A00;
+  box-shadow: 0 0 14px #FF8A00, inset 0 0 10px rgba(255, 138, 0, 0.4);
+  animation: laserTracer 3s linear infinite;
+}
+
+/* Scanline animation for profile card */
+@keyframes scanlineMove {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(420px);
+    opacity: 0;
+  }
+}
+
+.animate-scanline {
+  animation: scanlineMove 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* 3D preserve utilities */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.translate-z-10 {
+  transform: translateZ(10px);
+}
+
+.translate-z-20 {
+  transform: translateZ(20px);
+}
+
+.translate-z-30 {
+  transform: translateZ(30px);
+}
+
+
 
 

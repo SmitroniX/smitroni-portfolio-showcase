@@ -17,6 +17,10 @@ import { CompilerPage } from './pages/CompilerPage';
 import { sounds } from './utils/sound';
 import { Terminal, ArrowRight, Play } from 'lucide-react';
 import { SpotlightCard } from './components/SpotlightCard';
+import { KineticMarquee } from './components/KineticMarquee';
+import { CyberHUD } from './components/CyberHUD';
+import { KineticText } from './components/KineticText';
+import { Magnetic } from './components/Magnetic';
 
 export function App() {
   const [showAppleHello, setShowAppleHello] = useState<boolean>(() => {
@@ -137,8 +141,11 @@ export function App() {
       {/* Precision Custom Cursor */}
       <CustomCursor />
 
-      {/* High-End Ambient 3D Three.js Backdrop */}
+      {/* Extreme 3D WebGL Cybernetic Morphing Core & Particle Wavefront Engine */}
       <ThreeCanvas />
+
+      {/* Real-time Telemetry & Audio Synthesizer Matrix HUD */}
+      <CyberHUD />
 
       {/* Subtle Dot Grid Background Pattern */}
       <div className="fixed inset-0 bg-noise pointer-events-none z-0" />
@@ -154,34 +161,45 @@ export function App() {
       {/* Main Flow */}
       <main className="relative z-10">
         <Hero onOpenTerminal={() => setCommandPaletteOpen(true)} />
+
+        {/* Velocity-Reactive Kinetic Marquee Ribbon 1 */}
+        <KineticMarquee direction="left" speed={38} className="my-6" />
+
         <Projects />
+
         <DevOpsArchitecture />
+
+        {/* Velocity-Reactive Kinetic Marquee Ribbon 2 */}
+        <KineticMarquee direction="right" speed={42} outlineStyle className="my-6" />
 
         {/* Dedicated Standalone Compiler Showcase Card */}
         <section className="py-16 relative overflow-hidden">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <SpotlightCard className="p-8 border border-white/10 relative overflow-hidden group">
+            <SpotlightCard enableTilt enableFoil enableLaserBeam className="p-8 border border-white/10 relative overflow-hidden group">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                 <div className="space-y-2 max-w-xl">
                   <div className="flex items-center gap-2 text-xs font-mono text-[#FF8A00] uppercase font-bold">
                     <Terminal className="w-4 h-4" /> Code With SmitroniX
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-bold text-white font-display">
-                    Code With SmitroniX — Online IDE & Java GUI Runner
+                    <KineticText text="Code With SmitroniX — Cloud IDE & Virtual Java GUI" playSound speed={30} />
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed">
-                    Full-screen cloud IDE supporting Java (Swing & AWT virtual GUI desktop), Python, C++, C, JavaScript, TypeScript, Rust, Go, and Bash with real-time interactive terminal and academic lab report PDF export.
+                    Full-screen cloud IDE supporting Java (Swing &amp; AWT virtual GUI desktop), Python, C++, C, JavaScript, TypeScript, Rust, Go, and Bash with real-time interactive terminal and academic lab report PDF export.
                   </p>
                 </div>
 
-                <button
-                  onClick={() => navigateTo('compiler')}
-                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] hover:from-[#16A34A] hover:to-[#15803D] text-white font-bold font-mono text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 active:scale-95 transition-all shrink-0"
-                >
-                  <Play className="w-4 h-4 fill-current" />
-                  <span>Launch Code With SmitroniX</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                <Magnetic strength={0.3} radius={70}>
+                  <button
+                    onClick={() => navigateTo('compiler')}
+                    data-cursor="project"
+                    className="inline-flex items-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] hover:from-[#16A34A] hover:to-[#15803D] text-white font-bold font-mono text-xs uppercase tracking-wider shadow-xl shadow-emerald-500/25 active:scale-95 transition-all shrink-0"
+                  >
+                    <Play className="w-4 h-4 fill-current" />
+                    <span>Launch Code With SmitroniX</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </Magnetic>
               </div>
             </SpotlightCard>
           </div>

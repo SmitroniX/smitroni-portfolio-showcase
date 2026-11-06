@@ -5,6 +5,8 @@ import { PERSONAL_INFO } from '../data/portfolioData';
 import { SpotlightCard } from './SpotlightCard';
 import { sounds } from '../utils/sound';
 import confetti from 'canvas-confetti';
+import { KineticText } from './KineticText';
+import { Magnetic } from './Magnetic';
 
 export const ContactSection: React.FC = () => {
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -53,7 +55,7 @@ export const ContactSection: React.FC = () => {
             Get In Touch
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-display mt-1">
-            Let&apos;s Build Something Remarkable
+            <KineticText text="Let's Build Something Remarkable" playSound speed={35} />
           </h2>
           <p className="text-slate-400 text-sm font-sans mt-3 leading-relaxed">
             I&apos;m currently open to software engineering internships, systems architecture contracts, and open-source collaborations. Have an idea, project, or role in mind? Let&apos;s connect.
@@ -205,7 +207,7 @@ export const ContactSection: React.FC = () => {
 
           {/* Message Form (Right 7 Cols) */}
           <div className="lg:col-span-7">
-            <SpotlightCard className="p-6 sm:p-8">
+            <SpotlightCard enableTilt enableFoil className="p-6 sm:p-8">
               {submitted ? (
                 <div className="py-12 flex flex-col items-center text-center space-y-3">
                   <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
@@ -217,15 +219,17 @@ export const ContactSection: React.FC = () => {
                   <p className="text-xs sm:text-sm text-slate-400 max-w-sm">
                     Thank you, {form.name}. I&apos;ve received your message and will reply to {form.email} as soon as possible.
                   </p>
-                  <button
-                    onClick={() => {
-                      setSubmitted(false);
-                      setForm({ name: '', email: '', message: '' });
-                    }}
-                    className="mt-4 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-medium text-slate-300 transition-colors"
-                  >
-                    Send Another Note
-                  </button>
+                  <Magnetic strength={0.25} radius={50}>
+                    <button
+                      onClick={() => {
+                        setSubmitted(false);
+                        setForm({ name: '', email: '', message: '' });
+                      }}
+                      className="mt-4 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-medium text-slate-300 transition-colors"
+                    >
+                      Send Another Note
+                    </button>
+                  </Magnetic>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -273,19 +277,21 @@ export const ContactSection: React.FC = () => {
                     />
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={isSending}
-                    className="w-full py-3 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-60"
-                  >
-                    {isSending ? (
-                      <span>Sending note...</span>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4" /> Send Message
-                      </>
-                    )}
-                  </button>
+                  <Magnetic strength={0.2} radius={80} className="w-full">
+                    <button
+                      type="submit"
+                      disabled={isSending}
+                      className="w-full py-3.5 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-60 shadow-lg hover:shadow-xl active:scale-[0.99]"
+                    >
+                      {isSending ? (
+                        <span>Sending note...</span>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" /> Send Message
+                        </>
+                      )}
+                    </button>
+                  </Magnetic>
                 </form>
               )}
             </SpotlightCard>

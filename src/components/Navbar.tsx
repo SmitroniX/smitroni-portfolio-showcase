@@ -3,6 +3,7 @@ import { Volume2, VolumeX, Menu, X, ArrowUpRight, Command, Terminal, Skull, File
 import { GithubIcon, LinkedinIcon } from './BrandIcons';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { sounds } from '../utils/sound';
+import { Magnetic } from './Magnetic';
 
 interface NavbarProps {
   onOpenCommandPalette: () => void;
@@ -61,13 +62,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette, onOpenComp
         
         {/* Identity Logo */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={handleLogoClick}
-            className="w-8 h-8 rounded-lg overflow-hidden border border-white/10 bg-slate-900 flex items-center justify-center text-xs font-bold font-mono text-[#FF8A00] hover:border-[#FF8A00]/50 transition-colors cursor-pointer group"
-            title="Asmit Jogdand (Click 5x to trigger secret)"
-          >
-            AJ
-          </button>
+          <Magnetic strength={0.3} radius={45}>
+            <button
+              onClick={handleLogoClick}
+              className="w-8 h-8 rounded-lg overflow-hidden border border-white/10 bg-slate-900 flex items-center justify-center text-xs font-bold font-mono text-[#FF8A00] hover:border-[#FF8A00]/50 transition-colors cursor-pointer group"
+              title="Asmit Jogdand (Click 5x to trigger secret)"
+            >
+              AJ
+            </button>
+          </Magnetic>
           <a
             href="#"
             onClick={() => sounds.playClick()}
@@ -85,89 +88,104 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandPalette, onOpenComp
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-1">
           {navLinks.map((link) => (
-            <a
-              key={link.name}
-              href={link.href}
-              onClick={() => sounds.playClick()}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all"
-            >
-              {link.name}
-            </a>
+            <Magnetic key={link.name} strength={0.2} radius={35}>
+              <a
+                href={link.href}
+                onClick={() => sounds.playClick()}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all block"
+              >
+                {link.name}
+              </a>
+            </Magnetic>
           ))}
 
           {/* Standalone Compiler Page Link */}
-          <button
-            onClick={() => {
-              sounds.playClick();
-              onOpenCompiler();
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-emerald-500/20 transition-all ml-1"
-          >
-            <Terminal className="w-3.5 h-3.5" />
-            <span>Code With SmitroniX</span>
-          </button>
+          <Magnetic strength={0.25} radius={45}>
+            <button
+              onClick={() => {
+                sounds.playClick();
+                onOpenCompiler();
+              }}
+              data-cursor="project"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-emerald-500/20 transition-all ml-1"
+            >
+              <Terminal className="w-3.5 h-3.5" />
+              <span>Code With SmitroniX</span>
+            </button>
+          </Magnetic>
         </nav>
 
         {/* Right Tools & Actions */}
         <div className="flex items-center gap-2">
           {/* Apple Hello Intro Trigger */}
           {onReplayHello && (
-            <button
-              onClick={() => {
-                sounds.playClick();
-                onReplayHello();
-              }}
-              className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all group"
-              title="Replay Apple Hello Welcome Animation"
-            >
-              <span className="font-serif italic text-xs tracking-wider text-slate-200 group-hover:text-amber-400 transition-colors">hello.</span>
-            </button>
+            <Magnetic strength={0.25} radius={45}>
+              <button
+                onClick={() => {
+                  sounds.playClick();
+                  onReplayHello();
+                }}
+                className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all group"
+                title="Replay Apple Hello Welcome Animation"
+              >
+                <span className="font-serif italic text-xs tracking-wider text-slate-200 group-hover:text-amber-400 transition-colors">hello.</span>
+              </button>
+            </Magnetic>
           )}
 
           {/* Command Palette Trigger */}
-          <button
-            onClick={() => {
-              sounds.playClick();
-              onOpenCommandPalette();
-            }}
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-slate-300 transition-colors"
-            title="Search & commands (⌘K)"
-          >
-            <Command className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-[11px]">⌘K</span>
-          </button>
+          <Magnetic strength={0.25} radius={45}>
+            <button
+              onClick={() => {
+                sounds.playClick();
+                onOpenCommandPalette();
+              }}
+              data-cursor="terminal"
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-slate-300 transition-colors"
+              title="Search & commands (⌘K)"
+            >
+              <Command className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-[11px]">⌘K</span>
+            </button>
+          </Magnetic>
 
           {/* Sound Toggle */}
-          <button
-            onClick={handleSoundToggle}
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors"
-            title={soundOn ? 'Mute micro-interactions' : 'Enable audio feedback'}
-          >
-            {soundOn ? <Volume2 className="w-3.5 h-3.5 text-[#FF8A00]" /> : <VolumeX className="w-3.5 h-3.5 text-slate-500" />}
-          </button>
+          <Magnetic strength={0.25} radius={45}>
+            <button
+              onClick={handleSoundToggle}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors block"
+              title={soundOn ? 'Mute micro-interactions' : 'Enable audio feedback'}
+            >
+              {soundOn ? <Volume2 className="w-3.5 h-3.5 text-[#FF8A00]" /> : <VolumeX className="w-3.5 h-3.5 text-slate-500" />}
+            </button>
+          </Magnetic>
 
           {/* Direct Social Links */}
-          <a
-            href={PERSONAL_INFO.socials.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => sounds.playClick()}
-            className="hidden sm:inline-flex p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors"
-            title="GitHub"
-          >
-            <GithubIcon className="w-3.5 h-3.5" />
-          </a>
+          <Magnetic strength={0.25} radius={45}>
+            <a
+              href={PERSONAL_INFO.socials.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => sounds.playClick()}
+              className="hidden sm:inline-flex p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors"
+              title="GitHub"
+            >
+              <GithubIcon className="w-3.5 h-3.5" />
+            </a>
+          </Magnetic>
 
-          <a
-            href={PERSONAL_INFO.socials.linkedin}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => sounds.playClick()}
-            className="hidden sm:inline-flex p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors"
-            title="LinkedIn"
-          >
-            <LinkedinIcon className="w-3.5 h-3.5" />
-          </a>
+          <Magnetic strength={0.25} radius={45}>
+            <a
+              href={PERSONAL_INFO.socials.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => sounds.playClick()}
+              className="hidden sm:inline-flex p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors"
+              title="LinkedIn"
+            >
+              <LinkedinIcon className="w-3.5 h-3.5" />
+            </a>
+          </Magnetic>
 
           {/* Resume Download Action */}
           <a

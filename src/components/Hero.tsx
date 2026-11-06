@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Copy, Check, Terminal, MapPin, Clock, ExternalLink, FileDown, ShieldCheck, GraduationCap } from 'lucide-react';
+import { ArrowRight, Copy, Check, Terminal, MapPin, Clock, ExternalLink, FileDown, ShieldCheck, GraduationCap, Sparkles } from 'lucide-react';
 import { GithubIcon } from './BrandIcons';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { SpotlightCard } from './SpotlightCard';
 import { HeroProfileReveal } from './HeroProfileReveal';
 import { sounds } from '../utils/sound';
+import { KineticText } from './KineticText';
+import { Magnetic } from './Magnetic';
+import { motion } from 'framer-motion';
 
 interface HeroProps {
   onOpenTerminal: () => void;
@@ -40,9 +43,9 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
   };
 
   return (
-    <section className="relative pt-32 pb-20 overflow-hidden">
+    <section className="relative pt-32 pb-16 overflow-hidden">
       {/* Soft subtle radial ambient backdrop */}
-      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[750px] h-[400px] bg-gradient-to-b from-orange-500/10 via-amber-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[850px] h-[450px] bg-gradient-to-b from-orange-500/15 via-amber-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
@@ -52,96 +55,120 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
           {/* Left Column: Headlines & Actions (7 Cols) */}
           <div className="lg:col-span-7 space-y-6">
             
-            {/* Status Badges */}
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 border border-white/10 text-xs font-mono text-slate-300 backdrop-blur-md">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Available for SWE Internships</span>
-              </div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-mono text-amber-300 backdrop-blur-md">
-                <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
-                <span>CGPA 8.65 • RAIT Mumbai</span>
-              </div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-xs font-mono text-cyan-300 backdrop-blur-md">
-                <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Captain • HTB #331386</span>
-              </div>
+            {/* Status Badges with Magnetic Proximity */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              <Magnetic strength={0.2} radius={50}>
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-white/10 text-xs font-mono text-slate-300 backdrop-blur-md shadow-md">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Available for SWE Internships</span>
+                </div>
+              </Magnetic>
+
+              <Magnetic strength={0.2} radius={50}>
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-mono text-amber-300 backdrop-blur-md shadow-md">
+                  <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
+                  <span>CGPA 8.65 • RAIT Mumbai</span>
+                </div>
+              </Magnetic>
+
+              <Magnetic strength={0.2} radius={50}>
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-xs font-mono text-cyan-300 backdrop-blur-md shadow-md">
+                  <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Captain • HTB #331386</span>
+                </div>
+              </Magnetic>
             </div>
 
             <div className="space-y-4">
-              <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white font-display leading-[1.1]">
+              <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white font-display leading-[1.08]">
                 Hey, I&apos;m{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400">
-                  Asmit Jogdand
+                  <KineticText text="Asmit Jogdand" playSound speed={30} />
                 </span>
                 .
               </h1>
 
-              <p className="text-xl sm:text-2xl text-slate-300 font-normal leading-snug">
+              <div className="text-xl sm:text-2xl text-slate-300 font-normal leading-snug">
                 Full-stack software engineer &amp; systems builder in Mumbai. Known online as{' '}
-                <span className="text-[#FF8A00] font-semibold">@SmitroniX</span>.
-              </p>
+                <span className="text-[#FF8A00] font-semibold font-mono">
+                  <KineticText text="@SmitroniX" playSound speed={40} />
+                </span>
+                .
+              </div>
             </div>
 
             <p className="text-base text-slate-400 leading-relaxed font-sans max-w-xl">
-              Computer Engineering undergraduate at <span className="text-slate-200 font-medium">Ramrao Adik Institute of Technology (RAIT)</span>. 
-              I engineer low-latency systems like <span className="text-slate-200 font-medium">ShadowLauncher</span> (native 138 FPS gaming core), campus platforms like <span className="text-slate-200 font-medium">DYPU Connect</span>, 
+              Computer Engineering undergraduate at{' '}
+              <span className="text-slate-200 font-medium">Ramrao Adik Institute of Technology (RAIT)</span>. 
+              I engineer low-latency systems like{' '}
+              <span className="text-slate-200 font-medium font-mono text-[#FF8A00]">ShadowLauncher</span> (native 138 FPS gaming core), campus platforms like{' '}
+              <span className="text-slate-200 font-medium">DYPU Connect</span>, 
               and privacy-first apps like <span className="text-slate-200 font-medium">SmiTriX</span>.
             </p>
 
-            {/* Action Row */}
+            {/* Action Row with Magnetic Elements */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
-              <a
-                href="#projects"
-                onClick={() => sounds.playClick()}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-medium text-sm transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
-              >
-                <span>View Projects</span>
-                <ArrowRight className="w-4 h-4" />
-              </a>
+              <Magnetic strength={0.3} radius={70}>
+                <a
+                  href="#projects"
+                  onClick={() => sounds.playClick()}
+                  data-cursor="project"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-bold text-sm transition-all shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 group"
+                >
+                  <span>View Projects</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </a>
+              </Magnetic>
 
               {/* Direct Resume Download Button */}
-              <a
-                href={PERSONAL_INFO.resumeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                download="Asmit_Jogdand_Resume.pdf"
-                onClick={() => sounds.playClick()}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#FF8A00] to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-bold text-sm transition-all shadow-lg shadow-orange-500/20 hover:-translate-y-0.5 active:translate-y-0"
-                title="Download Official Asmit Jogdand Resume (PDF)"
-              >
-                <FileDown className="w-4 h-4" />
-                <span>Resume (PDF)</span>
-              </a>
+              <Magnetic strength={0.3} radius={70}>
+                <a
+                  href={PERSONAL_INFO.resumeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download="Asmit_Jogdand_Resume.pdf"
+                  onClick={() => sounds.playClick()}
+                  className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-gradient-to-r from-[#FF8A00] to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-bold text-sm transition-all shadow-lg shadow-orange-500/25 active:scale-95 group"
+                  title="Download Official Asmit Jogdand Resume (PDF)"
+                >
+                  <FileDown className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
+                  <span>Resume (PDF)</span>
+                </a>
+              </Magnetic>
 
-              <button
-                onClick={handleCopyEmail}
-                className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-900/90 hover:bg-slate-800/90 border border-white/10 hover:border-white/20 text-slate-200 text-sm font-medium transition-all"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4 text-emerald-400" />
-                    <span className="text-emerald-400">Email Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4 text-slate-400" />
-                    <span>Copy Email</span>
-                  </>
-                )}
-              </button>
+              <Magnetic strength={0.25} radius={60}>
+                <button
+                  onClick={handleCopyEmail}
+                  className="inline-flex items-center gap-2 px-4 py-3.5 rounded-xl bg-slate-900/90 hover:bg-slate-800/90 border border-white/10 hover:border-white/20 text-slate-200 text-sm font-medium transition-all active:scale-95"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4 text-emerald-400" />
+                      <span className="text-emerald-400 font-mono text-xs">Email Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4 text-slate-400" />
+                      <span>Copy Email</span>
+                    </>
+                  )}
+                </button>
+              </Magnetic>
 
-              <button
-                onClick={() => {
-                  sounds.playWarp();
-                  onOpenTerminal();
-                }}
-                className="inline-flex items-center gap-2 px-3.5 py-3 rounded-xl bg-slate-900/60 hover:bg-slate-800/80 border border-white/10 text-slate-300 text-sm font-mono transition-all"
-                title="Open Command Palette"
-              >
-                <Terminal className="w-4 h-4 text-[#FF8A00]" />
-                <span className="hidden sm:inline">⌘K</span>
-              </button>
+              <Magnetic strength={0.25} radius={60}>
+                <button
+                  onClick={() => {
+                    sounds.playWarp();
+                    onOpenTerminal();
+                  }}
+                  data-cursor="terminal"
+                  className="inline-flex items-center gap-2 px-4 py-3.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/80 border border-white/10 text-slate-300 text-sm font-mono transition-all active:scale-95"
+                  title="Open Command Palette"
+                >
+                  <Terminal className="w-4 h-4 text-[#FF8A00]" />
+                  <span className="hidden sm:inline font-bold">⌘K</span>
+                </button>
+              </Magnetic>
             </div>
 
           </div>
@@ -157,7 +184,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           
           {/* Bento 1: Live Mumbai Clock & Location */}
-          <SpotlightCard className="p-5 flex flex-col justify-between">
+          <SpotlightCard className="p-5 flex flex-col justify-between" enableTilt enableFoil>
             <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
               <span className="flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-[#FF8A00]" /> Mumbai, IN
@@ -168,8 +195,9 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
             </div>
 
             <div className="space-y-1">
-              <div className="text-2xl font-bold font-mono tracking-tight text-white">
-                {time || 'Loading...'}
+              <div className="text-2xl font-bold font-mono tracking-tight text-white flex items-center gap-2">
+                <span>{time || 'Loading...'}</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
               </div>
               <p className="text-xs text-slate-400">
                 UTC+5:30 • Usually hacking, building, or reviewing PRs
@@ -178,7 +206,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
           </SpotlightCard>
 
           {/* Bento 2: Academic & CTF Merit */}
-          <SpotlightCard className="p-5 flex flex-col justify-between">
+          <SpotlightCard className="p-5 flex flex-col justify-between" enableTilt enableFoil>
             <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
               <span className="flex items-center gap-1.5 text-amber-400">
                 <GraduationCap className="w-3.5 h-3.5" /> Academic &amp; CTF
@@ -200,7 +228,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
           </SpotlightCard>
 
           {/* Bento 3: Currently Building */}
-          <SpotlightCard className="p-5 flex flex-col justify-between">
+          <SpotlightCard className="p-5 flex flex-col justify-between" enableTilt enableFoil>
             <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
               <span className="flex items-center gap-1.5 text-emerald-400">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
@@ -210,7 +238,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-white truncate">
+              <h3 className="text-sm font-semibold text-white truncate font-mono">
                 {PERSONAL_INFO.currently.building}
               </h3>
               <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
@@ -220,7 +248,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
           </SpotlightCard>
 
           {/* Bento 4: GitHub Pulse */}
-          <SpotlightCard className="p-5 flex flex-col justify-between group">
+          <SpotlightCard className="p-5 flex flex-col justify-between group" enableTilt enableFoil>
             <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
               <span className="flex items-center gap-1.5">
                 <GithubIcon className="w-3.5 h-3.5 text-slate-300" /> GitHub

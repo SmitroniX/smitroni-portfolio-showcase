@@ -1,24 +1,50 @@
 import React, { useState } from 'react';
-import { ExternalLink, CheckCircle, Terminal, Layers, ArrowUpRight, Sparkles, Server, Users, Shield, Cpu, Activity, Lock, Database } from 'lucide-react';
+import { ExternalLink, CheckCircle, Terminal, Layers, ArrowUpRight, Sparkles, Server, Users, Shield, Cpu, Activity, Lock, Database, Play, Fingerprint, RefreshCw } from 'lucide-react';
 import { GithubIcon } from './BrandIcons';
 import { PROJECTS, Project } from '../data/portfolioData';
 import { SpotlightCard } from './SpotlightCard';
 import { sounds } from '../utils/sound';
+import { KineticText } from './KineticText';
+import { Magnetic } from './Magnetic';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const Projects: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('All');
 
+  // Interactive micro-simulation state
+  const [shadowFpsMode, setShadowFpsMode] = useState<'138' | '60'>('138');
+  const [smitrixVerified, setSmitrixVerified] = useState<boolean>(false);
+  const [smitrixScanning, setSmitrixScanning] = useState<boolean>(false);
+
   const categories = ['All', 'Full Stack', 'Systems & Engine', 'Developer Tools', 'Cloud & API'];
 
-  const filteredProjects = activeCategory === 'All'
-    ? PROJECTS
-    : PROJECTS.filter((p) => p.category === activeCategory);
+  const filteredProjects =
+    activeCategory === 'All'
+      ? PROJECTS
+      : PROJECTS.filter((p) => p.category === activeCategory);
+
+  const handleSimulatePasskey = () => {
+    sounds.playWarp();
+    setSmitrixScanning(true);
+    setSmitrixVerified(false);
+
+    setTimeout(() => {
+      setSmitrixScanning(false);
+      setSmitrixVerified(true);
+      sounds.playAccessGranted();
+    }, 600);
+  };
+
+  const handleToggleShadowFps = () => {
+    sounds.playClick();
+    setShadowFpsMode((prev) => (prev === '138' ? '60' : '138'));
+  };
 
   const renderVisualMockup = (project: Project) => {
     switch (project.previewType) {
       case 'shadowlauncher':
         return (
-          <div className="rounded-xl bg-[#090D15] border border-white/10 p-4 space-y-3 font-mono text-xs">
+          <div className="rounded-xl bg-[#090D15] border border-white/10 p-4 space-y-3 font-mono text-xs preserve-3d">
             <div className="flex items-center justify-between pb-2 border-b border-white/5">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
@@ -26,16 +52,22 @@ export const Projects: React.FC = () => {
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
                 <span className="text-[11px] text-slate-400 ml-1">ShadowLauncher Core // JNI Engine</span>
               </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+              <button
+                onClick={handleToggleShadowFps}
+                className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 flex items-center gap-1 transition-all active:scale-95"
+                title="Click to toggle FPS Mode (60Hz vs 120Hz/138FPS)"
+              >
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                138 FPS (120Hz)
-              </span>
+                {shadowFpsMode === '138' ? '138 FPS (120Hz Max)' : '60 FPS (VSync)'}
+              </button>
             </div>
 
             <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
               <div className="p-2 rounded-lg bg-white/5 border border-white/5 text-slate-300">
                 <div className="text-slate-500 text-[9px] uppercase">Latency</div>
-                <div className="text-emerald-400 font-bold">&lt;8ms HUD</div>
+                <div className="text-emerald-400 font-bold">
+                  {shadowFpsMode === '138' ? '<7.2ms Frame' : '<16.6ms'}
+                </div>
               </div>
               <div className="p-2 rounded-lg bg-orange-500/10 border border-orange-500/20 text-[#FF8A00]">
                 <div className="text-slate-500 text-[9px] uppercase">Native Bridge</div>
@@ -47,16 +79,22 @@ export const Projects: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-black/60 border border-white/5 text-slate-400 text-[10px] flex items-center justify-between">
-              <span>Renderer: OpenGL ES 3.2 (Mobile Vulkan Pipe)</span>
-              <span className="text-slate-500 font-mono">VSync: Active</span>
+            {/* Live Interactive Oscilloscope Frame Trace */}
+            <div className="p-2 rounded-lg bg-black/70 border border-white/5 flex items-center justify-between text-[10px] text-slate-400">
+              <span className="flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Renderer: OpenGL ES 3.2 (Mobile Vulkan Pipe)</span>
+              </span>
+              <span className="text-emerald-400 font-mono font-bold animate-pulse">
+                {shadowFpsMode === '138' ? '138 FPS PEAK' : '60 FPS LOCKED'}
+              </span>
             </div>
           </div>
         );
 
       case 'smitrix':
         return (
-          <div className="rounded-xl bg-[#090D15] border border-white/10 p-4 space-y-3 font-sans text-xs">
+          <div className="rounded-xl bg-[#090D15] border border-white/10 p-4 space-y-3 font-sans text-xs preserve-3d">
             <div className="flex items-center justify-between pb-2 border-b border-white/5">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
@@ -64,10 +102,24 @@ export const Projects: React.FC = () => {
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
                 <span className="text-[11px] font-mono text-slate-400 ml-1">SmiTriX PWA // Private Workout Hub</span>
               </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 flex items-center gap-1">
-                <Lock className="w-3 h-3 text-cyan-400" />
-                WebAuthn Passkey
-              </span>
+              <button
+                onClick={handleSimulatePasskey}
+                className={`px-2 py-0.5 rounded text-[10px] font-mono border flex items-center gap-1 transition-all active:scale-95 ${
+                  smitrixVerified
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                    : smitrixScanning
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse'
+                    : 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20 hover:bg-cyan-500/20'
+                }`}
+                title="Click to test WebAuthn Passkey Handshake"
+              >
+                <Fingerprint className="w-3 h-3 text-cyan-400" />
+                {smitrixScanning
+                  ? 'Verifying...'
+                  : smitrixVerified
+                  ? 'Passkey Verified ✓'
+                  : 'Test Passkey Scan'}
+              </button>
             </div>
 
             <div className="grid grid-cols-3 gap-2 text-center text-[10px] font-mono">
@@ -97,7 +149,7 @@ export const Projects: React.FC = () => {
 
       case 'compiler':
         return (
-          <div className="rounded-xl bg-[#090D15] border border-white/10 p-4 space-y-3 font-sans text-xs">
+          <div className="rounded-xl bg-[#090D15] border border-white/10 p-4 space-y-3 font-sans text-xs preserve-3d">
             <div className="flex items-center justify-between pb-2 border-b border-white/5">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
@@ -126,7 +178,7 @@ export const Projects: React.FC = () => {
 
       case 'dypu':
         return (
-          <div className="rounded-xl bg-[#090D15] border border-white/10 p-4 space-y-3 font-sans text-xs">
+          <div className="rounded-xl bg-[#090D15] border border-white/10 p-4 space-y-3 font-sans text-xs preserve-3d">
             <div className="flex items-center justify-between pb-2 border-b border-white/5">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
@@ -154,7 +206,7 @@ export const Projects: React.FC = () => {
             <div className="p-2.5 rounded-lg bg-slate-900/80 border border-white/5 text-slate-300 text-[11px]">
               <div className="flex justify-between items-center text-slate-400 text-[10px] mb-1">
                 <span>Recent University Exchange</span>
-                <span>Just now</span>
+                <span className="text-emerald-400 font-mono font-bold">2.5k Students</span>
               </div>
               &ldquo;Database Systems notes &amp; Arduino Starter Kit available for exchange at RAIT Central Library.&rdquo;
             </div>
@@ -163,7 +215,7 @@ export const Projects: React.FC = () => {
 
       case 'aniplex':
         return (
-          <div className="rounded-xl bg-[#090D15] border border-white/10 p-4 space-y-3 font-sans text-xs">
+          <div className="rounded-xl bg-[#090D15] border border-white/10 p-4 space-y-3 font-sans text-xs preserve-3d">
             <div className="flex items-center justify-between pb-2 border-b border-white/5">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
@@ -171,7 +223,7 @@ export const Projects: React.FC = () => {
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
                 <span className="text-[11px] font-mono text-slate-400 ml-1">ani-plex.vercel.app</span>
               </div>
-              <span className="text-[10px] font-mono text-cyan-400">1080P PROXY</span>
+              <span className="text-[10px] font-mono text-cyan-400 font-bold">1080P PROXY</span>
             </div>
 
             <div className="flex items-center justify-between bg-black/40 px-3 py-2 rounded-lg border border-white/5 text-slate-400 text-[11px]">
@@ -180,16 +232,16 @@ export const Projects: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2 pt-1">
-              <span className="px-2 py-1 rounded bg-white/5 text-[10px] text-slate-300">Consumet API Engine</span>
+              <span className="px-2 py-1 rounded bg-white/5 text-[10px] text-slate-300">Consumet Engine</span>
               <span className="px-2 py-1 rounded bg-white/5 text-[10px] text-slate-300">Zero Buffering</span>
               <span className="px-2 py-1 rounded bg-white/5 text-[10px] text-slate-300">Manga Reader</span>
             </div>
           </div>
         );
 
-      case 'shadow':
+      default:
         return (
-          <div className="rounded-xl bg-[#090D15] border border-white/10 p-4 space-y-2.5 font-mono text-xs">
+          <div className="rounded-xl bg-[#090D15] border border-white/10 p-4 space-y-2.5 font-mono text-xs preserve-3d">
             <div className="flex items-center justify-between pb-2 border-b border-white/5">
               <span className="text-[11px] text-slate-400">REST Microservice // Response</span>
               <span className="text-[10px] text-emerald-400 font-bold">142ms</span>
@@ -200,40 +252,6 @@ export const Projects: React.FC = () => {
               <div className="text-slate-500">Host: shadowapi-bice.vercel.app</div>
               <div className="text-slate-400 pt-1">
                 {`{ "status": 200, "cached": true, "ttl": 3600, "results": 48 }`}
-              </div>
-            </div>
-          </div>
-        );
-
-      case 'cli':
-        return (
-          <div className="rounded-xl bg-[#090D15] border border-white/10 p-4 space-y-2.5 font-mono text-xs">
-            <div className="flex items-center justify-between pb-2 border-b border-white/5">
-              <span className="text-[11px] text-slate-400">Terminal Shell Companion</span>
-              <span className="text-[10px] text-amber-400 font-bold">Gemini 1.5</span>
-            </div>
-
-            <div className="bg-black/60 p-3 rounded-lg border border-white/5 space-y-1.5 text-[11px]">
-              <div className="text-slate-300">$ gemini ask &quot;explain AWS lambda cold start&quot;</div>
-              <div className="text-slate-400 text-[10px] leading-relaxed">
-                &gt; Cold starts occur when a serverless execution environment is initialized for the first time...
-              </div>
-            </div>
-          </div>
-        );
-
-      default:
-        return (
-          <div className="rounded-xl bg-[#090D15] border border-white/10 p-4 space-y-2.5 font-sans text-xs">
-            <div className="flex items-center justify-between pb-2 border-b border-white/5">
-              <span className="text-[11px] font-mono text-slate-400">Bot Gateway // Discord.js</span>
-              <span className="text-[10px] font-mono text-emerald-400">99.9% Uptime</span>
-            </div>
-
-            <div className="bg-black/60 p-3 rounded-lg border border-white/5 space-y-1 text-[11px]">
-              <div className="text-[#5865F2] font-semibold">PlexStaff Bot Gateway</div>
-              <div className="text-slate-300 text-[10px]">
-                Managing 50,000+ members • Automated moderation heuristics • Instant verification
               </div>
             </div>
           </div>
@@ -252,7 +270,7 @@ export const Projects: React.FC = () => {
               Selected Work
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-display mt-1">
-              Projects &amp; Systems
+              <KineticText text="Projects & Systems" playSound speed={35} />
             </h2>
           </div>
           <p className="text-slate-400 text-sm font-sans mt-3 md:mt-0 max-w-md">
@@ -260,31 +278,46 @@ export const Projects: React.FC = () => {
           </p>
         </div>
 
-        {/* Filter Categories */}
+        {/* Filter Categories with Spring Animated Pill */}
         <div className="flex flex-wrap gap-2 mb-10">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => {
-                sounds.playClick();
-                setActiveCategory(cat);
-              }}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                activeCategory === cat
-                  ? 'bg-white text-slate-950 font-semibold shadow-sm'
-                  : 'bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white border border-white/5'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+          {categories.map((cat) => {
+            const isActive = activeCategory === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => {
+                  sounds.playClick();
+                  setActiveCategory(cat);
+                }}
+                className={`relative px-4 py-2 rounded-xl text-xs font-medium transition-colors ${
+                  isActive ? 'text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeCategoryPill"
+                    transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+                    className="absolute inset-0 bg-white rounded-xl shadow-lg"
+                  />
+                )}
+                {!isActive && (
+                  <div className="absolute inset-0 bg-slate-900/80 rounded-xl border border-white/5 hover:border-white/10" />
+                )}
+                <span className="relative z-10">{cat}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Projects Grid */}
+        {/* Projects Grid with 3D Tilt, Holographic Foil, and Laser Border Beam */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filteredProjects.map((project) => (
             <SpotlightCard
               key={project.id}
+              data-cursor="project"
+              enableTilt
+              enableFoil
+              enableLaserBeam
               className="p-6 sm:p-7 flex flex-col justify-between group"
             >
               <div className="space-y-5">
@@ -296,18 +329,18 @@ export const Projects: React.FC = () => {
                 {/* Project Header */}
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-xs font-mono text-[#FF8A00]">
+                    <span className="text-xs font-mono text-[#FF8A00] font-semibold">
                       {project.category}
                     </span>
                     {project.stats && (
                       <span className="text-xs font-mono text-slate-400">
-                        {project.stats.label}: <strong className="text-white">{project.stats.value}</strong>
+                        {project.stats.label}: <strong className="text-white font-bold">{project.stats.value}</strong>
                       </span>
                     )}
                   </div>
 
                   <h3 className="text-xl font-bold text-white font-display group-hover:text-amber-200 transition-colors">
-                    {project.title}
+                    <KineticText text={project.title} playSound speed={25} />
                   </h3>
                   <p className="text-xs text-slate-400 mt-1 font-sans">
                     {project.tagline}
@@ -345,28 +378,32 @@ export const Projects: React.FC = () => {
 
                 <div className="flex items-center gap-2 self-end sm:self-auto">
                   {project.githubUrl && (
-                    <a
-                      href={project.githubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => sounds.playClick()}
-                      className="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
-                      title="View GitHub Repository"
-                    >
-                      <GithubIcon className="w-4 h-4" />
-                    </a>
+                    <Magnetic strength={0.3} radius={50}>
+                      <a
+                        href={project.githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => sounds.playClick()}
+                        className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors block"
+                        title="View GitHub Repository"
+                      >
+                        <GithubIcon className="w-4 h-4" />
+                      </a>
+                    </Magnetic>
                   )}
                   {project.liveUrl && (
-                    <a
-                      href={project.liveUrl}
-                      target={project.liveUrl.startsWith('#') ? '_self' : '_blank'}
-                      rel={project.liveUrl.startsWith('#') ? undefined : 'noopener noreferrer'}
-                      onClick={() => sounds.playClick()}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-slate-950 hover:bg-slate-100 font-medium text-xs transition-colors"
-                    >
-                      <span>{project.liveUrl.startsWith('#') ? 'Launch App' : 'Live Site'}</span>
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </a>
+                    <Magnetic strength={0.3} radius={60}>
+                      <a
+                        href={project.liveUrl}
+                        target={project.liveUrl.startsWith('#') ? '_self' : '_blank'}
+                        rel={project.liveUrl.startsWith('#') ? undefined : 'noopener noreferrer'}
+                        onClick={() => sounds.playClick()}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-bold text-xs transition-all shadow-md active:scale-95"
+                      >
+                        <span>{project.liveUrl.startsWith('#') ? 'Launch App' : 'Live Site'}</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </a>
+                    </Magnetic>
                   )}
                 </div>
               </div>
