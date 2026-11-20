@@ -1,43 +1,40 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Activity, Volume2, VolumeX, Cpu, Radio, ChevronUp, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Activity, Volume2, VolumeX, Radio, ChevronUp, ChevronDown } from 'lucide-react';
 import { sounds } from '../utils/sound';
 
 export const CyberHUD: React.FC = () => {
   const [fps, setFps] = useState<number>(60);
   const [frameTime, setFrameTime] = useState<number>(16.6);
+  const [scrollPct, setScrollPct] = useState<number>(0);
   const [coords, setCoords] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
-  const [collapsed, setCollapsed] = useState<boolean>(false);
-  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(sounds.soundEnabled);
+  const [expanded, setExpanded] = useState<boolean>(false);
+  const [eqLevels, setEqLevels] = useState<number[]>([35, 65, 85, 45, 30]);
 
-  // Audio equalizer bars state
-  const [eqLevels, setEqLevels] = useState<number[]>([40, 70, 90, 50, 30]);
-
-  // Real-time FPS Calculation Loop
   useEffect(() => {
     let frameCount = 0;
     let lastTime = performance.now();
-    let animId: number;
+    let animId = 0;
 
     const measureFps = (now: number) => {
       frameCount++;
       const delta = now - lastTime;
 
-      if (delta >= 500) {
-        const currentFps = Math.round((frameCount * 1000) / delta);
-        const currentFrameTime = +(1000 / currentFps).toFixed(1);
+      if (delta >= 600) {
+        const currentFps = Math.min(240, Math.round((frameCount * 1000) / delta));
+        const currentFrameTime = +(1000 / Math.max(1, currentFps)).toFixed(1);
         setFps(currentFps);
         setFrameTime(currentFrameTime);
         frameCount = 0;
         lastTime = now;
 
-        // Animate subtle equalizer fluctuations
         setEqLevels([
-          Math.floor(20 + Math.random() * 80),
-          Math.floor(30 + Math.random() * 70),
+          Math.floor(20 + Math.random() * 75),
+          Math.floor(30 + Math.random() * 68),
           Math.floor(40 + Math.random() * 60),
-          Math.floor(25 + Math.random() * 75),
-          Math.floor(15 + Math.random() * 85),
+          Math.floor(25 + Math.random() * 72),
+          Math.floor(15 + Math.random() * 80),
         ]);
       }
 
@@ -46,16 +43,23 @@ export const CyberHUD: React.FC = () => {
 
     animId = requestAnimationFrame(measureFps);
 
-    // Mouse coordinates tracking
     const handleMouseMove = (e: MouseEvent) => {
       setCoords({ x: e.clientX, y: e.clientY });
     };
 
+    const handleScroll = () => {
+      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      setScrollPct(Math.round((window.scrollY / max) * 100));
+    };
+
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
 
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
@@ -67,93 +71,107 @@ export const CyberHUD: React.FC = () => {
 
   return (
     <aside
-      aria-label="System Telemetry & Controls"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="fixed bottom-4 right-4 z-40 select-none font-mono text-[11px]"
+      aria-label="Developer Runtime Telemetry"
+      className="fixed bottom-4 right-4 z-40 select-none font-mono text-[11px] hidden sm:block"
     >
-      <div className="relative rounded-2xl bg-[#090D15]/85 border border-white/10 shadow-2xl backdrop-blur-xl p-3 flex flex-col gap-2.5 transition-all duration-300 hover:border-orange-500/40 hover:shadow-orange-500/10">
-        
-        {/* Header Bar */}
-        <div className="flex items-center justify-between gap-4">
+      <div className="rounded-xl bg-[#070B13]/90 border border-white/[0.11] shadow-2xl backdrop-blur-xl px-3 py-2 flex flex-col gap-2 transition-colors hover:border-[#FF8A00]/40">
+        {/* Compact Header Pill */}
+        <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
-            <span className="text-slate-300 font-bold uppercase tracking-wider text-[10px]">
-              GL_TELEMETRY
-            </span>
+            <span className="text-emerald-400 font-bold tabular-nums">{fps} FPS</span>
+            <span className="text-slate-600">|</span>
+            <span className="text-slate-400 tabular-nums">{scrollPct}%</span>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Audio Toggle Button */}
+          <div className="flex items-center gap-1.5">
             <button
+              type="button"
               onClick={handleToggleSound}
-              className={`p-1.5 rounded-lg border transition-all ${
+              aria-label={soundEnabled ? 'Mute UI synthesizer sound' : 'Enable UI synthesizer sound'}
+              className={`p-1 rounded-md border transition-all cursor-pointer ${
                 soundEnabled
-                  ? 'bg-orange-500/10 border-orange-500/30 text-[#FF8A00] hover:bg-orange-500/20'
-                  : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                  ? 'bg-[#FF6B00]/15 border-[#FF6B00]/40 text-[#FF8A00]'
+                  : 'bg-white/[0.04] border-white/10 text-slate-400 hover:text-white'
               }`}
-              title={soundEnabled ? 'Acoustic Synthesis Active (Click to Mute)' : 'Sound Muted (Click to Enable)'}
+              title={soundEnabled ? 'UI Audio: ON' : 'UI Audio: OFF (Click to enable)'}
             >
-              {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+              {soundEnabled ? (
+                <Volume2 className="w-3.5 h-3.5" />
+              ) : (
+                <VolumeX className="w-3.5 h-3.5" />
+              )}
             </button>
 
-            {/* Collapse toggle */}
             <button
-              onClick={() => setCollapsed(!collapsed)}
-              className="p-1 rounded-lg text-slate-400 hover:text-white transition-colors"
+              type="button"
+              onClick={() => setExpanded((prev) => !prev)}
+              aria-label={expanded ? 'Collapse telemetry panel' : 'Expand telemetry panel'}
+              aria-expanded={expanded}
+              className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
             >
-              {collapsed ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              {expanded ? (
+                <ChevronDown className="w-3.5 h-3.5" />
+              ) : (
+                <ChevronUp className="w-3.5 h-3.5" />
+              )}
             </button>
           </div>
         </div>
 
-        {/* Expandable Telemetry Metrics */}
-        {!collapsed && (
-          <div className="space-y-2 pt-1 border-t border-white/5">
-            {/* FPS & Latency */}
-            <div className="flex items-center justify-between gap-4 text-slate-300">
-              <span className="flex items-center gap-1.5 text-slate-400">
-                <Activity className="w-3 h-3 text-[#FF8A00]" />
-                <span>REFRESH</span>
-              </span>
-              <span className="font-bold text-emerald-400">
-                {fps} FPS <span className="text-slate-500 font-normal">({frameTime}ms)</span>
-              </span>
-            </div>
-
-            {/* Cursor Coordinates */}
-            <div className="flex items-center justify-between gap-4 text-slate-300">
-              <span className="flex items-center gap-1.5 text-slate-400">
-                <Radio className="w-3 h-3 text-cyan-400" />
-                <span>POINTER</span>
-              </span>
-              <span className="text-cyan-300 font-mono">
-                X:{coords.x} Y:{coords.y}
-              </span>
-            </div>
-
-            {/* Sound Equalizer Visualizer */}
-            <div className="flex items-center justify-between gap-4 pt-1">
-              <span className="text-[10px] text-slate-500 uppercase">SYNTH FREQ</span>
-              <div className="flex items-end gap-1 h-3.5">
-                {eqLevels.map((lvl, idx) => (
-                  <div
-                    key={idx}
-                    className="w-1 rounded-full transition-all duration-150"
-                    style={{
-                      height: soundEnabled ? `${lvl}%` : '20%',
-                      backgroundColor: soundEnabled ? (idx % 2 === 0 ? '#FF8A00' : '#00F0FF') : '#64748B',
-                    }}
-                  />
-                ))}
+        {/* Expandable Live Diagnostics */}
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-2 pt-2 border-t border-white/[0.07] overflow-hidden min-w-[205px]"
+            >
+              <div className="flex items-center justify-between text-slate-300">
+                <span className="flex items-center gap-1.5 text-slate-400">
+                  <Activity className="w-3 h-3 text-[#FF8A00]" />
+                  <span>FRAME</span>
+                </span>
+                <span className="text-emerald-400 tabular-nums">{frameTime}ms</span>
               </div>
-            </div>
-          </div>
-        )}
 
+              <div className="flex items-center justify-between text-slate-300">
+                <span className="flex items-center gap-1.5 text-slate-400">
+                  <Radio className="w-3 h-3 text-[#00F0FF]" />
+                  <span>CURSOR</span>
+                </span>
+                <span className="text-[#00F0FF] tabular-nums">
+                  {coords.x}, {coords.y}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between pt-0.5">
+                <span className="text-[10px] text-slate-500 uppercase">AUDIO SYNTH</span>
+                <div className="flex items-end gap-1 h-3">
+                  {eqLevels.map((lvl, idx) => (
+                    <div
+                      key={idx}
+                      className="w-1 rounded-full transition-all duration-150"
+                      style={{
+                        height: soundEnabled ? `${lvl}%` : '22%',
+                        backgroundColor: soundEnabled
+                          ? idx % 2 === 0
+                            ? '#FF8A00'
+                            : '#00F0FF'
+                          : '#475569',
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </aside>
   );

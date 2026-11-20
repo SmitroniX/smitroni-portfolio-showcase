@@ -9,21 +9,22 @@ export const CustomCursor: React.FC = () => {
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
 
-  // Smooth spring physics for outer ring
-  const springConfig = { damping: 28, stiffness: 350, mass: 0.5 };
+  const springConfig = { damping: 28, stiffness: 380, mass: 0.45 };
   const smoothX = useSpring(cursorX, springConfig);
   const smoothY = useSpring(cursorY, springConfig);
 
   useEffect(() => {
-    // Only enable on desktop with fine pointer
-    if (window.matchMedia('(pointer: coarse)').matches) {
+    if (
+      window.matchMedia('(pointer: coarse)').matches ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
       return;
     }
 
     const handleMouseMove = (e: MouseEvent) => {
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
-      if (!isVisible) setIsVisible(true);
+      setIsVisible(true);
     };
 
     const handleMouseDown = () => setIsClicking(true);
@@ -61,13 +62,13 @@ export const CustomCursor: React.FC = () => {
       window.removeEventListener('mouseover', handleMouseOver);
       document.removeEventListener('mouseleave', handleMouseLeaveWindow);
     };
-  }, [cursorX, cursorY, isVisible]);
+  }, [cursorX, cursorY]);
 
   if (!isVisible) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
-      {/* Outer Smooth Follower Ring */}
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
+      {/* Outer Engineered Reticle Ring */}
       <motion.div
         className="fixed top-0 left-0 rounded-full border pointer-events-none"
         style={{
@@ -75,19 +76,20 @@ export const CustomCursor: React.FC = () => {
           y: smoothY,
           translateX: '-50%',
           translateY: '-50%',
-          width: isHovered ? 44 : 26,
-          height: isHovered ? 44 : 26,
-          borderColor: isHovered ? 'rgba(0, 240, 255, 0.65)' : 'rgba(255, 255, 255, 0.25)',
-          backgroundColor: isHovered ? 'rgba(0, 240, 255, 0.08)' : 'transparent',
-          boxShadow: isHovered ? '0 0 15px rgba(0, 240, 255, 0.25)' : 'none',
-          scale: isClicking ? 0.8 : 1,
         }}
-        transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+        animate={{
+          width: isHovered ? 42 : 24,
+          height: isHovered ? 42 : 24,
+          borderColor: isHovered ? 'rgba(255, 138, 0, 0.78)' : 'rgba(255, 255, 255, 0.24)',
+          backgroundColor: isHovered ? 'rgba(255, 107, 0, 0.08)' : 'rgba(0, 0, 0, 0)',
+          scale: isClicking ? 0.78 : 1,
+        }}
+        transition={{ type: 'spring', damping: 24, stiffness: 360 }}
       />
 
-      {/* Inner Precision Dot */}
+      {/* Inner Precision Core Dot */}
       <motion.div
-        className="fixed top-0 left-0 rounded-full bg-white pointer-events-none"
+        className="fixed top-0 left-0 rounded-full pointer-events-none"
         style={{
           x: cursorX,
           y: cursorY,
@@ -95,8 +97,10 @@ export const CustomCursor: React.FC = () => {
           translateY: '-50%',
           width: 5,
           height: 5,
-          backgroundColor: isHovered ? '#00f0ff' : '#ffffff',
-          boxShadow: isHovered ? '0 0 10px #00f0ff' : '0 0 4px rgba(255, 255, 255, 0.8)',
+          backgroundColor: isHovered ? '#FF8A00' : '#00F0FF',
+          boxShadow: isHovered
+            ? '0 0 10px rgba(255, 138, 0, 0.9)'
+            : '0 0 8px rgba(0, 240, 255, 0.75)',
         }}
       />
     </div>

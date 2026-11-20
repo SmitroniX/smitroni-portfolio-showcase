@@ -9,23 +9,23 @@ interface KineticMarqueeProps {
 }
 
 const DEFAULT_ITEMS = [
-  'SHADOWLAUNCHER // 138 FPS NATIVE JNI RUNTIME',
-  'ZERO-DAY EXPLOITS & REVERSE ENGINEERING',
-  'SMITRIX // PASSKEY WEBAUTHN OFFLINE PWA',
-  'CODE WITH SMITRONIX // VIRTUAL JAVA GUI RUNNER',
-  'DEVOPS ARCHITECTURE // DOCKER • K8S • GITHUB ACTIONS',
-  'RAIT MUMBAI // CGPA 8.65 COMPUTER ENGINEERING',
-  'HACK THE BOX // CAPTAIN RANK #331386',
+  'JAVA 21 LTS // HIGH-CONCURRENCY SYSTEMS',
+  'SHADOWLAUNCHER // 138 FPS GL4ES NATIVE ENGINE',
+  'REACT 19 + TYPESCRIPT // ZERO-JANK INTERFACES',
+  'SMITRIX // WEBAUTHN PASSKEY OFFLINE PWA',
+  'CODE WITH SMITRONIX // 9-RUNTIME CLOUD IDE',
+  'DOCKER + AWS EC2 + REDIS // 99.9% UPTIME',
+  'SUDO UNKNOWN // HACK THE BOX TEAM #331386',
+  'RAIT MUMBAI // 8.65 CGPA COMPUTER ENGINEERING',
 ];
 
 export const KineticMarquee: React.FC<KineticMarqueeProps> = ({
   items = DEFAULT_ITEMS,
   direction = 'left',
-  speed = 40,
+  speed = 36,
   className = '',
   outlineStyle = false,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
   const [scrollVelocity, setScrollVelocity] = useState(0);
   const lastScrollY = useRef(0);
   const scrollTimeout = useRef<number | null>(null);
@@ -36,57 +36,72 @@ export const KineticMarquee: React.FC<KineticMarqueeProps> = ({
       const delta = currentScrollY - lastScrollY.current;
       lastScrollY.current = currentScrollY;
 
-      // Bound velocity between -15 and 15
-      const clamped = Math.max(-15, Math.min(15, delta * 0.4));
+      const clamped = Math.max(-12, Math.min(12, delta * 0.35));
       setScrollVelocity(clamped);
 
       if (scrollTimeout.current) window.clearTimeout(scrollTimeout.current);
       scrollTimeout.current = window.setTimeout(() => {
         setScrollVelocity(0);
-      }, 150);
+      }, 160);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout.current) window.clearTimeout(scrollTimeout.current);
+    };
   }, []);
 
-  // Duplicate items for continuous seamless loop
-  const displayItems = [...items, ...items, ...items, ...items];
-
-  const effectiveSkew = direction === 'left' ? -scrollVelocity * 0.4 : scrollVelocity * 0.4;
+  const displayItems = [...items, ...items, ...items];
+  const effectiveSkew = direction === 'left' ? -scrollVelocity * 0.3 : scrollVelocity * 0.3;
 
   return (
     <div
-      ref={containerRef}
-      className={`relative w-full overflow-hidden select-none py-3.5 border-y border-white/[0.06] bg-black/40 backdrop-blur-md ${className}`}
+      aria-label="Engineering highlights ticker"
+      className={`relative w-full overflow-hidden select-none py-3 border-y border-white/[0.06] bg-[#070A12]/70 backdrop-blur-md ${className}`}
       style={{
-        transform: `perspective(600px) skewY(${direction === 'left' ? -0.8 : 0.8}deg) skewX(${effectiveSkew}deg)`,
-        transition: 'transform 0.15s ease-out',
+        transform: `skewX(${effectiveSkew}deg)`,
+        transition: 'transform 0.18s ease-out',
       }}
     >
+      {/* Left & Right Edge Fade Masks */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-28 bg-gradient-to-r from-[#05070B] to-transparent z-10"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-28 bg-gradient-to-l from-[#05070B] to-transparent z-10"
+      />
+
       <div
         className={`flex whitespace-nowrap will-change-transform ${
           direction === 'left' ? 'animate-marquee-left' : 'animate-marquee-right'
         }`}
         style={{
-          animationDuration: `${Math.max(15, speed - Math.abs(scrollVelocity) * 1.5)}s`,
+          animationDuration: `${Math.max(16, speed - Math.abs(scrollVelocity) * 1.1)}s`,
         }}
       >
         {displayItems.map((item, idx) => (
           <div
             key={idx}
-            className="inline-flex items-center gap-6 mx-4 font-mono uppercase tracking-wider text-xs sm:text-sm font-extrabold group"
+            className="inline-flex items-center gap-5 mx-3 font-mono uppercase tracking-wider text-[11px] sm:text-xs font-bold group"
           >
             <span
               className={
                 outlineStyle || idx % 2 === 1
-                  ? 'text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.4)] group-hover:[-webkit-text-stroke:1px_#FF8A00] transition-colors'
-                  : 'text-slate-300 group-hover:text-[#FF8A00] transition-colors'
+                  ? 'text-slate-400 group-hover:text-[#00F0FF] transition-colors'
+                  : 'text-slate-200 group-hover:text-[#FF8A00] transition-colors'
               }
             >
               {item}
             </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#FF8A00] opacity-80" />
+            <span
+              aria-hidden="true"
+              className={`w-1.5 h-1.5 rounded-full ${
+                idx % 2 === 0 ? 'bg-[#FF6B00]' : 'bg-[#00F0FF]'
+              } opacity-80`}
+            />
           </div>
         ))}
       </div>

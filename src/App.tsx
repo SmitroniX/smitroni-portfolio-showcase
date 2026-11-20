@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { MotionConfig } from 'framer-motion';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
+import { KineticMarquee } from './components/KineticMarquee';
 import { Projects } from './components/Projects';
 import { DevOpsArchitecture } from './components/DevOpsArchitecture';
 import { SkillsRadar } from './components/SkillsRadar';
@@ -9,6 +11,7 @@ import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { ThreeCanvas } from './components/ThreeCanvas';
 import { CustomCursor } from './components/CustomCursor';
+import { CyberHUD } from './components/CyberHUD';
 import { TerminalModal } from './components/TerminalModal';
 import { DarkSideModal } from './components/DarkSideModal';
 import { CompilerPage } from './pages/CompilerPage';
@@ -28,7 +31,10 @@ export function App() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [darkSideOpen, setDarkSideOpen] = useState(() => {
     if (typeof window !== 'undefined') {
-      return window.location.hash.includes('darkside') || window.location.hash.includes('classified');
+      return (
+        window.location.hash.includes('darkside') ||
+        window.location.hash.includes('classified')
+      );
     }
     return false;
   });
@@ -70,7 +76,7 @@ export function App() {
   // Global hotkeys (Cmd+K / Ctrl+K, ESC, & secret 'darkside' sequence)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setCommandPaletteOpen((prev) => !prev);
       } else if (e.key === 'Escape') {
@@ -105,46 +111,59 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050508] text-slate-100 relative font-sans selection:bg-cyan-500 selection:text-black">
-      {/* Precision Custom Cursor */}
-      <CustomCursor />
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen bg-[#05070B] bg-dev-grid text-slate-100 relative font-sans selection:bg-[#FF6B00] selection:text-black">
+        {/* Precision Developer Reticle Cursor */}
+        <CustomCursor />
 
-      {/* 60FPS Ambient Particle Wavefront Engine */}
-      <ThreeCanvas />
+        {/* Scroll & Pointer Reactive 3D WebGL Systems Engine */}
+        <ThreeCanvas />
 
-      {/* Floating Glassmorphic Navbar */}
-      <Navbar
-        onOpenCommandPalette={() => setCommandPaletteOpen(true)}
-        onOpenCompiler={() => navigateTo('compiler')}
-        onOpenDarkSide={() => setDarkSideOpen(true)}
-      />
+        {/* Floating Glassmorphic Navbar with Scroll Progress Rail */}
+        <Navbar
+          onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+          onOpenCompiler={() => navigateTo('compiler')}
+          onOpenDarkSide={() => setDarkSideOpen(true)}
+        />
 
-      {/* Main Content Flow */}
-      <main className="relative z-10">
-        <Hero onOpenTerminal={() => setCommandPaletteOpen(true)} />
-        <Projects />
-        <DevOpsArchitecture />
-        <SkillsRadar />
-        <ExperienceTimeline />
-        <ContactSection />
-      </main>
+        {/* Main Content Flow */}
+        <main className="relative z-10">
+          <Hero
+            onOpenTerminal={() => setCommandPaletteOpen(true)}
+            onOpenCompiler={() => navigateTo('compiler')}
+          />
 
-      {/* Minimalist Footer */}
-      <Footer />
+          {/* Scroll-Velocity Reactive Developer Marquee */}
+          <KineticMarquee direction="left" speed={34} />
 
-      {/* Command Palette Modal (Cmd+K) */}
-      <TerminalModal
-        isOpen={commandPaletteOpen}
-        onClose={() => setCommandPaletteOpen(false)}
-        onOpenCompiler={() => navigateTo('compiler')}
-        onOpenDarkSide={() => setDarkSideOpen(true)}
-      />
+          <Projects onOpenCompiler={() => navigateTo('compiler')} />
+          <DevOpsArchitecture />
+          <SkillsRadar />
+          <ExperienceTimeline />
+          <ContactSection />
+        </main>
 
-      {/* Secret Cyber Dossier Modal (Easter Egg) */}
-      {darkSideOpen && (
-        <DarkSideModal isOpen={darkSideOpen} onClose={() => setDarkSideOpen(false)} />
-      )}
-    </div>
+        {/* Developer Status Footer */}
+        <Footer onOpenTerminal={() => setCommandPaletteOpen(true)} />
+
+        {/* Collapsible Live FPS / Audio Synth Telemetry Pill */}
+        <CyberHUD />
+
+        {/* Dual-Mode Command Palette & Interactive Bash Shell (Cmd+K) */}
+        <TerminalModal
+          isOpen={commandPaletteOpen}
+          onClose={() => setCommandPaletteOpen(false)}
+          onOpenCompiler={() => navigateTo('compiler')}
+          onOpenDarkSide={() => setDarkSideOpen(true)}
+        />
+
+        {/* Secret Cyber Dossier Modal (Easter Egg) */}
+        {darkSideOpen && (
+          <DarkSideModal isOpen={darkSideOpen} onClose={() => setDarkSideOpen(false)} />
+        )}
+      </div>
+    </MotionConfig>
   );
 }
+
 export default App;

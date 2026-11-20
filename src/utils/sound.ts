@@ -3,7 +3,7 @@
 
 class SoundEngine {
   private ctx: AudioContext | null = null;
-  public soundEnabled: boolean = true;
+  public soundEnabled: boolean = false;
 
   private initCtx() {
     if (!this.ctx && typeof window !== 'undefined') {
